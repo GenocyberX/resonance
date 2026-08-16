@@ -50,8 +50,10 @@ export class WorldEngine {
   // Visual Test Mode state
   private isVisualTest: boolean = false;
   private isGoldenMode: boolean = false;
+  private stabilityMode: 'dynamic' | 'static' | 'none' = 'none';
   private testScenario: RoadTestMode = 'NORMAL';
   private testTimeOfDay: VisualTestTime = 'day';
+  private lastFrameHash: number = 0;
 
   // Cached scanline geometry for player anchoring, debug telemetry and projected terrain boundaries
   private scanlineCenter: Float32Array = new Float32Array(100);
@@ -94,10 +96,12 @@ export class WorldEngine {
     enabled: boolean,
     scenario: RoadTestMode = 'FLAT_STRAIGHT',
     time: VisualTestTime = 'day',
-    golden: boolean = false
+    golden: boolean = false,
+    stability: 'dynamic' | 'static' | 'none' = 'none'
   ): void {
     this.isVisualTest = enabled;
     this.isGoldenMode = golden;
+    this.stabilityMode = stability;
     this.testScenario = scenario;
     this.testTimeOfDay = time;
     this.road.setTestMode(scenario);
@@ -105,8 +109,8 @@ export class WorldEngine {
     if (enabled) {
       this.state.cameraShake = 0;
       this.setVisualTestTime(time);
-      this.traffic.maxTrafficCount = golden ? 1 : 2;
-      if (golden) {
+      this.traffic.maxTrafficCount = (golden || stability !== 'none') ? 1 : 2;
+      if (golden || stability !== 'none') {
         this.director.reset(2026);
       }
     } else {
@@ -126,13 +130,24 @@ export class WorldEngine {
     this.state.dayNight = this.dayNightCycle.calculateState(normTime);
   }
 
-  public getVisualTestMode(): { isVisualTest: boolean; scenario: RoadTestMode; time: VisualTestTime; isGolden: boolean } {
+  public getVisualTestMode(): {
+    isVisualTest: boolean;
+    scenario: RoadTestMode;
+    time: VisualTestTime;
+    isGolden: boolean;
+    stability: 'dynamic' | 'static' | 'none';
+  } {
     return {
       isVisualTest: this.isVisualTest,
       scenario: this.testScenario,
       time: this.testTimeOfDay,
       isGolden: this.isGoldenMode,
+      stability: this.stabilityMode,
     };
+  }
+
+  public getLastFrameHash(): number {
+    return this.lastFrameHash;
   }
 
   public getScanlineDataAt(y: number): { center: number; halfWidth: number; depth: number } {
@@ -234,6 +249,18 @@ export class WorldEngine {
    * Main simulation tick with strict physical road containment and smooth chase camera tracking.
    */
   public update(dt: number, musicParams: WorldMusicParameters, viewportWidth: number = 120, viewportHeight: number = 42): void {
+    if (this.stabilityMode === 'static') {
+      // In Static Stability Mode, simulation time and player position are 100% frozen
+      this.state.player.speed = 0;
+      this.state.player.lateralOffset = 0;
+      this.state.camera.x = 0;
+      this.state.camera.z = -145;
+      this.state.camera.y = 310;
+      this.state.cameraShake = 0;
+      this.state.weather = { type: 'CLEAR', intensity: 0, particles: [] };
+      return;
+    }
+
     this.state.worldTime += dt;
 
     if (this.isVisualTest) {
@@ -292,7 +319,11 @@ export class WorldEngine {
     this.lastTargetCamX = targetCamX;
 
     const camElevation = this.road.getElevationAt(camZ);
-    const shakeOffset = this.isVisualTest ? 0 : (this.rng.next() - 0.5) * this.state.cameraShake * 18;
+
+    // Damped harmonic oscillation for smooth camera shake instead of random white noise
+    const shakeOffset = this.isVisualTest || this.state.cameraShake <= 0.001
+      ? 0
+      : Math.sin(this.state.worldTime * 45) * this.state.cameraShake * 12;
 
     // Framerate-independent exponential smoothing for camera lateral position
     const alpha = 1.0 - Math.exp(-CAMERA_SMOOTH_RATE * dt);
@@ -439,6 +470,9 @@ export class WorldEngine {
     for (const p of this.state.weather.particles) {
       frameBuffer.setCell(p.x, p.y, p.char, p.color, 5, undefined, true);
     }
+
+    // 8. FRAME HASH (for deterministic stability validation)
+    this.lastFrameHash = frameBuffer.getFrameHash();
   }
 
   /**
@@ -838,7 +872,7 @@ export class WorldEngine {
               bg = ColorPalette.scaleBrightness(inlandBg, 1.25);
               char = '░';
             } else {
-              const isTuft = ((x * 7 + y * 13 + Math.floor(time * 2)) % 11) === 0;
+              const isTuft = ((x * 7 + y * 13) % 11) === 0;
               if (isTuft) {
                 char = depthFactor > 0.5 ? '"' : '·';
               }
@@ -963,7 +997,7 @@ export class WorldEngine {
             let color = oceanRippleColor;
 
             if (waveVal > 0.75) {
-              char = depthFactor > 0.6 ? '_/\\_' : (depthFactor > 0.3 ? '~~' : '~');
+              char = depthFactor > 0.6 ? '^' : (depthFactor > 0.3 ? '≈' : '~');
               color = waveSparkle ? '#ffffff' : oceanRippleColor;
             } else if (waveVal > 0.45) {
               char = depthFactor > 0.5 ? '·' : ' ';

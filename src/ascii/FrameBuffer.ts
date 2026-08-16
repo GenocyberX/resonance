@@ -60,6 +60,10 @@ export class FrameBuffer {
     bg?: string,
     isSprite: boolean = false
   ): boolean {
+    if (char.length > 1) {
+      throw new Error(`[FrameBuffer] setCell() only accepts a single character/grapheme. Received string with length ${char.length}: "${char}"`);
+    }
+
     const ix = Math.round(x);
     const iy = Math.round(y);
 
@@ -87,6 +91,34 @@ export class FrameBuffer {
     }
 
     return true;
+  }
+
+  /**
+   * Computes a fast, deterministic 32-bit FNV-1a hash across all cells in the FrameBuffer.
+   * Used for static frame stability verification and regression testing.
+   */
+  public getFrameHash(): number {
+    let hash = 0x811c9dc5;
+    for (let y = 0; y < this.height; y++) {
+      const row = this.cells[y];
+      for (let x = 0; x < this.width; x++) {
+        const cell = row[x];
+        const code = cell.char.charCodeAt(0) || 32;
+        hash ^= code;
+        hash = Math.imul(hash, 0x01000193);
+
+        const colorCode = cell.color.charCodeAt(1) || 0;
+        hash ^= colorCode;
+        hash = Math.imul(hash, 0x01000193);
+
+        if (cell.bg) {
+          const bgCode = cell.bg.charCodeAt(1) || 0;
+          hash ^= bgCode;
+          hash = Math.imul(hash, 0x01000193);
+        }
+      }
+    }
+    return hash >>> 0;
   }
 
   /**

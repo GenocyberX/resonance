@@ -13,6 +13,17 @@ export interface PlayerContainmentTelemetry {
   isWorldClamped: boolean;
 }
 
+export interface RenderTelemetry {
+  simFps: number;
+  visualFps: number;
+  domRenderMs: number;
+  rowsUpdated: number;
+  rowsTotal: number;
+  spanCount: number;
+  resizeCount: number;
+  frameHash: string;
+}
+
 export interface UiTelemetryData {
   fps: number;
   worldState: WorldState;
@@ -24,6 +35,8 @@ export interface UiTelemetryData {
     isVisualTest: boolean;
     scenario: string;
     time?: string;
+    stability?: string;
   };
   containment?: PlayerContainmentTelemetry;
+  renderStats?: RenderTelemetry;
 }

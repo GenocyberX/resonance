@@ -6,7 +6,7 @@ import { AudioControls } from '../ui/AudioControls';
 import { Hud } from '../ui/Hud';
 import { DebugPanel } from '../ui/DebugPanel';
 import { APP_CONFIG } from './config';
-import { UiTelemetryData } from '../ui/types';
+import { UiTelemetryData, RenderTelemetry } from '../ui/types';
 import { RoadTestMode } from '../road/RoadGenerator';
 
 export class ResonanceApp {
@@ -20,9 +20,21 @@ export class ResonanceApp {
 
   private isRunning: boolean = false;
   private lastFrameTime: number = 0;
-  private fps: number = 60;
-  private frameCount: number = 0;
-  private fpsAccumulator: number = 0;
+  private lastVisualRenderTime: number = 0;
+  private lastUiUpdateTime: number = 0;
+
+  // Cadence timing constants
+  private readonly VISUAL_RENDER_INTERVAL_MS: number = 1000 / 30; // 30 FPS DOM presentation target
+  private readonly UI_UPDATE_INTERVAL_MS: number = 100;           // 10 Hz telemetry update rate
+
+  // FPS tracking (Simulation vs Visual)
+  private simFps: number = 60;
+  private simFrameCount: number = 0;
+  private simFpsAccumulator: number = 0;
+
+  private visualFps: number = 30;
+  private visualFrameCount: number = 0;
+  private visualFpsAccumulator: number = 0;
 
   constructor() {
     // 1. Initialize Audio subsystem
@@ -49,13 +61,13 @@ export class ResonanceApp {
     this.hud = new Hud();
     this.debugPanel = new DebugPanel();
 
-    // 5. Check URL parameters for Visual Test Mode
+    // 5. Check URL parameters for Visual Test & Stability Modes
     this.checkUrlVisualTestMode();
 
     // 6. Setup Keyboard Shortcuts for Visual Test Scenarios
     this.setupKeybindings();
 
-    // 7. Setup Responsive Viewport Resize
+    // 7. Setup Responsive Viewport Resize with debouncing
     this.setupResizeObserver();
   }
 
@@ -63,10 +75,14 @@ export class ResonanceApp {
     if (typeof window === 'undefined') return;
 
     const params = new URLSearchParams(window.location.search);
-    const hasVisualTest = params.has('visualTest') || params.has('scene') || params.has('time') || params.has('golden');
+    const hasVisualTest = params.has('visualTest') || params.has('scene') || params.has('time') || params.has('golden') || params.has('stability');
 
     if (hasVisualTest) {
       const isGolden = params.get('golden') === 'tropical';
+      const isStabilityStatic = params.get('stability') === 'static';
+      const isStabilityDynamic = params.get('stability') === '1' || params.get('stability') === 'dynamic';
+      const stability: 'dynamic' | 'static' | 'none' = isStabilityStatic ? 'static' : (isStabilityDynamic ? 'dynamic' : 'none');
+
       const sceneParam = (params.get('scene') || 'straight').toLowerCase();
       const timeParam = (params.get('time') || 'day').toLowerCase() as VisualTestTime;
       let scenario: RoadTestMode = 'FLAT_STRAIGHT';
@@ -85,9 +101,10 @@ export class ResonanceApp {
         true,
         scenario,
         ['day', 'sunset', 'night', 'dawn'].includes(timeParam) ? timeParam : 'day',
-        isGolden
+        isGolden,
+        stability
       );
-      console.info(`[Resonance] Visual Test Mode active. Scenario: ${scenario}, Time: ${timeParam}, Golden: ${isGolden}`);
+      console.info(`[Resonance] Visual Test Mode active. Scenario: ${scenario}, Time: ${timeParam}, Golden: ${isGolden}, Stability: ${stability}`);
     }
   }
 
@@ -98,7 +115,6 @@ export class ResonanceApp {
     let timeIndex = 0;
 
     window.addEventListener('keydown', (e: KeyboardEvent) => {
-      // Don't intercept when user is typing in an input
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
       switch (e.key) {
@@ -140,8 +156,15 @@ export class ResonanceApp {
   private setupResizeObserver(): void {
     const container = document.getElementById('viewport-container');
     if (container) {
+      let resizeTimeout: number | null = null;
       const resizeObserver = new ResizeObserver(() => {
-        this.renderer.resizeToContainer();
+        if (resizeTimeout !== null) {
+          window.clearTimeout(resizeTimeout);
+        }
+        resizeTimeout = window.setTimeout(() => {
+          this.renderer.resizeToContainer();
+          resizeTimeout = null;
+        }, 50);
       });
       resizeObserver.observe(container);
     }
@@ -152,6 +175,8 @@ export class ResonanceApp {
 
     this.isRunning = true;
     this.lastFrameTime = performance.now();
+    this.lastVisualRenderTime = this.lastFrameTime;
+    this.lastUiUpdateTime = this.lastFrameTime;
     this.renderer.resizeToContainer();
 
     requestAnimationFrame(this.gameLoop.bind(this));
@@ -160,48 +185,79 @@ export class ResonanceApp {
   private gameLoop(timestamp: number): void {
     if (!this.isRunning) return;
 
-    // Calculate delta time in seconds
+    // Simulation Delta Time calculation
     const dt = Math.min(0.1, (timestamp - this.lastFrameTime) / 1000);
     this.lastFrameTime = timestamp;
 
-    // Measure FPS
-    this.frameCount++;
-    this.fpsAccumulator += dt;
-    if (this.fpsAccumulator >= 0.5) {
-      this.fps = (this.frameCount / this.fpsAccumulator);
-      this.frameCount = 0;
-      this.fpsAccumulator = 0;
+    // Measure Simulation FPS
+    this.simFrameCount++;
+    this.simFpsAccumulator += dt;
+    if (this.simFpsAccumulator >= 0.5) {
+      this.simFps = this.simFrameCount / this.simFpsAccumulator;
+      this.simFrameCount = 0;
+      this.simFpsAccumulator = 0;
     }
 
-    // 1. Audio Analysis & Music State update
+    // 1. Audio Analysis & Music State update (high frequency)
     const musicState = this.audioEngine.update(dt);
 
     // 2. Map Music State to World Parameters
     const worldParams = this.musicMapper.map(musicState);
 
-    // 3. Update Procedural World Simulation
+    // 3. Update Procedural World Simulation (continuous simulation dt)
     const fb = this.renderer.getFrameBuffer();
     this.worldEngine.update(dt, worldParams, fb.width, fb.height);
 
-    // 4. Render ASCII Frame
-    this.worldEngine.render(fb);
-    this.renderer.render();
+    // 4. Decoupled Visual ASCII DOM Presentation (Target ~30 FPS for flicker-free stability)
+    const elapsedSinceRender = timestamp - this.lastVisualRenderTime;
+    if (elapsedSinceRender >= this.VISUAL_RENDER_INTERVAL_MS) {
+      const renderDt = elapsedSinceRender / 1000;
+      this.lastVisualRenderTime = timestamp;
 
-    // 5. Update UI & Telemetry
-    const telemetry: UiTelemetryData = {
-      fps: this.fps,
-      worldState: this.worldEngine.getState(),
-      musicState,
-      totalCollisions: this.worldEngine.getCollisionSystem().getTotalCollisions(),
-      activeTrafficCount: this.worldEngine.getState().traffic.length,
-      seed: APP_CONFIG.defaultSeed,
-      visualTestMode: this.worldEngine.getVisualTestMode(),
-      containment: this.worldEngine.getContainmentTelemetry(),
-    };
+      this.visualFrameCount++;
+      this.visualFpsAccumulator += renderDt;
+      if (this.visualFpsAccumulator >= 0.5) {
+        this.visualFps = this.visualFrameCount / this.visualFpsAccumulator;
+        this.visualFrameCount = 0;
+        this.visualFpsAccumulator = 0;
+      }
 
-    this.hud.update(telemetry);
-    this.audioControls.update();
-    this.debugPanel.update(telemetry);
+      this.worldEngine.render(fb);
+      this.renderer.render();
+    }
+
+    // 5. Throttled UI & Telemetry update (10 Hz)
+    if (timestamp - this.lastUiUpdateTime >= this.UI_UPDATE_INTERVAL_MS) {
+      this.lastUiUpdateTime = timestamp;
+
+      const rStats = this.renderer.getStats();
+      const renderTelemetry: RenderTelemetry = {
+        simFps: this.simFps,
+        visualFps: this.visualFps,
+        domRenderMs: rStats.domRenderTimeMs,
+        rowsUpdated: rStats.rowsUpdated,
+        rowsTotal: rStats.rowsTotal,
+        spanCount: rStats.spanCount,
+        resizeCount: rStats.resizeCount,
+        frameHash: `0x${this.worldEngine.getLastFrameHash().toString(16).toUpperCase().padStart(8, '0')}`,
+      };
+
+      const telemetry: UiTelemetryData = {
+        fps: this.simFps,
+        worldState: this.worldEngine.getState(),
+        musicState,
+        totalCollisions: this.worldEngine.getCollisionSystem().getTotalCollisions(),
+        activeTrafficCount: this.worldEngine.getState().traffic.length,
+        seed: APP_CONFIG.defaultSeed,
+        visualTestMode: this.worldEngine.getVisualTestMode(),
+        containment: this.worldEngine.getContainmentTelemetry(),
+        renderStats: renderTelemetry,
+      };
+
+      this.hud.update(telemetry);
+      this.audioControls.update();
+      this.debugPanel.update(telemetry);
+    }
 
     requestAnimationFrame(this.gameLoop.bind(this));
   }

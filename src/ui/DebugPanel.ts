@@ -1,51 +1,52 @@
 import { UiTelemetryData } from './types';
 
 export class DebugPanel {
-  private panelElement: HTMLElement;
-  private toggleBtn: HTMLElement;
-  private closeBtn: HTMLElement;
+  private element: HTMLElement;
   private contentElement: HTMLElement;
   private isVisible: boolean = false;
 
   constructor() {
-    this.panelElement = document.getElementById('debug-panel') as HTMLElement;
-    this.toggleBtn = document.getElementById('btn-toggle-debug') as HTMLElement;
-    this.closeBtn = document.getElementById('btn-close-debug') as HTMLElement;
-    this.contentElement = document.getElementById('debug-content') as HTMLElement;
-
-    this.setupListeners();
-  }
-
-  private setupListeners(): void {
-    this.toggleBtn.addEventListener('click', () => this.toggle());
-    this.closeBtn.addEventListener('click', () => this.hide());
+    this.element = document.getElementById('debug-panel') || this.createFallbackElement();
+    this.contentElement = this.element.querySelector('.debug-content') || this.element;
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'd' || e.key === 'D') {
-        if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) return;
+      if (e.key === '`' || e.key === '~' || e.key === 'F3') {
         this.toggle();
       }
     });
   }
 
+  private createFallbackElement(): HTMLElement {
+    const el = document.createElement('div');
+    el.id = 'debug-panel';
+    el.className = 'debug-panel';
+    el.style.display = 'none';
+    document.body.appendChild(el);
+    return el;
+  }
+
   public toggle(): void {
     this.isVisible = !this.isVisible;
-    if (this.isVisible) {
-      this.panelElement.classList.remove('hidden');
-    } else {
-      this.panelElement.classList.add('hidden');
-    }
+    this.element.style.display = this.isVisible ? 'block' : 'none';
+    this.element.classList.toggle('visible', this.isVisible);
+  }
+
+  public show(): void {
+    this.isVisible = true;
+    this.element.style.display = 'block';
+    this.element.classList.add('visible');
   }
 
   public hide(): void {
     this.isVisible = false;
-    this.panelElement.classList.add('hidden');
+    this.element.style.display = 'none';
+    this.element.classList.remove('visible');
   }
 
   public update(telemetry: UiTelemetryData): void {
     if (!this.isVisible) return;
 
-    const { fps, worldState, musicState, totalCollisions, activeTrafficCount, seed, visualTestMode, containment } = telemetry;
+    const { fps, worldState, musicState, totalCollisions, activeTrafficCount, seed, visualTestMode, containment, renderStats } = telemetry;
     const player = worldState.player;
     const biomeBlend = worldState.biomeBlend;
     const dayNight = worldState.dayNight;
@@ -54,6 +55,10 @@ export class DebugPanel {
     const biomeLabel = biomeBlend.transitionProgress > 0.05
       ? `${biomeBlend.currentBiome.id} → ${biomeBlend.nextBiome.id} (${transitionPct}%)`
       : biomeBlend.currentBiome.id;
+
+    const stabilityMode = visualTestMode?.stability && visualTestMode.stability !== 'none'
+      ? `<span style="color:#34d399">${visualTestMode.stability.toUpperCase()}</span>`
+      : 'OFF';
 
     const testLabel = visualTestMode?.isVisualTest
       ? `<span style="color:#fbbf24">${visualTestMode.scenario} (${visualTestMode.time || 'day'})</span>`
@@ -69,30 +74,65 @@ export class DebugPanel {
     const visualClamped = containment?.isVisualClamped ? '<span style="color:#f43f5e">YES</span>' : '<span style="color:#34d399">NO</span>';
     const worldClamped = containment?.isWorldClamped ? '<span style="color:#f43f5e">YES</span>' : '<span style="color:#34d399">NO</span>';
 
+    const simFps = renderStats ? Math.round(renderStats.simFps) : Math.round(fps);
+    const visualFps = renderStats ? Math.round(renderStats.visualFps) : Math.round(fps);
+    const domRenderMs = renderStats ? renderStats.domRenderMs.toFixed(2) : '-';
+    const rowsUpdated = renderStats ? `${renderStats.rowsUpdated} / ${renderStats.rowsTotal}` : '-';
+    const spanCount = renderStats ? renderStats.spanCount : '-';
+    const resizeCount = renderStats ? renderStats.resizeCount : 0;
+    const frameHash = renderStats ? renderStats.frameHash : '-';
+
     this.contentElement.innerHTML = `
       <div class="debug-row">
-        <span class="debug-label">FPS</span>
-        <span class="debug-val">${Math.round(fps)}</span>
+        <span class="debug-label">SIM / VISUAL FPS</span>
+        <span class="debug-val" style="color: #38bdf8">${simFps} / ${visualFps}</span>
       </div>
       <div class="debug-row">
-        <span class="debug-label">TEST MODE</span>
-        <span class="debug-val">${testLabel}</span>
+        <span class="debug-label">DOM RENDER MS</span>
+        <span class="debug-val" style="color: #34d399">${domRenderMs} ms</span>
       </div>
       <div class="debug-row">
-        <span class="debug-label">SEED</span>
-        <span class="debug-val">${seed}</span>
+        <span class="debug-label">ROWS UPDATED</span>
+        <span class="debug-val">${rowsUpdated}</span>
       </div>
       <div class="debug-row">
-        <span class="debug-label">DAY PHASE</span>
-        <span class="debug-val" style="color: #fbbf24">${dayNight.phase} (${Math.round(dayNight.normalizedCycle * 100)}%)</span>
+        <span class="debug-label">SPAN COUNT</span>
+        <span class="debug-val">${spanCount}</span>
       </div>
       <div class="debug-row">
-        <span class="debug-label">SPEED</span>
-        <span class="debug-val">${Math.round(player.speed)} km/h</span>
+        <span class="debug-label">FRAME HASH</span>
+        <span class="debug-val" style="color: #fde047; font-family: monospace;">${frameHash}</span>
       </div>
       <div class="debug-row">
-        <span class="debug-label">DRIVER STATE</span>
-        <span class="debug-val" style="color: #38bdf8">${player.driverState}</span>
+        <span class="debug-label">STABILITY MODE</span>
+        <span class="debug-val">${stabilityMode}</span>
+      </div>
+      <div class="debug-row">
+        <span class="debug-label">RESIZE COUNT</span>
+        <span class="debug-val">${resizeCount}</span>
+      </div>
+
+      <div style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+        <div class="debug-row">
+          <span class="debug-label">TEST MODE</span>
+          <span class="debug-val">${testLabel}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">SEED</span>
+          <span class="debug-val">${seed}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">DAY PHASE</span>
+          <span class="debug-val" style="color: #fbbf24">${dayNight.phase} (${Math.round(dayNight.normalizedCycle * 100)}%)</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">SPEED</span>
+          <span class="debug-val">${Math.round(player.speed)} km/h</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">DRIVER STATE</span>
+          <span class="debug-val" style="color: #38bdf8">${player.driverState}</span>
+        </div>
       </div>
 
       <div style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
