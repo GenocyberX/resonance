@@ -1,5 +1,7 @@
 import { BiomeDefinition } from '../../types';
 import { CactusSprite } from '../../../sprites/scenery/CactusSprite';
+import { CanyonMesaSprite } from '../../../sprites/scenery/CanyonMesaSprite';
+import { CanyonButteSprite } from '../../../sprites/scenery/CanyonButteSprite';
 import { RockSprite } from '../../../sprites/obstacles/RockSprite';
 import { BillboardSprite } from '../../../sprites/scenery/BillboardSprite';
 import { StreetLampSprite } from '../../../sprites/scenery/StreetLampSprite';
@@ -23,8 +25,10 @@ export const DesertBiome: BiomeDefinition = {
     { sprite: CactusSprite, weight: 1.0 },
   ],
   structurePool: [
-    { sprite: StreetLampSprite, weight: 0.3 },
-    { sprite: BillboardSprite, weight: 0.2 },
+    { sprite: CanyonMesaSprite, weight: 0.35 },
+    { sprite: CanyonButteSprite, weight: 0.35 },
+    { sprite: StreetLampSprite, weight: 0.2 },
+    { sprite: BillboardSprite, weight: 0.1 },
   ],
   obstaclePool: [
     { sprite: RockSprite, weight: 0.7 },

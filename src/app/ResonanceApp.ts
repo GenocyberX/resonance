@@ -75,10 +75,21 @@ export class ResonanceApp {
     if (typeof window === 'undefined') return;
 
     const params = new URLSearchParams(window.location.search);
-    const hasGallery = params.has('gallery') || params.get('sprites') === '1' || params.get('gallery') === 'sprites';
+    const galleryParam = (params.get('gallery') || '').toLowerCase();
+    const hasGallery = params.has('gallery') || params.get('sprites') === '1';
+    const isMono = params.get('mono') === '1';
+
     if (hasGallery) {
-      this.worldEngine.setGalleryMode(true);
-      console.info('[Resonance] Sprite Gallery & LOD Inspection Mode active.');
+      if (galleryParam === 'contrast') {
+        this.worldEngine.setGalleryMode(true, 0, 'contrast', isMono);
+        console.info('[Resonance] Art Lab: Contrast Matrix Mode active.');
+      } else if (galleryParam === 'approach') {
+        this.worldEngine.setGalleryMode(true, 0, 'approach', isMono);
+        console.info('[Resonance] Art Lab: Motion & Scale Approach Mode active.');
+      } else {
+        this.worldEngine.setGalleryMode(true, 0, 'sprites', isMono);
+        console.info(`[Resonance] Art Lab: Sprite Gallery active${isMono ? ' (Monochrome)' : ''}.`);
+      }
       return;
     }
 
@@ -128,10 +139,45 @@ export class ResonanceApp {
         case 'g':
         case 'G':
           if (this.worldEngine.getGalleryMode()) {
-            this.worldEngine.nextGallerySprite();
+            if (this.worldEngine.getGallerySubMode() !== 'sprites') {
+              this.worldEngine.setGallerySubMode('sprites');
+            } else {
+              this.worldEngine.nextGallerySprite();
+            }
           } else {
-            this.worldEngine.setGalleryMode(true);
-            console.info('[Resonance] Entered Sprite Gallery Mode');
+            this.worldEngine.setGalleryMode(true, 0, 'sprites');
+            console.info('[Resonance] Entered Art Lab: Sprite Gallery Mode');
+          }
+          break;
+        case 'm':
+        case 'M':
+          if (this.worldEngine.getGalleryMode()) {
+            this.worldEngine.toggleMonochrome();
+            console.info(`[Resonance] Monochrome Silhouette Mode: ${this.worldEngine.getMonochrome() ? 'ON' : 'OFF'}`);
+          }
+          break;
+        case 'c':
+        case 'C':
+          if (this.worldEngine.getGalleryMode()) {
+            const nextMode = this.worldEngine.getGallerySubMode() === 'contrast' ? 'sprites' : 'contrast';
+            this.worldEngine.setGallerySubMode(nextMode);
+            console.info(`[Resonance] Art Lab Mode: ${nextMode.toUpperCase()}`);
+          } else {
+            this.worldEngine.setGalleryMode(true, 0, 'contrast');
+            console.info('[Resonance] Entered Art Lab: Contrast Matrix Mode');
+          }
+          break;
+        case 'v':
+        case 'V':
+        case 'p':
+        case 'P':
+          if (this.worldEngine.getGalleryMode()) {
+            const nextMode = this.worldEngine.getGallerySubMode() === 'approach' ? 'sprites' : 'approach';
+            this.worldEngine.setGallerySubMode(nextMode);
+            console.info(`[Resonance] Art Lab Mode: ${nextMode.toUpperCase()}`);
+          } else {
+            this.worldEngine.setGalleryMode(true, 0, 'approach');
+            console.info('[Resonance] Entered Art Lab: Motion & Scale Approach Mode');
           }
           break;
         case 'ArrowRight':

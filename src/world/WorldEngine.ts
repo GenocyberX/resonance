@@ -14,22 +14,8 @@ import { WorldState } from './WorldState';
 import { AmbientParticle, WorldMusicParameters } from './types';
 import { SeededRandom } from '../procedural/SeededRandom';
 import { PlayerContainmentTelemetry } from '../ui/types';
-import { PalmTreeSprite } from '../sprites/scenery/PalmTreeSprite';
-import { PineTreeSprite } from '../sprites/scenery/PineTreeSprite';
-import { CactusSprite } from '../sprites/scenery/CactusSprite';
-import { DeciduousTreeSprite } from '../sprites/scenery/DeciduousTreeSprite';
-import { SportsCarSprite } from '../sprites/vehicles/SportsCarSprite';
-import { TrafficSedanSprite } from '../sprites/vehicles/TrafficSedanSprite';
-import { TruckSprite } from '../sprites/vehicles/TruckSprite';
-import { LighthouseSprite } from '../sprites/scenery/LighthouseSprite';
-import { CoastalHotelSprite } from '../sprites/scenery/CoastalHotelSprite';
-import { RoadsideCafeSprite } from '../sprites/scenery/RoadsideCafeSprite';
-import { BeachShackSprite } from '../sprites/scenery/BeachShackSprite';
-import { SailboatSprite } from '../sprites/scenery/SailboatSprite';
-import { DirectionSignSprite } from '../sprites/scenery/DirectionSignSprite';
-import { BillboardSprite } from '../sprites/scenery/BillboardSprite';
-import { StreetLampSprite } from '../sprites/scenery/StreetLampSprite';
 import { LODLevel, SpriteDefinition } from '../ascii/types';
+import { SpriteLibrary } from '../ascii/SpriteLibrary';
 
 interface Cloud {
   xNorm: number;
@@ -63,11 +49,15 @@ export class WorldEngine {
   private stars: { xNorm: number; yNorm: number; char: string; brightness: number; twinkleSpeed: number }[] = [];
   private clouds: Cloud[] = [];
 
-  // Visual Test Mode state
+  // Visual Test Mode & Resonance Art Lab state
   private isVisualTest: boolean = false;
   private isGoldenMode: boolean = false;
   private isGalleryMode: boolean = false;
+  private gallerySubMode: 'sprites' | 'contrast' | 'approach' = 'sprites';
+  private isMonochromeGallery: boolean = false;
   private galleryIndex: number = 0;
+  private approachZ: number = 1000;
+  private approachSpeed: number = 260;
   private stabilityMode: 'dynamic' | 'static' | 'none' = 'none';
   private testScenario: RoadTestMode = 'NORMAL';
   private testTimeOfDay: VisualTestTime = 'day';
@@ -155,6 +145,8 @@ export class WorldEngine {
     isGolden: boolean;
     stability: 'dynamic' | 'static' | 'none';
     isGallery: boolean;
+    gallerySubMode: 'sprites' | 'contrast' | 'approach';
+    isMonochrome: boolean;
   } {
     return {
       isVisualTest: this.isVisualTest,
@@ -163,16 +155,51 @@ export class WorldEngine {
       isGolden: this.isGoldenMode,
       stability: this.stabilityMode,
       isGallery: this.isGalleryMode,
+      gallerySubMode: this.gallerySubMode,
+      isMonochrome: this.isMonochromeGallery,
     };
   }
 
-  public setGalleryMode(enabled: boolean, index: number = 0): void {
+  public setGalleryMode(
+    enabled: boolean,
+    index: number = 0,
+    subMode: 'sprites' | 'contrast' | 'approach' = 'sprites',
+    monochrome: boolean = false
+  ): void {
     this.isGalleryMode = enabled;
     this.galleryIndex = Math.max(0, index);
+    this.gallerySubMode = subMode;
+    this.isMonochromeGallery = monochrome;
+    if (subMode === 'approach') {
+      this.approachZ = 1100;
+    }
   }
 
   public getGalleryMode(): boolean {
     return this.isGalleryMode;
+  }
+
+  public setGallerySubMode(mode: 'sprites' | 'contrast' | 'approach'): void {
+    this.gallerySubMode = mode;
+    if (mode === 'approach') {
+      this.approachZ = 1100;
+    }
+  }
+
+  public getGallerySubMode(): 'sprites' | 'contrast' | 'approach' {
+    return this.gallerySubMode;
+  }
+
+  public toggleMonochrome(): void {
+    this.isMonochromeGallery = !this.isMonochromeGallery;
+  }
+
+  public setMonochrome(enabled: boolean): void {
+    this.isMonochromeGallery = enabled;
+  }
+
+  public getMonochrome(): boolean {
+    return this.isMonochromeGallery;
   }
 
   public nextGallerySprite(): void {
@@ -286,6 +313,16 @@ export class WorldEngine {
    * Main simulation tick with strict physical road containment and smooth chase camera tracking.
    */
   public update(dt: number, musicParams: WorldMusicParameters, viewportWidth: number = 120, viewportHeight: number = 42): void {
+    if (this.isGalleryMode) {
+      if (this.gallerySubMode === 'approach') {
+        this.approachZ -= this.approachSpeed * dt;
+        if (this.approachZ < 65) {
+          this.approachZ = 1200;
+        }
+      }
+      return;
+    }
+
     if (this.stabilityMode === 'static') {
       // In Static Stability Mode, simulation time and player position are 100% frozen
       this.state.player.speed = 0;
@@ -1216,64 +1253,143 @@ export class WorldEngine {
   }
 
   /**
-   * Renders the interactive Sprite Gallery & LOD Inspection Screen.
+   * Renders the interactive Resonance Art Lab (Sprite Gallery, Contrast Matrix, and Motion Approach).
    */
   private renderSpriteGallery(fb: FrameBuffer, width: number, height: number): void {
     fb.clear(' ', '#ffffff', '#090d16');
 
-    const sprites: SpriteDefinition[] = [
-      PalmTreeSprite,
-      PineTreeSprite,
-      CactusSprite,
-      DeciduousTreeSprite,
-      SportsCarSprite,
-      TrafficSedanSprite,
-      TruckSprite,
-      LighthouseSprite,
-      CoastalHotelSprite,
-      RoadsideCafeSprite,
-      BeachShackSprite,
-      SailboatSprite,
-      DirectionSignSprite,
-      BillboardSprite,
-      StreetLampSprite,
-    ];
-
+    const sprites: SpriteDefinition[] = SpriteLibrary.getHeroSprites();
     const currentSprite = sprites[this.galleryIndex % sprites.length];
-    const headerText = `=== RESONANCE SPRITE GALLERY & LOD INSPECTION [${(this.galleryIndex % sprites.length) + 1}/${sprites.length}] ===`;
-    fb.drawString(Math.floor((width - headerText.length) / 2), 1, headerText, '#38bdf8', 0, '#0f172a');
 
-    const infoText = `${currentSprite.name.toUpperCase()} (ID: ${currentSprite.id}) | Category: ${currentSprite.category || 'SCENERY'} | World: ${currentSprite.worldWidth || '-'}x${currentSprite.worldHeight || '-'} | Scale: ${currentSprite.visualScale || 1.0}`;
-    fb.drawString(Math.max(2, Math.floor((width - infoText.length) / 2)), 3, infoText, '#fde047');
+    if (this.gallerySubMode === 'sprites') {
+      const monoBadge = this.isMonochromeGallery ? ' [MONOCHROME SILHOUETTE]' : '';
+      const headerText = `=== RESONANCE ART LAB — SPRITE GALLERY [${(this.galleryIndex % sprites.length) + 1}/${sprites.length}]${monoBadge} ===`;
+      fb.drawString(Math.floor((width - headerText.length) / 2), 1, headerText, this.isMonochromeGallery ? '#ffffff' : '#38bdf8', 0, '#0f172a');
 
-    const helpText = `[PREV: LEFT ARROW / 'A']  •  [NEXT: RIGHT ARROW / 'D' / 'G']  •  [EXIT: ESC / '0']`;
-    fb.drawString(Math.max(2, Math.floor((width - helpText.length) / 2)), height - 2, helpText, '#94a3b8');
+      const infoText = `${currentSprite.name.toUpperCase()} (ID: ${currentSprite.id}) | Cat: ${currentSprite.category || 'SCENERY'} | World: ${currentSprite.worldWidth || '-'}x${currentSprite.worldHeight || '-'} | Scale: ${currentSprite.visualScale || 1.0}`;
+      fb.drawString(Math.max(2, Math.floor((width - infoText.length) / 2)), 3, infoText, '#fde047');
 
-    // Display baseline and slots for FAR, MEDIUM, NEAR, CLOSE
-    const lods: LODLevel[] = ['far', 'medium', 'near', 'close'];
-    const colStep = Math.floor(width / 4);
-    const baselineY = height - 5;
+      const helpText = `[A/D: PREV/NEXT]  •  [M: MONOCHROME]  •  [C: CONTRAST TEST]  •  [V: APPROACH TEST]  •  [ESC/0: DRIVE]`;
+      fb.drawString(Math.max(2, Math.floor((width - helpText.length) / 2)), height - 2, helpText, '#94a3b8');
 
-    // Draw horizontal ground baseline
-    fb.drawHLine(4, width - 5, baselineY, '─', '#334155', 0);
+      // Baseline and slots for FAR, MEDIUM, NEAR, CLOSE
+      const lods: LODLevel[] = ['far', 'medium', 'near', 'close'];
+      const colStep = Math.floor(width / 4);
+      const baselineY = height - 5;
 
-    for (let i = 0; i < lods.length; i++) {
-      const lod = lods[i];
-      const variant = currentSprite.variants[lod];
-      const slotCenterX = Math.floor(colStep * i + colStep / 2);
+      // Draw horizontal ground baseline
+      fb.drawHLine(4, width - 5, baselineY, '─', '#334155', 0);
 
-      const label = `[ ${lod.toUpperCase()} ]`;
-      fb.drawString(slotCenterX - Math.floor(label.length / 2), 5, label, '#38bdf8');
+      for (let i = 0; i < lods.length; i++) {
+        const lod = lods[i];
+        const variant = currentSprite.variants[lod];
+        const slotCenterX = Math.floor(colStep * i + colStep / 2);
+
+        const label = `[ ${lod.toUpperCase()} ]`;
+        fb.drawString(slotCenterX - Math.floor(label.length / 2), 5, label, '#38bdf8');
+
+        if (variant) {
+          const dimLabel = `${variant.width}x${variant.height}`;
+          fb.drawString(slotCenterX - Math.floor(dimLabel.length / 2), 7, dimLabel, '#64748b');
+
+          // Draw sprite anchored at baseline
+          fb.drawSprite(
+            slotCenterX,
+            baselineY,
+            variant,
+            currentSprite.defaultColor,
+            0,
+            this.isMonochromeGallery ? '#ffffff' : undefined,
+            this.isMonochromeGallery
+          );
+        } else {
+          const noneLabel = '(none)';
+          fb.drawString(slotCenterX - Math.floor(noneLabel.length / 2), Math.floor(baselineY / 2), noneLabel, '#ef4444');
+        }
+      }
+    } else if (this.gallerySubMode === 'contrast') {
+      const headerText = `=== RESONANCE ART LAB — CONTRAST MATRIX [${(this.galleryIndex % sprites.length) + 1}/${sprites.length}] ===`;
+      fb.drawString(Math.floor((width - headerText.length) / 2), 1, headerText, '#fde047', 0, '#0f172a');
+
+      const infoText = `${currentSprite.name.toUpperCase()} (ID: ${currentSprite.id}) — Cross-Biome Contrast Verification`;
+      fb.drawString(Math.max(2, Math.floor((width - infoText.length) / 2)), 2, infoText, '#38bdf8');
+
+      const helpText = `[A/D: SWITCH SPRITE]  •  [G: STANDARD GALLERY]  •  [V: APPROACH TEST]  •  [ESC/0: DRIVE]`;
+      fb.drawString(Math.max(2, Math.floor((width - helpText.length) / 2)), height - 2, helpText, '#94a3b8');
+
+      const swatches = [
+        { name: '1. BLACK (VOID)', bg: '#000000' },
+        { name: '2. FOREST GREEN', bg: '#064e3b' },
+        { name: '3. CANYON SAND', bg: '#78350f' },
+        { name: '4. DAY SKY BLUE', bg: '#0284c7' },
+        { name: '5. GLACIAL SNOW', bg: '#cbd5e1' },
+        { name: '6. NEON NIGHT', bg: '#3b0764' },
+      ];
+
+      const panelW = Math.floor((width - 8) / 3);
+      const panelH = Math.floor((height - 8) / 2);
+      const variant = currentSprite.variants.near || currentSprite.variants.medium || currentSprite.variants.close;
+
+      for (let idx = 0; idx < swatches.length; idx++) {
+        const swatch = swatches[idx];
+        const col = idx % 3;
+        const row = Math.floor(idx / 3);
+        const px1 = 3 + col * panelW;
+        const px2 = px1 + panelW - 2;
+        const py1 = 4 + row * panelH;
+        const py2 = py1 + panelH - 2;
+
+        // Fill swatch background
+        for (let y = py1; y <= py2; y++) {
+          for (let x = px1; x <= px2; x++) {
+            fb.setCell(x, y, ' ', '#ffffff', 0, swatch.bg, false);
+          }
+        }
+
+        // Swatch label
+        fb.drawString(px1 + 1, py1, swatch.name, '#f8fafc', 0, swatch.bg);
+
+        // Draw sprite inside swatch
+        if (variant) {
+          const centerX = Math.floor((px1 + px2) / 2);
+          const contactY = py2 - 1;
+          fb.drawSprite(centerX, contactY, variant, currentSprite.defaultColor, 0);
+        }
+      }
+    } else if (this.gallerySubMode === 'approach') {
+      const headerText = `=== RESONANCE ART LAB — MOTION & SCALE APPROACH TEST [${(this.galleryIndex % sprites.length) + 1}/${sprites.length}] ===`;
+      fb.drawString(Math.floor((width - headerText.length) / 2), 1, headerText, '#38bdf8', 0, '#0f172a');
+
+      const projH = DepthSorter.calculateProjectedHeight(
+        this.approachZ,
+        currentSprite.worldHeight,
+        height,
+        currentSprite.visualScale
+      );
+      const activeLOD = DepthSorter.calculateProjectedLOD(this.approachZ, currentSprite, height);
+      const variant = currentSprite.variants[activeLOD] || currentSprite.variants.close;
+
+      const telemetryText = `relZ: ${this.approachZ.toFixed(1)} u  |  H_proj: ${projH.toFixed(2)} rows  |  LOD: [${activeLOD.toUpperCase()}]  |  Variant: ${variant ? `${variant.width}x${variant.height}` : '(none)'}`;
+      fb.drawString(Math.max(2, Math.floor((width - telemetryText.length) / 2)), 3, telemetryText, '#fde047');
+
+      const helpText = `[A/D: SWITCH SPRITE]  •  [G: STANDARD GALLERY]  •  [C: CONTRAST TEST]  •  [ESC/0: DRIVE]`;
+      fb.drawString(Math.max(2, Math.floor((width - helpText.length) / 2)), height - 2, helpText, '#94a3b8');
+
+      const baselineY = height - 6;
+      fb.drawHLine(6, width - 7, baselineY, '─', '#334155', 0);
+      fb.drawString(8, baselineY + 1, 'GROUND CONTACT BASELINE', '#475569');
 
       if (variant) {
-        const dimLabel = `${variant.width}x${variant.height}`;
-        fb.drawString(slotCenterX - Math.floor(dimLabel.length / 2), 7, dimLabel, '#64748b');
-
-        // Draw sprite anchored at baseline
-        fb.drawSprite(slotCenterX, baselineY, variant, currentSprite.defaultColor, 0);
-      } else {
-        const noneLabel = '(none)';
-        fb.drawString(slotCenterX - Math.floor(noneLabel.length / 2), Math.floor(baselineY / 2), noneLabel, '#ef4444');
+        const centerX = Math.floor(width / 2);
+        fb.drawSprite(
+          centerX,
+          baselineY,
+          variant,
+          currentSprite.defaultColor,
+          0,
+          this.isMonochromeGallery ? '#ffffff' : undefined,
+          this.isMonochromeGallery
+        );
       }
     }
   }

@@ -43,7 +43,10 @@ export class TrafficController {
   private spawnVehicle(playerZ: number, road: RoadGenerator): void {
     const lanes = [-1, 0, 1];
     const lane = this.rng.choice(lanes);
-    const type: TrafficType = this.rng.boolean(0.35) ? 'truck' : 'sedan';
+    
+    // Distribute among coupe (30%), sedan (45%), truck (25%)
+    const roll = this.rng.next();
+    const type: TrafficType = roll < 0.30 ? 'coupe' : (roll < 0.75 ? 'sedan' : 'truck');
     const spawnZ = playerZ + this.rng.range(650, 1300);
 
     // Ensure no immediate overlap with existing traffic at spawn location

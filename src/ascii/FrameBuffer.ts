@@ -176,7 +176,8 @@ export class FrameBuffer {
     variant: SpriteVariant,
     defaultColor: string,
     z: number = 0,
-    colorOverride?: string
+    colorOverride?: string,
+    forceColorOverride: boolean = false
   ): void {
     const startX = Math.round(screenX - variant.anchorX);
     const startY = Math.round(screenY - variant.anchorY);
@@ -196,7 +197,7 @@ export class FrameBuffer {
 
         // Per-character color or global color
         let charColor = renderColor;
-        if (variant.colors && variant.colors[row] && variant.colors[row][col]) {
+        if (!forceColorOverride && variant.colors && variant.colors[row] && variant.colors[row][col]) {
           charColor = variant.colors[row][col];
         }
 

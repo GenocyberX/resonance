@@ -1,16 +1,21 @@
 import { SpriteDefinition } from './types';
 import { SportsCarSprite } from '../sprites/vehicles/SportsCarSprite';
+import { TrafficCoupeSprite } from '../sprites/vehicles/TrafficCoupeSprite';
 import { TrafficSedanSprite } from '../sprites/vehicles/TrafficSedanSprite';
 import { TruckSprite } from '../sprites/vehicles/TruckSprite';
 import { PalmTreeSprite } from '../sprites/scenery/PalmTreeSprite';
 import { PineTreeSprite } from '../sprites/scenery/PineTreeSprite';
+import { SnowPineSprite } from '../sprites/scenery/SnowPineSprite';
 import { CactusSprite } from '../sprites/scenery/CactusSprite';
 import { DeciduousTreeSprite } from '../sprites/scenery/DeciduousTreeSprite';
 import { LighthouseSprite } from '../sprites/scenery/LighthouseSprite';
 import { CoastalHotelSprite } from '../sprites/scenery/CoastalHotelSprite';
-import { RoadsideCafeSprite } from '../sprites/scenery/RoadsideCafeSprite';
 import { BeachShackSprite } from '../sprites/scenery/BeachShackSprite';
 import { SailboatSprite } from '../sprites/scenery/SailboatSprite';
+import { CanyonMesaSprite } from '../sprites/scenery/CanyonMesaSprite';
+import { CanyonButteSprite } from '../sprites/scenery/CanyonButteSprite';
+import { AlpinePeakSprite } from '../sprites/scenery/AlpinePeakSprite';
+import { RoadsideCafeSprite } from '../sprites/scenery/RoadsideCafeSprite';
 import { DirectionSignSprite } from '../sprites/scenery/DirectionSignSprite';
 import { BillboardSprite } from '../sprites/scenery/BillboardSprite';
 import { StreetLampSprite } from '../sprites/scenery/StreetLampSprite';
@@ -30,18 +35,26 @@ export class SpriteLibrary {
 
   public static initialize(): void {
     const list: SpriteDefinition[] = [
+      // 15 Mandatory Hero Assets
       SportsCarSprite,
+      TrafficCoupeSprite,
       TrafficSedanSprite,
       TruckSprite,
       PalmTreeSprite,
       PineTreeSprite,
+      SnowPineSprite,
       CactusSprite,
-      DeciduousTreeSprite,
       LighthouseSprite,
       CoastalHotelSprite,
-      RoadsideCafeSprite,
       BeachShackSprite,
       SailboatSprite,
+      CanyonMesaSprite,
+      CanyonButteSprite,
+      AlpinePeakSprite,
+
+      // Supporting World Assets
+      RoadsideCafeSprite,
+      DeciduousTreeSprite,
       DirectionSignSprite,
       BillboardSprite,
       StreetLampSprite,
@@ -72,6 +85,26 @@ export class SpriteLibrary {
 
   public static getAll(): SpriteDefinition[] {
     return Array.from(this.sprites.values());
+  }
+
+  public static getHeroSprites(): SpriteDefinition[] {
+    return [
+      SportsCarSprite,
+      TrafficCoupeSprite,
+      TrafficSedanSprite,
+      TruckSprite,
+      PalmTreeSprite,
+      PineTreeSprite,
+      SnowPineSprite,
+      CactusSprite,
+      LighthouseSprite,
+      CoastalHotelSprite,
+      BeachShackSprite,
+      SailboatSprite,
+      CanyonMesaSprite,
+      CanyonButteSprite,
+      AlpinePeakSprite,
+    ];
   }
 }
 

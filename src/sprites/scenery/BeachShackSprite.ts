@@ -1,113 +1,122 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const shackColors = {
-  R: '#d97706', // Thatch roof amber
-  W: '#fde68a', // Light straw highlight
-  T: '#92400e', // Wood framing
-  C: '#38bdf8', // Cyan bar counter / decor
-  Y: '#fbbf24', // Lantern glow
-  '*': '#d97706',
-};
+const TH = '#d97706'; // Thatched Amber Roof
+const TD = '#b45309'; // Thatched Roof Shadow
+const WD = '#78350f'; // Timber Beam Structure
+const SF = '#06b6d4'; // Turquoise Surfboard / Accent
+const LN = '#fde047'; // Warm Glowing Lanterns
+const BS = '#d97706'; // Sand Ground Contact
 
-export const BeachShackSprite: SpriteDefinition = Sprite.define(
-  'scenery_beach_shack',
-  'Tiki Beach Shack',
-  '#d97706',
-  {
-    close: Sprite.createColoredVariant(
-      `
-              .--------------.             
-          .--/   /\\  /\\  /\\   \\--.         
-        ./______/__\\/__\\/__\\______\\.       
-       /============================\\      
-      /______________________________\\     
-         |   (o)              (o)   |      
-         |    |====[======]====|    |      
-         |====|                |====|      
-         |  | |   |        |   | |  |      
-         |  | |   |        |   | |  |      
-         |  | |   |        |   | |  |      
-         |__|_|___|________|___|_|__|      
-        /============================\\     
-      `,
-      shackColors,
-      `
-              WWWWWWWWWWWWWW               
-          RRRR   WW  WW  WW   RRRR         
-        RRRRRRRRRRRRRRRRRRRRRRRRRRRR       
-       WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW      
-      RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR     
-         T   YYY              YYY   T      
-         T    TCCCCCCCCCCCCCCCT     T      
-         TTTTTT                TTTTTT      
-         T  T T   T        T   T T  T      
-         T  T T   T        T   T T  T      
-         T  T T   T        T   T T  T      
-         TTTTTTTTTTTTTTTTTTTTTTTTTTTT      
-        TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT     
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-            .------------.    
-          ./  /\\  /\\  /\\  \\.  
-         ./________________\\. 
-        /====================\\
-         | (o)        (o) |   
-         |===[========]===|   
-         | |            | |   
-         |_|____________|_|   
-      `,
-      shackColors,
-      `
-            WWWWWWWWWWWW      
-          RR  WW  WW  WW  RR  
-         RRRRRRRRRRRRRRRRRRRR 
-        WWWWWWWWWWWWWWWWWWWWWW
-         T YYY        YYY T   
-         TTTCCCCCCCCCCCCCTTT  
-         T T            T T   
-         TTTTTTTTTTTTTTTTTT   
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-           .----------.  
-          /____________\\ 
-          | (o)    (o) | 
-          |============| 
-          |            | 
-          |____________| 
-      `,
-      shackColors,
-      `
-           WWWWWWWWWW    
-          RRRRRRRRRRRRRR 
-          T YYY    YYY T 
-          TTTCCCCCCCCCTTT
-          T            T 
-          TTTTTTTTTTTTTT 
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-          /------\\
-          |======|
-          |      |
-      `,
-      shackColors,
-      `
-          RRRRRR  
-          TTTTTT  
-          TTTTTT  
-      `
-    ),
+export const BeachShackSprite: SpriteDefinition = {
+  id: 'beach_shack',
+  name: 'Coastal Beach Shack',
+  category: 'BUILDING',
+  defaultColor: '#f59e0b',
+  worldWidth: 160,
+  worldHeight: 140,
+  visualScale: 1.0,
+  variants: {
+    close: {
+      width: 22,
+      height: 13,
+      anchorX: 11,
+      anchorY: 12,
+      lines: [
+        "      .------------.  ",
+        "    ./==============\\.",
+        "  ./=================\\",
+        " /===[ TIKI BAR ]====\\",
+        " |   *          *   | ",
+        " || | |        | | || ",
+        " || | | (====) | | || ",
+        " || | | |BAR | | | || ",
+        " || |/\\_|____|_/\\| || ",
+        " ||/ / | |    | | \\ \\|",
+        " |/ /  | |    | |  \\ |",
+        " |_/__|_|____|_|__\\_| ",
+        "::..::..::..::..::..::",
+      ],
+      colors: [
+        ['', '', '', '', '', '', TH, TH, TH, TH, TH, TH, TH, TH, TH, TH, TH, TH, '', '', '', ''],
+        ['', '', '', '', TH, TH, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TH, TH, '', ''],
+        ['', '', TH, TH, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TH, TH],
+        ['', TH, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TH, TH],
+        ['', WD, '', '', LN, '', '', '', '', '', '', '', '', '', LN, '', '', '', '', WD, '', ''],
+        ['', WD, WD, '', WD, '', WD, '', '', '', '', '', '', '', WD, '', WD, '', WD, WD, '', ''],
+        ['', WD, WD, '', WD, '', WD, '', SF, SF, SF, SF, '', WD, '', WD, '', WD, WD, '', '', ''],
+        ['', WD, WD, '', WD, '', WD, '', SF, SF, SF, SF, '', WD, '', WD, '', WD, WD, '', '', ''],
+        ['', WD, WD, '', WD, SF, SF, WD, WD, WD, WD, WD, SF, SF, WD, '', WD, '', WD, WD, '', ''],
+        ['', WD, WD, SF, '', WD, '', WD, '', '', '', '', WD, '', WD, SF, '', WD, WD, WD, '', ''],
+        ['', WD, SF, '', '', WD, '', WD, '', '', '', '', WD, '', WD, '', SF, '', WD, WD, '', ''],
+        ['', WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, ''],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    near: {
+      width: 16,
+      height: 9,
+      anchorX: 8,
+      anchorY: 8,
+      lines: [
+        "    .--------.  ",
+        "  ./==========\\.",
+        " /=============\\",
+        " |  *        * |",
+        " || | (==) | || ",
+        " ||/\\_|BAR|_/\\||",
+        " ||/ | |  | |\\||",
+        " |_|_|_|__|_|_| ",
+        "::..::..::..::..",
+      ],
+      colors: [
+        ['', '', '', '', TH, TH, TH, TH, TH, TH, TH, TH, '', '', '', ''],
+        ['', '', TH, TH, TD, TD, TD, TD, TD, TD, TD, TD, TH, TH, '', ''],
+        ['', TH, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TD, TH, TH],
+        ['', WD, '', '', LN, '', '', '', '', '', '', '', LN, '', WD, ''],
+        ['', WD, WD, '', WD, '', SF, SF, SF, '', WD, '', WD, WD, '', ''],
+        ['', WD, WD, SF, SF, WD, WD, WD, WD, WD, SF, SF, WD, WD, '', ''],
+        ['', WD, SF, '', WD, '', WD, '', '', WD, '', WD, '', SF, WD, ''],
+        ['', WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, ''],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    medium: {
+      width: 11,
+      height: 6,
+      anchorX: 5,
+      anchorY: 5,
+      lines: [
+        "  .-----.  ",
+        " /=======\\ ",
+        " | *   * | ",
+        " || | | || ",
+        " |_|_|_|_| ",
+        "::..::..::.",
+      ],
+      colors: [
+        ['', '', TH, TH, TH, TH, TH, TH, TH, '', ''],
+        ['', TH, TD, TD, TD, TD, TD, TD, TD, TH, ''],
+        ['', WD, '', LN, '', '', '', LN, '', WD, ''],
+        ['', WD, WD, '', WD, '', WD, '', WD, WD, ''],
+        ['', WD, WD, WD, WD, WD, WD, WD, WD, WD, ''],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    far: {
+      width: 6,
+      height: 3,
+      anchorX: 3,
+      anchorY: 2,
+      lines: [
+        " .--. ",
+        "|====|",
+        "|_||_|",
+      ],
+      colors: [
+        ['', TH, TH, TH, TH, ''],
+        [TH, TD, TD, TD, TD, TH],
+        ['', WD, WD, WD, WD, ''],
+      ],
+    },
   },
-  {
-    category: 'BUILDING',
-    worldWidth: 200,
-    worldHeight: 220,
-    visualScale: 1.0,
-  }
-);
+};

@@ -1,11 +1,12 @@
 import { SpriteDefinition } from '../../ascii/types';
 
-const BD = '#38bdf8'; // Sky Blue Body Accent
-const CR = '#0284c7'; // Dark Cyan Body Shading
+const BD = '#38bdf8'; // Sky Blue Primary Paint
+const CR = '#0284c7'; // Deep Cobalt Body Shading
 const GL = '#0f172a'; // Tinted Rear Glass
-const RF = '#94a3b8'; // Glass Reflection White/Cyan
-const TL = '#ef4444'; // Red LED Taillight Bar
-const BL = '#ffffff'; // Brake Core / Reverse Light
+const RF = '#94a3b8'; // Glass Reflection Flare
+const TL = '#ef4444'; // Bright Red LED Taillight Bar
+const TD = '#991b1b'; // Deep Crimson Taillight Housing
+const BL = '#f8fafc'; // Reverse / Center Brake Core
 const EX = '#e2e8f0'; // Chrome Twin Exhausts
 const TR = '#18181b'; // Wide Performance Rubber Tires
 
@@ -19,31 +20,31 @@ export const SportsCarSprite: SpriteDefinition = {
   visualScale: 1.0,
   variants: {
     close: {
-      width: 24,
+      width: 26,
       height: 9,
-      anchorX: 12,
+      anchorX: 13,
       anchorY: 8,
       lines: [
-        "       .--------.       ",
-        "     ./  ______  \\.     ",
-        "   ./  /  ____  \\  \\.   ",
-        " ./===/  /____\\  \\===\\. ",
-        "/====[============]====\\",
-        "|[*]=| [::RES::] |=[*]| ",
-        "|=====[===========]====|",
-        "(O)(O)  (==)(==)  (O)(O)",
-        "/======================\\",
+        "        .----------.      ",
+        "      ./  ________  \\.    ",
+        "    ./  /  ______  \\  \\.  ",
+        "  ./===/  /______\\  \\===\\.",
+        " /====[==============]===\\",
+        " |<*>| [::  RES  ::] |<*>|",
+        " |====[==============]===|",
+        " (O)(O) (==)  (==) (O)(O) ",
+        " /======================\\ ",
       ],
       colors: [
-        ['', '', '', '', '', '', '', BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, '', '', '', '', '', '', ''],
-        ['', '', '', '', '', BD, BD, GL, GL, GL, GL, GL, GL, GL, GL, BD, BD, '', '', '', '', '', '', ''],
-        ['', '', '', BD, BD, GL, GL, RF, RF, RF, RF, RF, RF, GL, GL, GL, GL, BD, BD, '', '', '', '', ''],
-        ['', BD, BD, CR, CR, GL, GL, RF, RF, RF, RF, RF, GL, GL, CR, CR, BD, BD, '', '', '', '', '', ''],
-        [BD, CR, CR, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, CR, CR, BD, '', '', ''],
-        [BD, TL, BL, TL, CR, CR, RF, RF, RF, RF, RF, RF, RF, RF, CR, CR, TL, BL, TL, BD, '', '', '', ''],
-        [BD, CR, CR, CR, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, CR, CR, CR, BD, '', '', '', ''],
-        [TR, TR, TR, TR, '', '', EX, EX, EX, EX, EX, EX, EX, EX, '', '', TR, TR, TR, TR, '', '', '', ''],
-        [TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR],
+        ['', '', '', '', '', '', '', '', BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', BD, BD, GL, GL, GL, GL, GL, GL, GL, GL, BD, BD, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', BD, BD, GL, GL, RF, RF, RF, RF, RF, RF, GL, GL, BD, BD, '', '', '', '', '', '', '', ''],
+        ['', '', BD, BD, CR, CR, GL, GL, RF, RF, RF, RF, RF, RF, GL, GL, CR, CR, BD, BD, '', '', '', '', '', ''],
+        ['', BD, CR, CR, TD, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TD, CR, CR, BD, '', '', '', '', ''],
+        ['', BD, TL, BL, TL, CR, CR, RF, RF, RF, RF, RF, RF, RF, RF, CR, CR, TL, BL, TL, BD, '', '', '', '', ''],
+        ['', BD, CR, CR, CR, TD, TL, TL, TL, TL, TL, TL, TL, TL, TL, TL, TD, CR, CR, CR, BD, '', '', '', '', ''],
+        ['', TR, TR, TR, TR, '', EX, EX, EX, EX, '', '', EX, EX, EX, EX, '', TR, TR, TR, TR, '', '', '', '', ''],
+        ['', TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, '', ''],
       ],
     },
     near: {
@@ -56,7 +57,7 @@ export const SportsCarSprite: SpriteDefinition = {
         "    ./  ______  \\.  ",
         "  ./===/______\\===\\.",
         " |====[======]====| ",
-        " |[*]|  [RES]  |[*]|",
+        " |<*>| [ RES ] |<*>|",
         " (O)  (==)(==)  (O) ",
       ],
       colors: [

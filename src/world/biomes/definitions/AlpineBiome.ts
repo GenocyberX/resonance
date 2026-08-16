@@ -1,5 +1,6 @@
 import { BiomeDefinition } from '../../types';
-import { PineTreeSprite } from '../../../sprites/scenery/PineTreeSprite';
+import { SnowPineSprite } from '../../../sprites/scenery/SnowPineSprite';
+import { AlpinePeakSprite } from '../../../sprites/scenery/AlpinePeakSprite';
 import { RockSprite } from '../../../sprites/obstacles/RockSprite';
 import { StreetLampSprite } from '../../../sprites/scenery/StreetLampSprite';
 
@@ -19,9 +20,10 @@ export const AlpineBiome: BiomeDefinition = {
     fog: '#e0f2fe',
   },
   vegetationPool: [
-    { sprite: PineTreeSprite, weight: 1.0 },
+    { sprite: SnowPineSprite, weight: 1.0 },
   ],
   structurePool: [
+    { sprite: AlpinePeakSprite, weight: 0.4 },
     { sprite: StreetLampSprite, weight: 0.3 },
   ],
   obstaclePool: [
