@@ -1,0 +1,46 @@
+import { describe, it, expect } from 'vitest';
+import { CollisionSystem } from '../src/driving/CollisionSystem';
+import { PlayerVehicle } from '../src/entities/PlayerVehicle';
+import { TrafficVehicle } from '../src/entities/TrafficVehicle';
+import { SceneryObject } from '../src/entities/SceneryObject';
+import { TrafficConeSprite } from '../src/sprites/obstacles/TrafficConeSprite';
+
+describe('CollisionSystem', () => {
+  it('detects no collision when vehicles are far apart longitudinally', () => {
+    const system = new CollisionSystem();
+    const player = new PlayerVehicle(100);
+    const traffic = new TrafficVehicle('t1', 'sedan', 500, 0);
+
+    const collisions = system.checkCollisions(player, [traffic]);
+    expect(collisions.length).toBe(0);
+    expect(system.getTotalCollisions()).toBe(0);
+  });
+
+  it('detects collision when vehicles overlap longitudinally and laterally', () => {
+    const system = new CollisionSystem();
+    const player = new PlayerVehicle(200);
+    player.x = 0;
+    player.lateralOffset = 0;
+    player.speed = 180;
+
+    const traffic = new TrafficVehicle('t1', 'sedan', 205, 0);
+    traffic.x = 0;
+    traffic.lateralOffset = 0;
+    traffic.speed = 80;
+
+    const collisions = system.checkCollisions(player, [traffic]);
+    expect(collisions.length).toBe(1);
+    expect(system.getTotalCollisions()).toBe(1);
+    expect(player.driverState).toBe('RECOVER');
+    expect(player.speed).toBeLessThan(180);
+  });
+
+  it('ignores non-collidable scenery objects', () => {
+    const system = new CollisionSystem();
+    const player = new PlayerVehicle(100);
+    const nonCollidable = new SceneryObject('tree', TrafficConeSprite, 100, 0, false);
+
+    const collisions = system.checkCollisions(player, [nonCollidable]);
+    expect(collisions.length).toBe(0);
+  });
+});

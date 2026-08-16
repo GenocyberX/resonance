@@ -1,0 +1,221 @@
+.resonance-root {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background-color: var(--bg-dark);
+}
+
+/* Header */
+.resonance-header {
+  height: var(--header-height);
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--bg-panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 10;
+  user-select: none;
+}
+
+.brand-group {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.brand-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--text-primary);
+}
+
+.brand-subtitle {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--text-secondary);
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--bg-panel-border);
+  background: var(--bg-dark);
+}
+
+.mode-badge {
+  color: var(--accent-cyan);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.biome-badge {
+  color: var(--accent-emerald);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.time-badge {
+  color: var(--accent-amber);
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.btn-icon {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--bg-panel-border);
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-icon:hover {
+  background: var(--bg-panel-hover);
+  color: var(--text-primary);
+  border-color: var(--accent-cyan);
+}
+
+/* Viewport */
+.viewport-container {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: calc(100vh - var(--header-height) - var(--hud-height));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #020204;
+  overflow: hidden;
+}
+
+.ascii-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-mono);
+  line-height: 1.05;
+  white-space: pre;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.ascii-screen pre {
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+  line-height: inherit;
+}
+
+/* Debug Panel Overlay */
+.debug-overlay {
+  position: absolute;
+  top: calc(var(--header-height) + 12px);
+  right: 16px;
+  width: 320px;
+  max-height: calc(100vh - var(--header-height) - var(--hud-height) - 32px);
+  background: rgba(15, 17, 23, 0.94);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--bg-panel-border);
+  border-radius: 8px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.debug-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+}
+
+.debug-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--bg-panel-border);
+}
+
+.debug-header h3 {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  color: var(--accent-cyan);
+  margin: 0;
+}
+
+.btn-close {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1;
+  padding: 2px 6px;
+}
+
+.btn-close:hover {
+  color: var(--text-primary);
+}
+
+.debug-content {
+  padding: 12px 14px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.debug-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 2px 0;
+}
+
+.debug-label {
+  color: var(--text-secondary);
+}
+
+.debug-val {
+  color: var(--accent-amber);
+  font-weight: 600;
+}
+
+.debug-bar-wrap {
+  width: 90px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.debug-bar-fill {
+  height: 100%;
+  background: var(--accent-cyan);
+  transition: width 0.05s linear;
+}

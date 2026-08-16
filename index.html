@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RESONANCE — A Procedural ASCII Audiovisual Journey reacting to music in real time." />
+  <title>RESONANCE — A Procedural Audio Journey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/global.css" />
+  <link rel="stylesheet" href="/src/styles/resonance.css" />
+  <link rel="stylesheet" href="/src/styles/hud.css" />
+</head>
+<body>
+  <div id="app" class="resonance-root">
+    <!-- Header -->
+    <header class="resonance-header" id="resonance-header">
+      <div class="brand-group">
+        <h1 class="brand-title">RESONANCE</h1>
+        <span class="brand-subtitle">A PROCEDURAL AUDIO JOURNEY</span>
+      </div>
+      <div class="header-status" id="header-status">
+        <span class="status-badge mode-badge" id="badge-mode">DEMO MODE</span>
+        <span class="status-badge biome-badge" id="badge-biome">TROPICAL</span>
+        <span class="status-badge time-badge" id="badge-time">12:00 PM</span>
+      </div>
+      <div class="header-actions">
+        <button id="btn-toggle-debug" class="btn-icon" title="Toggle Debug Panel (Key: D)">
+          <span class="icon">⚙</span> DEBUG
+        </button>
+      </div>
+    </header>
+
+    <!-- Main ASCII Viewport -->
+    <main class="viewport-container" id="viewport-container">
+      <div class="ascii-screen" id="ascii-screen" role="region" aria-label="ASCII World Rendering">
+        <!-- Rendered ASCII content is injected here by AsciiRenderer -->
+      </div>
+    </main>
+
+    <!-- Bottom HUD & Audio Controls -->
+    <footer class="resonance-hud" id="resonance-hud">
+      <!-- Player Live Telemetry -->
+      <div class="hud-telemetry" id="hud-telemetry">
+        <div class="telemetry-item">
+          <span class="telemetry-label">SPEED</span>
+          <span class="telemetry-val" id="hud-speed">120 <small>KM/H</small></span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">DRIVER</span>
+          <span class="telemetry-val driver-state" id="hud-driver-state">CRUISE</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">MUSIC STATE</span>
+          <span class="telemetry-val music-state" id="hud-music-state">CALM</span>
+        </div>
+        <div class="telemetry-item visualizer-container">
+          <span class="telemetry-label">SPECTRUM</span>
+          <div class="mini-visualizer" id="hud-mini-visualizer">
+            <span class="viz-bar" id="viz-bass"></span>
+            <span class="viz-bar" id="viz-mids"></span>
+            <span class="viz-bar" id="viz-treble"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio Control Center -->
+      <div class="hud-audio-controls" id="hud-audio-controls">
+        <div class="audio-track-info">
+          <span class="track-label" id="track-title">NO AUDIO LOADED (AUTONOMOUS DEMO)</span>
+        </div>
+
+        <div class="audio-transport">
+          <label class="btn-file-upload" for="audio-file-input">
+            <span class="icon">📁</span> LOAD TRACK
+            <input type="file" id="audio-file-input" accept="audio/*" />
+          </label>
+
+          <button id="btn-play-pause" class="btn-transport" disabled title="Play / Pause">
+            <span id="btn-play-icon">▶</span>
+          </button>
+
+          <div class="timeline-group">
+            <span class="time-readout" id="time-current">0:00</span>
+            <input type="range" id="seek-bar" min="0" max="100" value="0" step="0.1" disabled />
+            <span class="time-readout" id="time-duration">0:00</span>
+          </div>
+
+          <div class="volume-group">
+            <span class="volume-icon">🔊</span>
+            <input type="range" id="volume-bar" min="0" max="1" value="0.8" step="0.02" />
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Collapsible Debug Overlay -->
+    <aside class="debug-overlay hidden" id="debug-panel">
+      <div class="debug-header">
+        <h3>ENGINE TELEMETRY</h3>
+        <button id="btn-close-debug" class="btn-close">×</button>
+      </div>
+      <div class="debug-content" id="debug-content">
+        <!-- Live telemetry populated by DebugPanel.ts -->
+      </div>
+    </aside>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
