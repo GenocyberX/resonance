@@ -1,39 +1,49 @@
 import { BiomeDefinition } from '../../types';
 import { CactusSprite } from '../../../sprites/scenery/CactusSprite';
+import { JoshuaTreeSprite } from '../../../sprites/scenery/JoshuaTreeSprite';
+import { DeadTreeSprite } from '../../../sprites/scenery/DeadTreeSprite';
 import { CanyonMesaSprite } from '../../../sprites/scenery/CanyonMesaSprite';
 import { CanyonButteSprite } from '../../../sprites/scenery/CanyonButteSprite';
-import { RockSprite } from '../../../sprites/obstacles/RockSprite';
+import { DesertDuneSprite } from '../../../sprites/scenery/DesertDuneSprite';
+import { BoulderClusterSprite } from '../../../sprites/scenery/BoulderClusterSprite';
 import { BillboardSprite } from '../../../sprites/scenery/BillboardSprite';
-import { StreetLampSprite } from '../../../sprites/scenery/StreetLampSprite';
+import { WarningSignSprite } from '../../../sprites/scenery/WarningSignSprite';
+import { HighwayMileMarkerSprite } from '../../../sprites/scenery/HighwayMileMarkerSprite';
+import { RockSprite } from '../../../sprites/obstacles/RockSprite';
 
 export const DesertBiome: BiomeDefinition = {
   id: 'DESERT',
   name: 'Sunbaked Canyon',
   palette: {
-    skyTop: '#9a3412',       // Burnt Copper
-    skyBottom: '#f97316',    // Warm Amber
-    horizon: '#fde047',      // Golden Sand Dunes
-    road: '#292524',         // Dust-Worn Asphalt
-    roadMarking: '#fef08a',  // Pale Sun Line
-    roadShoulder: '#78350f', // Red Earth Shoulder
-    ground: '#451a03',       // Canyon Basin
-    groundDetail: '#d97706', // Sand Drifts
-    mountains: '#b45309',    // Red Rock Mesas
-    fog: '#ffedd5',
+    skyTop: '#7c2d12',       // Scorched Terracotta
+    skyBottom: '#ea580c',    // Desert Amber
+    horizon: '#f97316',      // Golden Canyon Rim
+    road: '#1c1917',         // Sunbaked Asphalt
+    roadMarking: '#fde047',  // Amber Highway Line
+    roadShoulder: '#9a3412', // Rust Canyon Dirt
+    ground: '#451a03',       // Deep Ochre Basin
+    groundDetail: '#d97706', // Canyon Sand
+    mountains: '#78350f',    // Distant Sandstone Cliffs
+    fog: '#fed7aa',
   },
   vegetationPool: [
-    { sprite: CactusSprite, weight: 1.0 },
+    { sprite: CactusSprite, weight: 0.6 },
+    { sprite: JoshuaTreeSprite, weight: 0.5 },
+    { sprite: DeadTreeSprite, weight: 0.4 },
   ],
   structurePool: [
-    { sprite: CanyonMesaSprite, weight: 0.35 },
-    { sprite: CanyonButteSprite, weight: 0.35 },
-    { sprite: StreetLampSprite, weight: 0.2 },
-    { sprite: BillboardSprite, weight: 0.1 },
+    { sprite: CanyonMesaSprite, weight: 0.45 },
+    { sprite: CanyonButteSprite, weight: 0.55 },
+    { sprite: DesertDuneSprite, weight: 0.5 },
+    { sprite: BoulderClusterSprite, weight: 0.5 },
+    { sprite: BillboardSprite, weight: 0.3 },
+    { sprite: WarningSignSprite, weight: 0.4 },
+    { sprite: HighwayMileMarkerSprite, weight: 0.5 },
   ],
   obstaclePool: [
-    { sprite: RockSprite, weight: 0.7 },
+    { sprite: RockSprite, weight: 0.6 },
   ],
-  density: 0.8,
+  density: 1.1,
   groundChar: '.',
   mountainChar: 'M',
 };

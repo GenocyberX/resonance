@@ -1,7 +1,12 @@
 import { BiomeDefinition } from '../../types';
+import { VolcanicVentSprite } from '../../../sprites/scenery/VolcanicVentSprite';
+import { BasaltCragSprite } from '../../../sprites/scenery/BasaltCragSprite';
+import { DeadTreeSprite } from '../../../sprites/scenery/DeadTreeSprite';
+import { BoulderClusterSprite } from '../../../sprites/scenery/BoulderClusterSprite';
+import { WarningSignSprite } from '../../../sprites/scenery/WarningSignSprite';
+import { HighwayMileMarkerSprite } from '../../../sprites/scenery/HighwayMileMarkerSprite';
 import { RockSprite } from '../../../sprites/obstacles/RockSprite';
 import { TrafficConeSprite } from '../../../sprites/obstacles/TrafficConeSprite';
-import { StreetLampSprite } from '../../../sprites/scenery/StreetLampSprite';
 
 export const VolcanicBiome: BiomeDefinition = {
   id: 'VOLCANIC',
@@ -18,15 +23,21 @@ export const VolcanicBiome: BiomeDefinition = {
     mountains: '#450a0a',    // Caldera Volcano Peaks
     fog: '#fb923c',
   },
-  vegetationPool: [],
+  vegetationPool: [
+    { sprite: DeadTreeSprite, weight: 0.5 },
+  ],
   structurePool: [
-    { sprite: StreetLampSprite, weight: 0.2 },
+    { sprite: VolcanicVentSprite, weight: 0.55 },
+    { sprite: BasaltCragSprite, weight: 0.6 },
+    { sprite: BoulderClusterSprite, weight: 0.45 },
+    { sprite: WarningSignSprite, weight: 0.4 },
+    { sprite: HighwayMileMarkerSprite, weight: 0.5 },
   ],
   obstaclePool: [
     { sprite: RockSprite, weight: 0.8 },
     { sprite: TrafficConeSprite, weight: 0.2 },
   ],
-  density: 0.95,
+  density: 1.1,
   groundChar: '#',
   mountainChar: '^',
 };

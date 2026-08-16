@@ -1,60 +1,152 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-export const NeonTowerSprite: SpriteDefinition = Sprite.define(
-  'scenery_neon_tower',
-  'Cyberpunk Neon Tower',
-  '#06b6d4', // Cyan
-  {
-    close: Sprite.createVariant(
-      `
-            /\\
-           /||\\
-          [ || ]
-          [ || ]
-         /======\\
-        |  |::|  |
-        |  |::|  |
-       /========\\
-      |   |::|   |
-      |   |::|   |
-     /============\\
-    |    |::::|    |
-    |    |::::|    |
-      `
-    ),
-    near: Sprite.createVariant(
-      `
-          /\\
-         [||]
-        /====\\
-       | |::| |
-      /========\\
-     |   |::|   |
-     |   |::|   |
-      `
-    ),
-    medium: Sprite.createVariant(
-      `
-         /\\
-        [||]
-       /====\\
-      | |::| |
-      | |::| |
-      `
-    ),
-    far: Sprite.createVariant(
-      `
-        /\\
-       |::|
-       |::|
-      `
-    ),
+const CY = '#06b6d4'; // Synthwave Neon Cyan Glow
+const MG = '#ec4899'; // Ultraviolet / Neon Magenta
+const GD = '#fde047'; // Gold Spire Beacon
+const NV = '#090d16'; // Midnight Megastructure Cladding
+const DK = '#1e1b4b'; // Deep Indigo Shadow Face
+const BS = '#020617'; // Street Foundation
+
+export const NeonTowerSprite: SpriteDefinition = {
+  id: 'neon_tower',
+  name: 'Cyberpunk Skyscraper',
+  category: 'BUILDING',
+  defaultColor: '#06b6d4',
+  worldWidth: 260,
+  worldHeight: 480,
+  visualScale: 1.15,
+  variants: {
+    close: {
+      width: 24,
+      height: 20,
+      anchorX: 12,
+      anchorY: 19,
+      lines: [
+        "           /\\           ",
+        "          |  |          ",
+        "          |GD|          ",
+        "         /====\\         ",
+        "        |  ||  |        ",
+        "       /========\\       ",
+        "      |  |CY|MG| |      ",
+        "      |  |CY|MG| |      ",
+        "     /============\\     ",
+        "    |   |CY|  |MG| |    ",
+        "    |   |CY|  |MG| |    ",
+        "    |   |CY|  |MG| |    ",
+        "   /================\\   ",
+        "  |    |::|    |::|  |  ",
+        "  |    |CY|    |MG|  |  ",
+        "  |    |CY|    |MG|  |  ",
+        "  |    |::|    |::|  |  ",
+        " /====================\\ ",
+        "|  |CY|MG|CY|MG|CY|MG| |",
+        "::..::..::..::..::..::..",
+      ],
+      colors: [
+        ['', '', '', '', '', '', '', '', '', '', '', GD, GD, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', '', GD, CY, CY, GD, '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', '', GD, GD, GD, GD, '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', CY, CY, CY, CY, CY, CY, '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', NV, NV, CY, CY, MG, MG, NV, NV, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', NV, NV, CY, CY, CY, MG, MG, MG, NV, NV, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', NV, NV, CY, CY, CY, MG, MG, MG, NV, NV, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, '', '', '', '', '', ''],
+        ['', '', '', '', NV, NV, CY, CY, CY, DK, DK, MG, MG, MG, NV, NV, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', NV, NV, CY, CY, CY, DK, DK, MG, MG, MG, NV, NV, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', NV, NV, CY, CY, CY, DK, DK, MG, MG, MG, NV, NV, '', '', '', '', '', '', '', ''],
+        ['', '', '', CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, '', '', '', '', ''],
+        ['', '', NV, NV, CY, CY, CY, CY, DK, DK, DK, DK, MG, MG, MG, MG, NV, NV, '', '', '', '', '', ''],
+        ['', '', NV, NV, CY, CY, CY, CY, DK, DK, DK, DK, MG, MG, MG, MG, NV, NV, '', '', '', '', '', ''],
+        ['', '', NV, NV, CY, CY, CY, CY, DK, DK, DK, DK, MG, MG, MG, MG, NV, NV, '', '', '', '', '', ''],
+        ['', '', NV, NV, CY, CY, CY, CY, DK, DK, DK, DK, MG, MG, MG, MG, NV, NV, '', '', '', '', '', ''],
+        ['', MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, '', ''],
+        [NV, NV, CY, CY, MG, MG, CY, CY, MG, MG, CY, CY, MG, MG, CY, CY, MG, MG, CY, CY, MG, MG, NV, NV],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    near: {
+      width: 16,
+      height: 14,
+      anchorX: 8,
+      anchorY: 13,
+      lines: [
+        "       /\\       ",
+        "      |GD|      ",
+        "     /====\\     ",
+        "    |  ||  |    ",
+        "   /========\\   ",
+        "  |  |CY|MG| |  ",
+        " /============\\ ",
+        "|   |CY|  |MG| |",
+        "|   |CY|  |MG| |",
+        "/==============\\",
+        "| |CY|    |MG| |",
+        "| |CY|    |MG| |",
+        "/==============\\",
+        "::..::..::..::..",
+      ],
+      colors: [
+        ['', '', '', '', '', '', '', GD, GD, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', GD, GD, GD, GD, '', '', '', '', '', ''],
+        ['', '', '', '', '', CY, CY, CY, CY, CY, CY, '', '', '', '', ''],
+        ['', '', '', '', NV, NV, CY, CY, MG, MG, NV, NV, '', '', '', ''],
+        ['', '', '', CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, '', '', ''],
+        ['', '', NV, NV, CY, CY, CY, MG, MG, MG, NV, NV, '', '', '', ''],
+        ['', MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, '', ''],
+        [NV, NV, CY, CY, CY, DK, DK, MG, MG, MG, NV, NV, '', '', '', ''],
+        [NV, NV, CY, CY, CY, DK, DK, MG, MG, MG, NV, NV, '', '', '', ''],
+        [CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY],
+        [NV, NV, CY, CY, CY, DK, DK, DK, MG, MG, MG, NV, NV, '', '', ''],
+        [NV, NV, CY, CY, CY, DK, DK, DK, MG, MG, MG, NV, NV, '', '', ''],
+        [MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    medium: {
+      width: 10,
+      height: 8,
+      anchorX: 5,
+      anchorY: 7,
+      lines: [
+        "    /\\    ",
+        "   |GD|   ",
+        "  /====\\  ",
+        " | |CY| | ",
+        "/========\\",
+        "| |CY|MG||",
+        "/========\\",
+        "::..::..::",
+      ],
+      colors: [
+        ['', '', '', '', GD, GD, '', '', '', ''],
+        ['', '', '', GD, GD, GD, GD, '', '', ''],
+        ['', '', CY, CY, CY, CY, CY, CY, '', ''],
+        ['', NV, NV, CY, CY, CY, NV, NV, '', ''],
+        [CY, CY, CY, CY, CY, CY, CY, CY, CY, CY],
+        [NV, NV, CY, CY, MG, MG, NV, NV, '', ''],
+        [MG, MG, MG, MG, MG, MG, MG, MG, MG, MG],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    far: {
+      width: 6,
+      height: 4,
+      anchorX: 3,
+      anchorY: 3,
+      lines: [
+        "  /\\  ",
+        " |GD| ",
+        "/====\\",
+        "::..::",
+      ],
+      colors: [
+        ['', '', GD, GD, '', ''],
+        ['', GD, GD, GD, GD, ''],
+        [CY, CY, CY, CY, CY, CY],
+        [BS, BS, BS, BS, BS, BS],
+      ],
+    },
   },
-  {
-    category: 'LANDMARK',
-    worldWidth: 200,
-    worldHeight: 350,
-    visualScale: 1.0,
-  }
-);
+};

@@ -16,7 +16,8 @@ export type TerrainSurfaceType =
   | 'BEACH'
   | 'SHORELINE'
   | 'WATER'
-  | 'LANDMARK';
+  | 'LANDMARK'
+  | 'STRUCTURE';
 
 export interface SceneRegion {
   type: string;

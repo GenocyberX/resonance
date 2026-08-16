@@ -1,0 +1,121 @@
+import { SpriteDefinition } from '../../ascii/types';
+
+const SN = '#ffffff'; // Sunlit Ice Edge
+const IC = '#93c5fd'; // Glacial Ice Cyan
+const BL = '#3b82f6'; // Deep Ice Fracture Blue
+const DK = '#1e1b4b'; // Crevasse Indigo Shadow
+const BS = '#cbd5e1'; // Permafrost Moraine Base
+
+export const IceSpireSprite: SpriteDefinition = {
+  id: 'scenery_ice_spire',
+  name: 'Glacial Ice Spire',
+  category: 'STRUCTURE',
+  defaultColor: '#93c5fd',
+  worldWidth: 90,
+  worldHeight: 180,
+  visualScale: 1.0,
+  variants: {
+    close: {
+      width: 16,
+      height: 14,
+      anchorX: 8,
+      anchorY: 13,
+      lines: [
+        "       /\\       ",
+        "      /░░\\      ",
+        "     /░░░░\\     ",
+        "    /░░/\\░░\\    ",
+        "   /░░/▓▓\\░░\\   ",
+        "  /░░/▓▓▓▓\\░░\\  ",
+        " /░░/▓▓▓▓▓▓\\░░\\ ",
+        "/░░/▓▓/\\▓▓▓▓\\░░\\",
+        "|░/▓▓/  \\▓▓▓▓\\░|",
+        "|/▓▓/▓▓▓▓\\▓▓▓▓\\|",
+        "|▒▒|▒▒▒▒▒▒|▒▒▒▒|",
+        "|▓▓|▓▓▓▓▓▓|▓▓▓▓|",
+        "/==============\\",
+        "::..::..::..::..",
+      ],
+      colors: [
+        ['', '', '', '', '', '', '', SN, SN, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', SN, IC, IC, SN, '', '', '', '', '', ''],
+        ['', '', '', '', '', SN, IC, IC, IC, IC, SN, '', '', '', '', ''],
+        ['', '', '', '', SN, IC, IC, DK, DK, IC, IC, SN, '', '', '', ''],
+        ['', '', '', SN, IC, IC, DK, BL, BL, DK, IC, IC, SN, '', '', ''],
+        ['', '', SN, IC, IC, DK, BL, BL, BL, BL, DK, IC, IC, SN, '', ''],
+        ['', SN, IC, IC, DK, BL, BL, BL, BL, BL, BL, DK, IC, IC, SN, ''],
+        [SN, IC, IC, DK, BL, BL, DK, DK, BL, BL, BL, BL, DK, IC, IC, SN],
+        [SN, IC, DK, BL, BL, DK, DK, DK, DK, BL, BL, BL, BL, DK, IC, SN],
+        [SN, DK, BL, BL, DK, BL, BL, BL, BL, DK, BL, BL, BL, BL, DK, SN],
+        [IC, DK, BL, BL, BL, BL, BL, BL, BL, BL, BL, BL, BL, BL, DK, IC],
+        [DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    near: {
+      width: 10,
+      height: 9,
+      anchorX: 5,
+      anchorY: 8,
+      lines: [
+        "    /\\    ",
+        "   /░░\\   ",
+        "  /░/\\░\\  ",
+        " /░/▓▓\\░\\ ",
+        "/░/▓▓▓▓\\░\\",
+        "|/▓▓▓▓▓▓\\|",
+        "|▒▒▒▒▒▒▒▒|",
+        "/========\\",
+        "::..::..::",
+      ],
+      colors: [
+        ['', '', '', '', SN, SN, '', '', '', ''],
+        ['', '', '', SN, IC, IC, SN, '', '', ''],
+        ['', '', SN, IC, DK, DK, IC, SN, '', ''],
+        ['', SN, IC, DK, BL, BL, DK, IC, SN, ''],
+        [SN, IC, DK, BL, BL, BL, BL, DK, IC, SN],
+        [SN, DK, BL, BL, BL, BL, BL, BL, DK, SN],
+        [IC, DK, BL, BL, BL, BL, BL, BL, DK, IC],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    medium: {
+      width: 6,
+      height: 5,
+      anchorX: 3,
+      anchorY: 4,
+      lines: [
+        "  /\\  ",
+        " /░░\\ ",
+        "/░/▓\\░",
+        "|▒▒▒▒|",
+        "::..::",
+      ],
+      colors: [
+        ['', '', SN, SN, '', ''],
+        ['', SN, IC, IC, SN, ''],
+        [SN, IC, DK, BL, DK, IC],
+        [IC, DK, BL, BL, DK, IC],
+        [BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    far: {
+      width: 4,
+      height: 3,
+      anchorX: 2,
+      anchorY: 2,
+      lines: [
+        " /\\ ",
+        "/░/▓",
+        "::..",
+      ],
+      colors: [
+        ['', SN, SN, ''],
+        [SN, IC, DK, IC],
+        [BS, BS, BS, BS],
+      ],
+    },
+  },
+};

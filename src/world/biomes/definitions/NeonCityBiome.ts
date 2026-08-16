@@ -1,7 +1,10 @@
 import { BiomeDefinition } from '../../types';
 import { NeonTowerSprite } from '../../../sprites/scenery/NeonTowerSprite';
+import { HoloAdTotemSprite } from '../../../sprites/scenery/HoloAdTotemSprite';
+import { CyberGantrySprite } from '../../../sprites/scenery/CyberGantrySprite';
 import { BillboardSprite } from '../../../sprites/scenery/BillboardSprite';
-import { StreetLampSprite } from '../../../sprites/scenery/StreetLampSprite';
+import { CyberStreetLampSprite } from '../../../sprites/scenery/CyberStreetLampSprite';
+import { GuardrailSprite } from '../../../sprites/scenery/GuardrailSprite';
 import { TrafficConeSprite } from '../../../sprites/obstacles/TrafficConeSprite';
 
 export const NeonCityBiome: BiomeDefinition = {
@@ -21,9 +24,12 @@ export const NeonCityBiome: BiomeDefinition = {
   },
   vegetationPool: [],
   structurePool: [
-    { sprite: NeonTowerSprite, weight: 0.5 },
-    { sprite: StreetLampSprite, weight: 0.35 },
-    { sprite: BillboardSprite, weight: 0.25 },
+    { sprite: NeonTowerSprite, weight: 0.6 },
+    { sprite: HoloAdTotemSprite, weight: 0.55 },
+    { sprite: CyberGantrySprite, weight: 0.35 },
+    { sprite: CyberStreetLampSprite, weight: 0.65 },
+    { sprite: BillboardSprite, weight: 0.35 },
+    { sprite: GuardrailSprite, weight: 0.4 },
   ],
   obstaclePool: [
     { sprite: TrafficConeSprite, weight: 0.8 },

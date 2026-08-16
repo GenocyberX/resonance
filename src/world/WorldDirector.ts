@@ -3,6 +3,9 @@ import { SeededRandom } from '../procedural/SeededRandom';
 import { BiomeTransitionSystem } from './transitions/BiomeTransitionSystem';
 import { RoadGenerator } from '../road/RoadGenerator';
 import { SceneRegion, TerrainSurfaceType } from './types';
+import { SpriteDefinition } from '../ascii/types';
+
+// Tropical Hero & Supporting
 import { PalmTreeSprite } from '../sprites/scenery/PalmTreeSprite';
 import { ShortPalmSprite } from '../sprites/scenery/ShortPalmSprite';
 import { TropicalBushSprite } from '../sprites/scenery/TropicalBushSprite';
@@ -14,10 +17,49 @@ import { LifeguardHutSprite } from '../sprites/scenery/LifeguardHutSprite';
 import { PierSprite } from '../sprites/scenery/PierSprite';
 import { SailboatSprite } from '../sprites/scenery/SailboatSprite';
 import { SmallBoatSprite } from '../sprites/scenery/SmallBoatSprite';
+import { OceanBuoySprite } from '../sprites/scenery/OceanBuoySprite';
+import { CoastalRockSprite } from '../sprites/scenery/CoastalRockSprite';
 import { LighthouseSprite } from '../sprites/scenery/LighthouseSprite';
+
+// Canyon / Desert
+import { CactusSprite } from '../sprites/scenery/CactusSprite';
+import { JoshuaTreeSprite } from '../sprites/scenery/JoshuaTreeSprite';
+import { DeadTreeSprite } from '../sprites/scenery/DeadTreeSprite';
+import { CanyonMesaSprite } from '../sprites/scenery/CanyonMesaSprite';
+import { CanyonButteSprite } from '../sprites/scenery/CanyonButteSprite';
+import { DesertDuneSprite } from '../sprites/scenery/DesertDuneSprite';
+
+// Forest
+import { PineTreeSprite } from '../sprites/scenery/PineTreeSprite';
+import { DeciduousTreeSprite } from '../sprites/scenery/DeciduousTreeSprite';
+import { ForestFernSprite } from '../sprites/scenery/ForestFernSprite';
+import { WildflowerPatchSprite } from '../sprites/scenery/WildflowerPatchSprite';
+import { FallenLogSprite } from '../sprites/scenery/FallenLogSprite';
+
+// Alpine
+import { SnowPineSprite } from '../sprites/scenery/SnowPineSprite';
+import { AlpineShrubSprite } from '../sprites/scenery/AlpineShrubSprite';
+import { AlpinePeakSprite } from '../sprites/scenery/AlpinePeakSprite';
+import { IceSpireSprite } from '../sprites/scenery/IceSpireSprite';
+
+// Cyber
+import { NeonTowerSprite } from '../sprites/scenery/NeonTowerSprite';
+import { HoloAdTotemSprite } from '../sprites/scenery/HoloAdTotemSprite';
+import { CyberGantrySprite } from '../sprites/scenery/CyberGantrySprite';
+import { CyberStreetLampSprite } from '../sprites/scenery/CyberStreetLampSprite';
+
+// Volcanic
+import { VolcanicVentSprite } from '../sprites/scenery/VolcanicVentSprite';
+import { BasaltCragSprite } from '../sprites/scenery/BasaltCragSprite';
+
+// Geology & Roadside Everywhere
+import { BoulderClusterSprite } from '../sprites/scenery/BoulderClusterSprite';
 import { BillboardSprite } from '../sprites/scenery/BillboardSprite';
 import { DirectionSignSprite } from '../sprites/scenery/DirectionSignSprite';
+import { WarningSignSprite } from '../sprites/scenery/WarningSignSprite';
 import { StreetLampSprite } from '../sprites/scenery/StreetLampSprite';
+import { HighwayMileMarkerSprite } from '../sprites/scenery/HighwayMileMarkerSprite';
+import { GuardrailSprite } from '../sprites/scenery/GuardrailSprite';
 
 export class WorldDirector {
   private scenery: SceneryObject[] = [];
@@ -128,7 +170,7 @@ export class WorldDirector {
    */
   private generateChunk(chunkZ: number, road: RoadGenerator): void {
     const blendState = this.biomeSystem.evaluate(chunkZ);
-    const isTropical = blendState.currentBiome.id === 'TROPICAL';
+    const biomeId = blendState.currentBiome.id;
 
     // Canonical road dimensions
     const roadHalfWidth = road.defaultRoadWidth * 0.5; // 400
@@ -136,15 +178,40 @@ export class WorldDirector {
     const minSafeOffset = roadHalfWidth + safetyMargin; // 440
     const shorelineOffset = this.getShorelineOffsetAtZ(chunkZ, roadHalfWidth);
 
-    if (isTropical) {
-      const region = this.getRegionAtZ(chunkZ);
-      this.generateTropicalRegionChunk(chunkZ, road, region, minSafeOffset, shorelineOffset);
-    } else {
-      this.generateGenericChunk(chunkZ, road, blendState, minSafeOffset, roadHalfWidth * 2.8);
+    switch (biomeId) {
+      case 'TROPICAL': {
+        const region = this.getRegionAtZ(chunkZ);
+        this.generateTropicalRegionChunk(chunkZ, road, region, minSafeOffset, shorelineOffset);
+        break;
+      }
+      case 'DESERT': {
+        this.generateDesertChunk(chunkZ, minSafeOffset);
+        break;
+      }
+      case 'FOREST': {
+        this.generateForestChunk(chunkZ, minSafeOffset);
+        break;
+      }
+      case 'ALPINE': {
+        this.generateAlpineChunk(chunkZ, minSafeOffset);
+        break;
+      }
+      case 'NEON_CITY': {
+        this.generateNeonCityChunk(chunkZ, minSafeOffset);
+        break;
+      }
+      case 'VOLCANIC': {
+        this.generateVolcanicChunk(chunkZ, minSafeOffset);
+        break;
+      }
+      default: {
+        this.generateGenericChunk(chunkZ, blendState, minSafeOffset, roadHalfWidth * 2.8);
+        break;
+      }
     }
 
     // Rare road obstacles placed using CANONICAL lane center geometry
-    if (this.rng.boolean(0.05)) {
+    if (this.rng.boolean(0.04)) {
       const obstacleSprite = this.biomeSystem.sampleObstacleSprite(blendState, this.rng);
       if (obstacleSprite) {
         const lane = this.rng.choice([-1, 0, 1]);
@@ -169,10 +236,11 @@ export class WorldDirector {
 
     switch (region.type) {
       case 'PALM_BOULEVARD': {
-        // Left Inland Boulevard: tall palm + street lamp
+        // Left Inland Boulevard: tall palm + street lamp / guardrail
         const leftPalmX = -this.rng.range(minSafeOffset + 20, minSafeOffset + 240);
         this.addScenery(PalmTreeSprite, chunkZ + jitterZ, leftPalmX, 'ROADSIDE');
         this.addScenery(StreetLampSprite, chunkZ + jitterZ + 70, -minSafeOffset - 15, 'ROADSIDE');
+        this.addScenery(HighwayMileMarkerSprite, chunkZ + jitterZ - 50, -minSafeOffset - 10, 'ROADSIDE');
 
         // Right Beach Promenade: tall palm + coastal grass
         const rightPalmX = this.rng.range(minSafeOffset + 30, minSafeOffset + 220);
@@ -189,16 +257,22 @@ export class WorldDirector {
           this.addScenery(ShortPalmSprite, chunkZ + jitterZ, -this.rng.range(minSafeOffset + 30, minSafeOffset + 250), 'INLAND');
         }
 
-        // Right (Beach & Ocean): Lifeguard hut or pier on the shoreline + Sailboat in the water
-        if (this.rng.boolean(0.55)) {
+        // Right (Beach & Ocean): Lifeguard hut, pier, or coastal rock + Sailboat / Buoy
+        if (this.rng.boolean(0.45)) {
           this.addScenery(LifeguardHutSprite, chunkZ + jitterZ, this.rng.range(minSafeOffset + 60, shorelineOffset - 40), 'BEACH');
-        } else {
+        } else if (this.rng.boolean(0.5)) {
           this.addScenery(PierSprite, chunkZ + jitterZ, shorelineOffset, 'SHORELINE');
+        } else {
+          this.addScenery(CoastalRockSprite, chunkZ + jitterZ, shorelineOffset + 20, 'SHORELINE');
         }
 
-        // Distant Sailboat or Skiff strictly on WATER
+        // Distant Sailboat or Buoy strictly on WATER
         const waterX = this.rng.range(shorelineOffset + 180, shorelineOffset + 950);
-        this.addScenery(SailboatSprite, chunkZ + jitterZ + 30, waterX, 'WATER');
+        if (this.rng.boolean(0.65)) {
+          this.addScenery(SailboatSprite, chunkZ + jitterZ + 30, waterX, 'WATER');
+        } else {
+          this.addScenery(OceanBuoySprite, chunkZ + jitterZ + 30, waterX, 'WATER');
+        }
         break;
       }
 
@@ -214,9 +288,10 @@ export class WorldDirector {
         this.addScenery(StreetLampSprite, chunkZ + jitterZ - 30, -minSafeOffset - 15, 'ROADSIDE');
         this.addScenery(TropicalBushSprite, chunkZ + jitterZ + 40, -minSafeOffset - 35, 'ROADSIDE');
 
-        // Right Beach: Short Palm + Coastal dune grass
-        this.addScenery(ShortPalmSprite, chunkZ + jitterZ, this.rng.range(minSafeOffset + 20, minSafeOffset + 200), 'BEACH');
-        this.addScenery(CoastalGrassSprite, chunkZ + jitterZ + 20, minSafeOffset + 15, 'BEACH');
+        // Right Beach: Short Palm + Coastal dune grass + Guardrail
+        this.addScenery(ShortPalmSprite, chunkZ + jitterZ, this.rng.range(minSafeOffset + 30, minSafeOffset + 200), 'BEACH');
+        this.addScenery(CoastalGrassSprite, chunkZ + jitterZ + 20, minSafeOffset + 25, 'BEACH');
+        this.addScenery(GuardrailSprite, chunkZ + jitterZ - 40, minSafeOffset + 10, 'ROADSIDE');
         break;
       }
 
@@ -227,10 +302,11 @@ export class WorldDirector {
         this.addScenery(ShortPalmSprite, chunkZ + jitterZ + 30, clusterX - 90, 'INLAND');
         this.addScenery(TropicalBushSprite, chunkZ + jitterZ + 15, clusterX + 70, 'INLAND');
 
-        // Right: Tiki Beach Shack on the beach + Coastal palm
+        // Right: Tiki Beach Shack on the beach + Coastal palm + Coastal Rocks
         const shackX = this.rng.range(minSafeOffset + 70, shorelineOffset - 60);
         this.addScenery(BeachShackSprite, chunkZ + jitterZ, shackX, 'BEACH');
         this.addScenery(PalmTreeSprite, chunkZ + jitterZ + 45, this.rng.range(minSafeOffset + 220, shorelineOffset - 30), 'BEACH');
+        this.addScenery(CoastalRockSprite, chunkZ + jitterZ - 25, shorelineOffset + 30, 'SHORELINE');
         break;
       }
 
@@ -254,17 +330,149 @@ export class WorldDirector {
         this.addScenery(CoastalHotelSprite, chunkZ + jitterZ, hotelX, 'INLAND');
         this.addScenery(PalmTreeSprite, chunkZ + jitterZ + 60, -minSafeOffset - 30, 'ROADSIDE');
 
-        // Right: Tiki Shack + Lifeguard Hut on the beach
+        // Right: Tiki Shack + Lifeguard Hut on the beach + Buoy
         const shackX = this.rng.range(minSafeOffset + 60, shorelineOffset - 80);
         this.addScenery(BeachShackSprite, chunkZ + jitterZ, shackX, 'BEACH');
         this.addScenery(LifeguardHutSprite, chunkZ + jitterZ + 55, this.rng.range(minSafeOffset + 180, shorelineOffset - 40), 'BEACH');
+        this.addScenery(OceanBuoySprite, chunkZ + jitterZ + 80, shorelineOffset + 240, 'WATER');
         break;
       }
     }
   }
 
+  /**
+   * Generates Sunbaked Canyon & Desert scenery with rich geological formations.
+   */
+  private generateDesertChunk(chunkZ: number, minSafeOffset: number): void {
+    const jitterZ = this.rng.range(-25, 25);
+
+    // Left Side: Mesas / Buttes / Joshua Trees / Billboards
+    if (this.rng.boolean(0.55)) {
+      const mesaX = -this.rng.range(minSafeOffset + 280, minSafeOffset + 650);
+      this.addScenery(CanyonMesaSprite, chunkZ + jitterZ, mesaX, 'LANDMARK');
+    } else {
+      const joshuaX = -this.rng.range(minSafeOffset + 60, minSafeOffset + 280);
+      this.addScenery(JoshuaTreeSprite, chunkZ + jitterZ, joshuaX, 'INLAND');
+    }
+
+    if (this.rng.boolean(0.4)) {
+      this.addScenery(HighwayMileMarkerSprite, chunkZ + jitterZ - 40, -minSafeOffset - 15, 'ROADSIDE');
+    }
+
+    // Right Side: Buttes / Cactus / Sand Dunes / Boulders
+    if (this.rng.boolean(0.5)) {
+      const butteX = this.rng.range(minSafeOffset + 260, minSafeOffset + 600);
+      this.addScenery(CanyonButteSprite, chunkZ + jitterZ + 40, butteX, 'LANDMARK');
+    } else {
+      const duneX = this.rng.range(minSafeOffset + 120, minSafeOffset + 400);
+      this.addScenery(DesertDuneSprite, chunkZ + jitterZ + 40, duneX, 'INLAND');
+    }
+
+    const cactusX = this.rng.range(minSafeOffset + 30, minSafeOffset + 200);
+    this.addScenery(CactusSprite, chunkZ + jitterZ + 20, cactusX, 'INLAND');
+
+    if (this.rng.boolean(0.35)) {
+      this.addScenery(WarningSignSprite, chunkZ + jitterZ + 60, minSafeOffset + 15, 'ROADSIDE');
+    }
+  }
+
+  /**
+   * Generates Misty Pine Forest scenery with layered woodland composition.
+   */
+  private generateForestChunk(chunkZ: number, minSafeOffset: number): void {
+    const jitterZ = this.rng.range(-25, 25);
+
+    // Left Side: Pine Trees + Deciduous Trees + Ferns
+    const leftPineX = -this.rng.range(minSafeOffset + 40, minSafeOffset + 320);
+    this.addScenery(PineTreeSprite, chunkZ + jitterZ, leftPineX, 'INLAND');
+    this.addScenery(ForestFernSprite, chunkZ + jitterZ + 25, leftPineX + 45, 'ROADSIDE');
+    this.addScenery(StreetLampSprite, chunkZ + jitterZ - 50, -minSafeOffset - 15, 'ROADSIDE');
+
+    // Right Side: Deciduous / Pine + Fallen Mossy Log + Wildflower Patch + Guardrail
+    if (this.rng.boolean(0.5)) {
+      const rightPineX = this.rng.range(minSafeOffset + 50, minSafeOffset + 340);
+      this.addScenery(DeciduousTreeSprite, chunkZ + jitterZ + 30, rightPineX, 'INLAND');
+    } else {
+      const logX = this.rng.range(minSafeOffset + 40, minSafeOffset + 220);
+      this.addScenery(FallenLogSprite, chunkZ + jitterZ + 30, logX, 'INLAND');
+      this.addScenery(WildflowerPatchSprite, chunkZ + jitterZ + 55, logX + 35, 'INLAND');
+    }
+
+    this.addScenery(GuardrailSprite, chunkZ + jitterZ - 20, minSafeOffset + 10, 'ROADSIDE');
+    this.addScenery(HighwayMileMarkerSprite, chunkZ + jitterZ + 60, minSafeOffset + 15, 'ROADSIDE');
+  }
+
+  /**
+   * Generates Glacial Pass alpine scenery.
+   */
+  private generateAlpineChunk(chunkZ: number, minSafeOffset: number): void {
+    const jitterZ = this.rng.range(-25, 25);
+
+    // Left: Distant Alpine Peak or Ice Spire + Snow Pine
+    if (this.rng.boolean(0.55)) {
+      const peakX = -this.rng.range(minSafeOffset + 320, minSafeOffset + 700);
+      this.addScenery(AlpinePeakSprite, chunkZ + jitterZ, peakX, 'LANDMARK');
+    } else {
+      const spireX = -this.rng.range(minSafeOffset + 180, minSafeOffset + 450);
+      this.addScenery(IceSpireSprite, chunkZ + jitterZ, spireX, 'LANDMARK');
+    }
+
+    const leftSnowPineX = -this.rng.range(minSafeOffset + 40, minSafeOffset + 240);
+    this.addScenery(SnowPineSprite, chunkZ + jitterZ + 35, leftSnowPineX, 'INLAND');
+
+    // Right: Snow Pine + Alpine Shrub + Guardrail
+    const rightSnowPineX = this.rng.range(minSafeOffset + 40, minSafeOffset + 260);
+    this.addScenery(SnowPineSprite, chunkZ + jitterZ + 15, rightSnowPineX, 'INLAND');
+    this.addScenery(AlpineShrubSprite, chunkZ + jitterZ + 45, minSafeOffset + 30, 'ROADSIDE');
+    this.addScenery(GuardrailSprite, chunkZ + jitterZ - 30, minSafeOffset + 10, 'ROADSIDE');
+    this.addScenery(WarningSignSprite, chunkZ + jitterZ + 70, minSafeOffset + 15, 'ROADSIDE');
+  }
+
+  /**
+   * Generates Cyber Metropolis scenery with neon megastructures and holograms.
+   */
+  private generateNeonCityChunk(chunkZ: number, minSafeOffset: number): void {
+    const jitterZ = this.rng.range(-20, 20);
+
+    // Left: Cyber Skyscraper Megastructure + Cyber Streetlamp
+    const towerX = -this.rng.range(minSafeOffset + 240, minSafeOffset + 600);
+    this.addScenery(NeonTowerSprite, chunkZ + jitterZ, towerX, 'LANDMARK');
+    this.addScenery(CyberStreetLampSprite, chunkZ + jitterZ + 50, -minSafeOffset - 15, 'ROADSIDE');
+
+    // Right: Holographic Totem or Overhead Gantry + Billboard
+    if (this.rng.boolean(0.55)) {
+      const totemX = this.rng.range(minSafeOffset + 80, minSafeOffset + 300);
+      this.addScenery(HoloAdTotemSprite, chunkZ + jitterZ + 30, totemX, 'INLAND');
+    } else {
+      const gantryX = this.rng.range(minSafeOffset + 60, minSafeOffset + 220);
+      this.addScenery(CyberGantrySprite, chunkZ + jitterZ + 30, gantryX, 'STRUCTURE');
+    }
+
+    this.addScenery(CyberStreetLampSprite, chunkZ + jitterZ - 40, minSafeOffset + 15, 'ROADSIDE');
+    this.addScenery(GuardrailSprite, chunkZ + jitterZ + 60, minSafeOffset + 10, 'ROADSIDE');
+  }
+
+  /**
+   * Generates Obsidian Ridge volcanic scenery with basalt columns and fumaroles.
+   */
+  private generateVolcanicChunk(chunkZ: number, minSafeOffset: number): void {
+    const jitterZ = this.rng.range(-25, 25);
+
+    // Left: Basalt Crags + Dead Trees
+    const cragX = -this.rng.range(minSafeOffset + 120, minSafeOffset + 380);
+    this.addScenery(BasaltCragSprite, chunkZ + jitterZ, cragX, 'STRUCTURE');
+    this.addScenery(DeadTreeSprite, chunkZ + jitterZ + 45, cragX - 70, 'INLAND');
+
+    // Right: Volcanic Fumarole Vent + Boulder Cluster + Warning Sign
+    const ventX = this.rng.range(minSafeOffset + 80, minSafeOffset + 320);
+    this.addScenery(VolcanicVentSprite, chunkZ + jitterZ + 20, ventX, 'STRUCTURE');
+    this.addScenery(BoulderClusterSprite, chunkZ + jitterZ + 55, ventX + 80, 'INLAND');
+    this.addScenery(WarningSignSprite, chunkZ + jitterZ - 30, minSafeOffset + 15, 'ROADSIDE');
+    this.addScenery(HighwayMileMarkerSprite, chunkZ + jitterZ + 70, minSafeOffset + 10, 'ROADSIDE');
+  }
+
   private addScenery(
-    sprite: typeof PalmTreeSprite,
+    sprite: SpriteDefinition,
     z: number,
     lateralOffset: number,
     _surfaceType: TerrainSurfaceType
@@ -274,7 +482,6 @@ export class WorldDirector {
 
   private generateGenericChunk(
     chunkZ: number,
-    _road: RoadGenerator,
     blendState: ReturnType<BiomeTransitionSystem['evaluate']>,
     nearMin: number,
     midMax: number

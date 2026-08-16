@@ -2,9 +2,11 @@ export type LODLevel = 'close' | 'near' | 'medium' | 'far';
 
 export type SpriteCategory =
   | 'VEHICLE'
+  | 'VEGETATION'
   | 'VEGETATION_SMALL'
   | 'VEGETATION_LARGE'
   | 'BUILDING'
+  | 'STRUCTURE'
   | 'LANDMARK'
   | 'ROADSIDE'
   | 'WATERCRAFT'

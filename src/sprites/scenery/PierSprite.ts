@@ -1,89 +1,110 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const pierColors = {
-  L: '#fbbf24', // Lamppost light
-  M: '#94a3b8', // Metal lamppost
-  T: '#b45309', // Timber deck
-  P: '#78350f', // Wooden pilings
-  W: '#38bdf8', // Ocean ripples
-  '*': '#b45309',
-};
+const GL = '#fde047'; // Lantern Glow
+const ST = '#94a3b8'; // Steel Lamp Post
+const DK = '#b45309'; // Timber Deck Planks
+const WD = '#78350f'; // Pier Pilings / Supports
+const OC = '#38bdf8'; // Ocean Ripple Surface
+const OD = '#0284c7'; // Deep Water Contact
 
-export const PierSprite: SpriteDefinition = Sprite.define(
-  'scenery_pier',
-  'Coastal Wooden Pier',
-  '#b45309',
-  {
-    close: Sprite.createColoredVariant(
-      `
-              (o)                            
-               |                             
-         .=====|===========================. 
-        /|  |  |  |  |  |  |  |  |  |  |  |\\ 
-       /_|__|__|__|__|__|__|__|__|__|__|__|\\_
-         |     |     |     |     |     |     
-       ~~|~~~~~|~~~~~|~~~~~|~~~~~|~~~~~|~~~~ 
-       ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-      `,
-      pierColors,
-      `
-              LLL                            
-               M                             
-         TTTTTTMTTTTTTTTTTTTTTTTTTTTTTTTTTT  
-        TT  T  M  T  T  T  T  T  T  T  T  TT 
-       TTTTTTTTMTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-         P     P     P     P     P     P     
-       WWPWWWWWPWWWWWPWWWWWPWWWWWPWWWWWPWWWW 
-       W W W W W W W W W W W W W W W W W W W 
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-             (o)                 
-        .=====|================. 
-       /_|__|__|__|__|__|__|__|\\_
-         |   |   |   |   |   |   
-       ~~|~~~|~~~|~~~|~~~|~~~|~~~
-      `,
-      pierColors,
-      `
-             LLL                 
-        TTTTTTMTTTTTTTTTTTTTTTTT 
-       TTTTTTTTMTTTTTTTTTTTTTTTTT
-         P   P   P   P   P   P   
-       WWPWWWPWWWPWWWPWWWPWWWPWWW
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-        .===================.
-        |===|===|===|===|===|
-        ~|~~|~~~|~~~|~~~|~~~|
-      `,
-      pierColors,
-      `
-        TTTTTTTTTTTTTTTTTTTTT
-        TTTTTTTTTTTTTTTTTTTTT
-        WPWWPWWWPWWWPWWWPWWWP
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-        .==========.
-        ~|~~|~~|~~|~
-      `,
-      pierColors,
-      `
-        TTTTTTTTTTTT
-        WPWWPWWPWWPW
-      `
-    ),
+export const PierSprite: SpriteDefinition = {
+  id: 'scenery_pier',
+  name: 'Coastal Boardwalk Pier',
+  category: 'STRUCTURE',
+  defaultColor: '#b45309',
+  worldWidth: 200,
+  worldHeight: 110,
+  visualScale: 1.0,
+  variants: {
+    close: {
+      width: 26,
+      height: 10,
+      anchorX: 13,
+      anchorY: 9,
+      lines: [
+        "          (GL)            ",
+        "           ||             ",
+        "     .=====||===========. ",
+        "    /|  |  ||  |  |  |  |\\",
+        "   /_|__|__||__|__|__|__|\\",
+        "     |     ||    |     |  ",
+        "     |     ||    |     |  ",
+        "   ~~|~~~~~||~~~~|~~~~~|~~",
+        "  ~  |  ~  || ~  |  ~  | ~",
+        " ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~",
+      ],
+      colors: [
+        ['', '', '', '', '', '', '', '', '', '', GL, GL, GL, GL, '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', '', '', ST, ST, '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', DK, DK, DK, DK, DK, DK, ST, ST, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, '', ''],
+        ['', '', '', '', DK, DK, DK, DK, DK, DK, DK, ST, ST, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, ''],
+        ['', '', '', DK, DK, DK, DK, DK, DK, DK, DK, ST, ST, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK],
+        ['', '', '', '', '', WD, '', '', '', '', '', ST, ST, '', '', '', '', WD, '', '', '', '', WD, '', '', ''],
+        ['', '', '', '', '', WD, '', '', '', '', '', ST, ST, '', '', '', '', WD, '', '', '', '', WD, '', '', ''],
+        ['', '', '', OC, OC, WD, OC, OC, OC, OC, OC, ST, ST, OC, OC, OC, OC, WD, OC, OC, OC, OC, WD, OC, OC, ''],
+        ['', '', OC, '', '', WD, '', '', OC, '', ST, ST, '', OC, '', '', WD, '', '', OC, '', WD, '', OC, '', ''],
+        ['', OD, '', OD, '', OD, '', OD, '', OD, '', OD, '', OD, '', OD, '', OD, '', OD, '', OD, '', OD, '', OD],
+      ],
+    },
+    near: {
+      width: 18,
+      height: 7,
+      anchorX: 9,
+      anchorY: 6,
+      lines: [
+        "       (GL)       ",
+        "        ||        ",
+        "   .====||======. ",
+        "  /_|___||___|__|\\",
+        "    |   ||   |    ",
+        "  ~~|~~~||~~~|~~~~",
+        " ~ ~ ~ ~ ~ ~ ~ ~ ~",
+      ],
+      colors: [
+        ['', '', '', '', '', '', '', GL, GL, GL, GL, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ST, ST, '', '', '', '', '', '', '', ''],
+        ['', '', '', DK, DK, DK, DK, DK, ST, ST, DK, DK, DK, DK, DK, DK, '', ''],
+        ['', '', DK, DK, DK, DK, DK, DK, ST, ST, DK, DK, DK, DK, DK, DK, DK, ''],
+        ['', '', '', '', WD, '', '', '', ST, ST, '', '', '', WD, '', '', '', ''],
+        ['', '', OC, OC, WD, OC, OC, OC, ST, ST, OC, OC, OC, WD, OC, OC, OC, OC],
+        ['', OD, '', OD, '', OD, '', OD, '', OD, '', OD, '', OD, '', OD, '', OD],
+      ],
+    },
+    medium: {
+      width: 12,
+      height: 5,
+      anchorX: 6,
+      anchorY: 4,
+      lines: [
+        "    (GL)    ",
+        " .===||===. ",
+        "/_||_||_||_\\",
+        "~~|~~||~~|~~",
+        "~ ~ ~ ~ ~ ~ ",
+      ],
+      colors: [
+        ['', '', '', '', GL, GL, GL, GL, '', '', '', ''],
+        ['', DK, DK, DK, DK, ST, ST, DK, DK, DK, DK, ''],
+        [DK, DK, DK, DK, DK, ST, ST, DK, DK, DK, DK, DK],
+        [OC, OC, WD, OC, OC, ST, ST, OC, OC, WD, OC, OC],
+        [OD, '', OD, '', OD, '', OD, '', OD, '', OD, ''],
+      ],
+    },
+    far: {
+      width: 6,
+      height: 3,
+      anchorX: 3,
+      anchorY: 2,
+      lines: [
+        " (GL) ",
+        ".====.",
+        "~~~~~~",
+      ],
+      colors: [
+        ['', GL, GL, GL, GL, ''],
+        [DK, DK, DK, DK, DK, DK],
+        [OC, OC, OC, OC, OC, OC],
+      ],
+    },
   },
-  {
-    category: 'LANDMARK',
-    worldWidth: 260,
-    worldHeight: 120,
-    visualScale: 1.0,
-  }
-);
+};

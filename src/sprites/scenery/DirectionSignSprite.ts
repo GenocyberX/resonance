@@ -1,98 +1,109 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const signColors = {
-  G: '#15803d', // Highway green sign
-  W: '#f8fafc', // White text / border
-  Y: '#fde047', // Yellow exit badge
-  P: '#64748b', // Steel gantry pole
-  '*': '#15803d',
-};
+const GN = '#15803d'; // Highway Reflective Green
+const YL = '#fde047'; // Exit Gold Badge
+const WH = '#f8fafc'; // White Text / Arrows
+const ST = '#64748b'; // Galvanized Steel Gantry
+const BS = '#1e293b'; // Concrete Footing
 
-export const DirectionSignSprite: SpriteDefinition = Sprite.define(
-  'scenery_direction_sign',
-  'Highway Direction Sign',
-  '#15803d',
-  {
-    close: Sprite.createColoredVariant(
-      `
-        .=========================.
-        | [EXIT 1]  COAST BEACH ->|
-        |           OCEAN DRIVE   |
-        '========================='
-                    ||             
-                    ||             
-                    ||             
-                    ||             
-                   _||_            
-      `,
-      signColors,
-      `
-        WWWWWWWWWWWWWWWWWWWWWWWWWWW
-        W YYYYYYYY  WWWWWWWWWWW WWW
-        W           WWWWWWWWWWW   W
-        WWWWWWWWWWWWWWWWWWWWWWWWWWW
-                    PP             
-                    PP             
-                    PP             
-                    PP             
-                   PPPP            
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-        .===================.
-        | [EX]  COASTWAY -> |
-        '==================='
-                 ||          
-                 ||          
-                 ||          
-                _||_         
-      `,
-      signColors,
-      `
-        WWWWWWWWWWWWWWWWWWWWW
-        W YYYY  WWWWWWWW WW W
-        WWWWWWWWWWWWWWWWWWWWW
-                 PP          
-                 PP          
-                 PP          
-                PPPP         
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-        .=============.
-        | [COAST ->]  |
-        '============='
-              ||       
-              ||       
-      `,
-      signColors,
-      `
-        WWWWWWWWWWWWWWW
-        W WWWWWWWWWW  W
-        WWWWWWWWWWWWWWW
-              PP       
-              PP       
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-        .[====].
-           ||   
-      `,
-      signColors,
-      `
-        WWWWWWWW
-           PP   
-      `
-    ),
+export const DirectionSignSprite: SpriteDefinition = {
+  id: 'scenery_direction_sign',
+  name: 'Highway Direction Sign',
+  category: 'ROADSIDE',
+  defaultColor: '#15803d',
+  worldWidth: 120,
+  worldHeight: 100,
+  visualScale: 1.0,
+  variants: {
+    close: {
+      width: 22,
+      height: 10,
+      anchorX: 11,
+      anchorY: 9,
+      lines: [
+        ".====================.",
+        "|[EX 1] COAST HWY -> |",
+        "|       BEACH BAY  ^ |",
+        "'===================='",
+        "         ||           ",
+        "         ||           ",
+        "         ||           ",
+        "         ||           ",
+        "        _||_          ",
+        "       :====:         ",
+      ],
+      colors: [
+        [GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN],
+        [GN, YL, YL, YL, YL, YL, YL, GN, WH, WH, WH, WH, WH, WH, WH, GN, WH, WH, GN, GN, GN, GN],
+        [GN, GN, GN, GN, GN, GN, GN, GN, WH, WH, WH, WH, WH, WH, GN, GN, WH, GN, GN, GN, GN, GN],
+        [GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN],
+        ['', '', '', '', '', '', '', '', '', ST, ST, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', ST, ST, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', ST, ST, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', ST, ST, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ST, ST, ST, ST, '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', BS, BS, BS, BS, BS, BS, '', '', '', '', '', '', '', '', ''],
+      ],
+    },
+    near: {
+      width: 16,
+      height: 7,
+      anchorX: 8,
+      anchorY: 6,
+      lines: [
+        ".==============.",
+        "|[EX] COAST -> |",
+        "|     OCEAN  ^ |",
+        "'=============='",
+        "       ||       ",
+        "      _||_      ",
+        "     :====:     ",
+      ],
+      colors: [
+        [GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN],
+        [GN, YL, YL, YL, YL, GN, WH, WH, WH, WH, GN, WH, WH, GN, GN, GN],
+        [GN, GN, GN, GN, GN, GN, WH, WH, WH, WH, GN, GN, WH, GN, GN, GN],
+        [GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN, GN],
+        ['', '', '', '', '', '', '', ST, ST, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', ST, ST, ST, ST, '', '', '', '', '', ''],
+        ['', '', '', '', '', BS, BS, BS, BS, BS, BS, '', '', '', '', ''],
+      ],
+    },
+    medium: {
+      width: 10,
+      height: 5,
+      anchorX: 5,
+      anchorY: 4,
+      lines: [
+        ".========.",
+        "|[E] -> ^|",
+        "'========'",
+        "    ||    ",
+        "   :==:   ",
+      ],
+      colors: [
+        [GN, GN, GN, GN, GN, GN, GN, GN, GN, GN],
+        [GN, YL, YL, YL, GN, WH, WH, GN, WH, GN],
+        [GN, GN, GN, GN, GN, GN, GN, GN, GN, GN],
+        ['', '', '', '', ST, ST, '', '', '', ''],
+        ['', '', '', BS, BS, BS, BS, '', '', ''],
+      ],
+    },
+    far: {
+      width: 6,
+      height: 3,
+      anchorX: 3,
+      anchorY: 2,
+      lines: [
+        ".----.",
+        "|====|",
+        "  ||  ",
+      ],
+      colors: [
+        [GN, GN, GN, GN, GN, GN],
+        [GN, YL, WH, WH, GN, GN],
+        ['', '', ST, ST, '', ''],
+      ],
+    },
   },
-  {
-    category: 'ROADSIDE',
-    worldWidth: 160,
-    worldHeight: 150,
-    visualScale: 1.0,
-  }
-);
+};

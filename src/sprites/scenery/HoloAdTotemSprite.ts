@@ -1,0 +1,121 @@
+import { SpriteDefinition } from '../../ascii/types';
+
+const MG = '#ec4899'; // Neon Magenta Frame
+const CY = '#06b6d4'; // Holographic Cyan Projection
+const YL = '#fde047'; // Gold Holo Glyphs
+const DK = '#1e1b4b'; // Indigo Pedestal
+const BS = '#020617'; // Cyber Grid Foundation
+
+export const HoloAdTotemSprite: SpriteDefinition = {
+  id: 'scenery_holo_totem',
+  name: 'Holographic Ad Totem',
+  category: 'STRUCTURE',
+  defaultColor: '#ec4899',
+  worldWidth: 75,
+  worldHeight: 160,
+  visualScale: 1.0,
+  variants: {
+    close: {
+      width: 16,
+      height: 14,
+      anchorX: 8,
+      anchorY: 13,
+      lines: [
+        "  .----------.  ",
+        "  | (YL)(YL) |  ",
+        "  |  /====\\  |  ",
+        "  | | (CY) | |  ",
+        "  | | (MG) | |  ",
+        "  |  \\====/  |  ",
+        "  | (CY)(CY) |  ",
+        "  '----------'  ",
+        "      |  |      ",
+        "      |  |      ",
+        "     /====\\     ",
+        "    |======|    ",
+        "   /========\\   ",
+        "::..::..::..::..",
+      ],
+      colors: [
+        ['', '', MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, '', '', '', ''],
+        ['', '', MG, '', YL, YL, YL, YL, YL, YL, '', MG, '', '', '', ''],
+        ['', '', MG, '', '', CY, CY, CY, CY, '', '', MG, '', '', '', ''],
+        ['', '', MG, '', CY, '', CY, CY, '', CY, '', MG, '', '', '', ''],
+        ['', '', MG, '', MG, '', MG, MG, '', MG, '', MG, '', '', '', ''],
+        ['', '', MG, '', '', MG, MG, MG, MG, '', '', MG, '', '', '', ''],
+        ['', '', MG, '', CY, CY, CY, CY, CY, CY, '', MG, '', '', '', ''],
+        ['', '', MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, '', '', '', ''],
+        ['', '', '', '', '', '', DK, DK, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', DK, DK, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', DK, DK, DK, DK, '', '', '', '', '', '', ''],
+        ['', '', '', '', CY, CY, CY, CY, CY, CY, '', '', '', '', '', ''],
+        ['', '', '', MG, MG, MG, MG, MG, MG, MG, MG, '', '', '', '', ''],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    near: {
+      width: 10,
+      height: 9,
+      anchorX: 5,
+      anchorY: 8,
+      lines: [
+        " .------. ",
+        " |(YL)  | ",
+        " ||(CY)|| ",
+        " ||(MG)|| ",
+        " |(CY)  | ",
+        " '------' ",
+        "   |  |   ",
+        "  /====\\  ",
+        "::..::..::",
+      ],
+      colors: [
+        ['', MG, MG, MG, MG, MG, MG, MG, MG, ''],
+        ['', MG, YL, YL, YL, YL, '', '', MG, ''],
+        ['', MG, CY, CY, CY, CY, CY, CY, MG, ''],
+        ['', MG, MG, MG, MG, MG, MG, MG, MG, ''],
+        ['', MG, CY, CY, CY, CY, '', '', MG, ''],
+        ['', MG, MG, MG, MG, MG, MG, MG, MG, ''],
+        ['', '', '', DK, DK, '', '', '', '', ''],
+        ['', '', CY, CY, CY, CY, CY, CY, '', ''],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    medium: {
+      width: 6,
+      height: 5,
+      anchorX: 3,
+      anchorY: 4,
+      lines: [
+        ".----.",
+        "|(CY)|",
+        "|(MG)|",
+        " '==' ",
+        "::..::",
+      ],
+      colors: [
+        [MG, MG, MG, MG, MG, MG],
+        [MG, CY, CY, CY, CY, MG],
+        [MG, MG, MG, MG, MG, MG],
+        ['', DK, DK, DK, DK, ''],
+        [BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    far: {
+      width: 4,
+      height: 3,
+      anchorX: 2,
+      anchorY: 2,
+      lines: [
+        "|CY|",
+        "|MG|",
+        "::..",
+      ],
+      colors: [
+        [MG, CY, CY, MG],
+        [MG, MG, MG, MG],
+        [BS, BS, BS, BS],
+      ],
+    },
+  },
+};

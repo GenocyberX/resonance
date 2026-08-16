@@ -1,94 +1,115 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const hutColors = {
-  R: '#ef4444', // Red roof / safety ring
-  W: '#f8fafc', // White walls
-  G: '#38bdf8', // Glass lookouts
-  T: '#b45309', // Wooden stilts
-  '*': '#ef4444',
-};
+const RD = '#ef4444'; // Life Safety Red Roof
+const WH = '#f8fafc'; // White Weatherboard Walls
+const GL = '#38bdf8'; // Lookout Glass Windows
+const WD = '#b45309'; // Timber Pilings & Ladder
+const BS = '#d97706'; // Beach Sand Contact
 
-export const LifeguardHutSprite: SpriteDefinition = Sprite.define(
-  'scenery_lifeguard_hut',
-  'Beach Lifeguard Hut',
-  '#ef4444',
-  {
-    close: Sprite.createColoredVariant(
-      `
-            .---/\\---.       
-          ./__________\\.     
-          |  [#] (O) [#]  |  
-          |_______________|  
-           /|   |   |   |\\   
-          / |   |   |   | \\  
-         /  |   |===|   |  \\ 
-        '==================='
-      `,
-      hutColors,
-      `
-            RRRRRRRRRR       
-          RRRRRRRRRRRRRR     
-          W  GGG RRR GGG  W  
-          WWWWWWWWWWWWWWWWW  
-           TT   T   T   TT   
-          T T   T   T   T T  
-         T  T   T T T   T  T 
-        TTTTTTTTTTTTTTTTTTTTT
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-          .-/\\-.    
-        ./______\\.  
-        | [#](O) |  
-        |________|  
-         /|  | |\\   
-        / |==| | \\  
-       '==========' 
-      `,
-      hutColors,
-      `
-          RRRRRR    
-        RRRRRRRRRR  
-        W GGGWWR W  
-        WWWWWWWWWW  
-         TT  T TT   
-        T TTTT T T  
-       TTTTTTTTTTTT 
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-         ./\\/\\. 
-        | [##] |
-        |______|
-         /|  |\\ 
-      `,
-      hutColors,
-      `
-         RRRRRR 
-        W GGGG W
-        WWWWWWWW
-         TT  TT 
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-        /\\
-        ||
-      `,
-      hutColors,
-      `
-        RR
-        TT
-      `
-    ),
+export const LifeguardHutSprite: SpriteDefinition = {
+  id: 'scenery_lifeguard_hut',
+  name: 'Beach Lifeguard Hut',
+  category: 'STRUCTURE',
+  defaultColor: '#ef4444',
+  worldWidth: 130,
+  worldHeight: 120,
+  visualScale: 1.0,
+  variants: {
+    close: {
+      width: 20,
+      height: 12,
+      anchorX: 10,
+      anchorY: 11,
+      lines: [
+        "    .----/\\----.    ",
+        "  ./____________\\.  ",
+        "  /==============\\  ",
+        "  | [GL](RD)[GL] |  ",
+        "  |______________|  ",
+        "   /|   |  |   |\\   ",
+        "  / |   |  |   | \\  ",
+        " /  |   |==|   |  \\ ",
+        "/   |   |==|   |   \\",
+        "|___|___|__|___|___|",
+        "::..::..::..::..::..",
+        "::..::..::..::..::..",
+      ],
+      colors: [
+        ['', '', '', '', RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, '', '', '', ''],
+        ['', '', RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, '', ''],
+        ['', '', RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, '', ''],
+        ['', '', WH, WH, GL, GL, WH, RD, RD, WH, GL, GL, WH, WH, '', '', '', '', '', ''],
+        ['', '', WH, WH, WH, WH, WH, WH, WH, WH, WH, WH, WH, WH, WH, WH, '', '', '', ''],
+        ['', '', '', WD, WD, '', '', WD, '', WD, '', '', WD, WD, '', '', '', '', '', ''],
+        ['', '', WD, '', '', WD, '', WD, '', WD, '', WD, '', '', WD, '', '', '', '', ''],
+        ['', WD, '', '', '', WD, '', WD, WD, WD, '', WD, '', '', '', WD, '', '', '', ''],
+        [WD, '', '', '', '', WD, '', WD, WD, WD, '', WD, '', '', '', '', WD, '', '', ''],
+        [WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    near: {
+      width: 14,
+      height: 8,
+      anchorX: 7,
+      anchorY: 7,
+      lines: [
+        "  .--/\\--.    ",
+        "./________\\.  ",
+        "| [GL] [GL] | ",
+        "|___________| ",
+        " /|  ||  |\\   ",
+        "/ |  ||  | \\  ",
+        "|_|__||__|__| ",
+        "::..::..::..::",
+      ],
+      colors: [
+        ['', '', RD, RD, RD, RD, RD, RD, RD, RD, '', '', '', ''],
+        [RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, '', ''],
+        [WH, WH, GL, GL, WH, WH, GL, GL, WH, WH, '', '', '', ''],
+        [WH, WH, WH, WH, WH, WH, WH, WH, WH, WH, WH, WH, '', ''],
+        ['', WD, WD, '', WD, WD, '', WD, WD, '', '', '', '', ''],
+        [WD, '', '', WD, '', WD, WD, '', '', WD, '', '', '', ''],
+        [WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, '', ''],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    medium: {
+      width: 8,
+      height: 5,
+      anchorX: 4,
+      anchorY: 4,
+      lines: [
+        " .-/\\-. ",
+        "./____\\.",
+        "|[GL] [|",
+        " /|  |\\ ",
+        "::..::..",
+      ],
+      colors: [
+        ['', RD, RD, RD, RD, RD, RD, ''],
+        [RD, RD, RD, RD, RD, RD, RD, RD],
+        [WH, GL, GL, WH, GL, GL, WH, ''],
+        ['', WD, WD, '', '', WD, WD, ''],
+        [BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    far: {
+      width: 4,
+      height: 3,
+      anchorX: 2,
+      anchorY: 2,
+      lines: [
+        ".--.",
+        "|GL|",
+        "::..",
+      ],
+      colors: [
+        [RD, RD, RD, RD],
+        [WH, GL, GL, WH],
+        [BS, BS, BS, BS],
+      ],
+    },
   },
-  {
-    category: 'BUILDING',
-    worldWidth: 150,
-    worldHeight: 180,
-    visualScale: 1.0,
-  }
-);
+};

@@ -1,8 +1,15 @@
 import { BiomeDefinition } from '../../types';
 import { PineTreeSprite } from '../../../sprites/scenery/PineTreeSprite';
 import { DeciduousTreeSprite } from '../../../sprites/scenery/DeciduousTreeSprite';
-import { RockSprite } from '../../../sprites/obstacles/RockSprite';
+import { ForestFernSprite } from '../../../sprites/scenery/ForestFernSprite';
+import { WildflowerPatchSprite } from '../../../sprites/scenery/WildflowerPatchSprite';
+import { FallenLogSprite } from '../../../sprites/scenery/FallenLogSprite';
+import { BoulderClusterSprite } from '../../../sprites/scenery/BoulderClusterSprite';
 import { StreetLampSprite } from '../../../sprites/scenery/StreetLampSprite';
+import { HighwayMileMarkerSprite } from '../../../sprites/scenery/HighwayMileMarkerSprite';
+import { GuardrailSprite } from '../../../sprites/scenery/GuardrailSprite';
+import { WarningSignSprite } from '../../../sprites/scenery/WarningSignSprite';
+import { RockSprite } from '../../../sprites/obstacles/RockSprite';
 
 export const ForestBiome: BiomeDefinition = {
   id: 'FOREST',
@@ -20,11 +27,18 @@ export const ForestBiome: BiomeDefinition = {
     fog: '#d1fae5',
   },
   vegetationPool: [
-    { sprite: PineTreeSprite, weight: 0.65 },
-    { sprite: DeciduousTreeSprite, weight: 0.35 },
+    { sprite: PineTreeSprite, weight: 0.8 },
+    { sprite: DeciduousTreeSprite, weight: 0.5 },
+    { sprite: ForestFernSprite, weight: 0.6 },
+    { sprite: WildflowerPatchSprite, weight: 0.4 },
+    { sprite: FallenLogSprite, weight: 0.45 },
   ],
   structurePool: [
-    { sprite: StreetLampSprite, weight: 0.4 },
+    { sprite: BoulderClusterSprite, weight: 0.4 },
+    { sprite: StreetLampSprite, weight: 0.35 },
+    { sprite: GuardrailSprite, weight: 0.5 },
+    { sprite: HighwayMileMarkerSprite, weight: 0.55 },
+    { sprite: WarningSignSprite, weight: 0.35 },
   ],
   obstaclePool: [
     { sprite: RockSprite, weight: 0.4 },

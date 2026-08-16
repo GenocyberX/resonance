@@ -1,32 +1,32 @@
 import { SpriteDefinition } from '../../ascii/types';
 
-const PK = '#f43f5e'; // Neon Rose Frame
-const CY = '#38bdf8'; // Cyan Synth Wave / Text
-const GD = '#fde047'; // Golden Sunset Sun
-const NV = '#0f172a'; // Deep Billboard Background
-const ST = '#64748b'; // Structural Steel Truss
-const BS = '#1e293b'; // Concrete Footing
+const CY = '#06b6d4'; // Cyan LED Arrow Display
+const MG = '#ec4899'; // Magenta Strobe Beacon
+const ST = '#64748b'; // Structural Gantry Steel
+const NV = '#0f172a'; // Gantry Display Enclosure
+const BS = '#020617'; // Foundation Plinth
 
-export const BillboardSprite: SpriteDefinition = {
-  id: 'scenery_billboard',
-  name: 'Highway Billboard',
+export const CyberGantrySprite: SpriteDefinition = {
+  id: 'scenery_cyber_gantry',
+  name: 'Cyber Highway Overhead Gantry',
   category: 'STRUCTURE',
-  defaultColor: '#f43f5e',
-  worldWidth: 160,
-  worldHeight: 110,
+  defaultColor: '#06b6d4',
+  worldWidth: 190,
+  worldHeight: 120,
   visualScale: 1.0,
   variants: {
     close: {
       width: 26,
-      height: 10,
+      height: 11,
       anchorX: 13,
-      anchorY: 9,
+      anchorY: 10,
       lines: [
+        " (MG)                (MG) ",
         ".========================.",
-        "| (GD) PACIFIC SUNSET :: |",
-        "|  /\\   * SYNTHWAVE *    |",
-        "| /CY\\  ~~~~~~~~~~~~~    |",
+        "|[CY] 120 KM/H   [CY] -> |",
+        "|  ^  RESONANCE   ^  ||  |",
         "'========================'",
+        "    ||              ||    ",
         "    ||              ||    ",
         "    ||              ||    ",
         "    ||              ||    ",
@@ -34,11 +34,12 @@ export const BillboardSprite: SpriteDefinition = {
         "  :====:          :====:  ",
       ],
       colors: [
-        [PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK],
-        [PK, NV, GD, GD, GD, NV, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, NV, GD, GD, NV, NV, NV, NV, NV, PK],
-        [PK, NV, CY, CY, NV, NV, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, NV, NV, NV, NV, NV, NV, NV, NV, NV, PK],
-        [PK, NV, CY, CY, CY, NV, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, NV, NV, NV, NV, NV, NV, NV, NV, PK],
-        [PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK],
+        ['', MG, MG, MG, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', MG, MG, MG, '', ''],
+        [ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST],
+        [ST, NV, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, NV, NV, NV, CY, CY, CY, CY, CY, CY, NV, NV, NV, NV, ST],
+        [ST, NV, NV, CY, NV, NV, MG, MG, MG, MG, MG, MG, NV, NV, NV, CY, NV, NV, CY, CY, NV, NV, NV, NV, NV, ST],
+        [ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST],
+        ['', '', '', '', ST, ST, '', '', '', '', '', '', '', '', '', '', '', '', ST, ST, '', '', '', '', '', ''],
         ['', '', '', '', ST, ST, '', '', '', '', '', '', '', '', '', '', '', '', ST, ST, '', '', '', '', '', ''],
         ['', '', '', '', ST, ST, '', '', '', '', '', '', '', '', '', '', '', '', ST, ST, '', '', '', '', '', ''],
         ['', '', '', '', ST, ST, '', '', '', '', '', '', '', '', '', '', '', '', ST, ST, '', '', '', '', '', ''],
@@ -52,19 +53,19 @@ export const BillboardSprite: SpriteDefinition = {
       anchorX: 9,
       anchorY: 6,
       lines: [
+        "(MG)          (MG)",
         ".================.",
-        "|(GD) PACIFIC :: |",
-        "| /\\  ~~~~~~~~~~ |",
+        "|[CY] SPEED: 120 |",
         "'================'",
         "   ||        ||   ",
         "  _||_      _||_  ",
         " :====:    :====: ",
       ],
       colors: [
-        [PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK],
-        [PK, NV, GD, GD, GD, NV, CY, CY, CY, CY, CY, CY, CY, NV, GD, GD, NV, PK],
-        [PK, NV, CY, CY, NV, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, NV, NV, PK],
-        [PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK],
+        [MG, MG, MG, MG, '', '', '', '', '', '', '', '', '', '', MG, MG, MG, MG],
+        [ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST],
+        [ST, NV, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, CY, NV, NV, ST],
+        [ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST],
         ['', '', '', ST, ST, '', '', '', '', '', '', '', ST, ST, '', '', '', ''],
         ['', '', ST, ST, ST, ST, '', '', '', '', '', ST, ST, ST, ST, '', '', ''],
         ['', BS, BS, BS, BS, BS, BS, '', '', '', BS, BS, BS, BS, BS, BS, '', ''],
@@ -76,18 +77,18 @@ export const BillboardSprite: SpriteDefinition = {
       anchorX: 6,
       anchorY: 4,
       lines: [
+        "(M)      (M)",
         ".==========.",
-        "|(GD)SUN ::|",
+        "|[CY] 120  |",
         "'=========='",
         "  ||    ||  ",
-        " :==:  :==: ",
       ],
       colors: [
-        [PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK],
-        [PK, GD, GD, GD, NV, CY, CY, CY, NV, GD, GD, PK],
-        [PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK, PK],
+        [MG, MG, MG, '', '', '', '', '', '', MG, MG, MG],
+        [ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST],
+        [ST, NV, CY, CY, CY, CY, CY, CY, CY, CY, NV, ST],
+        [ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST, ST],
         ['', '', ST, ST, '', '', '', '', ST, ST, '', ''],
-        ['', BS, BS, BS, BS, '', '', BS, BS, BS, BS, ''],
       ],
     },
     far: {
@@ -101,8 +102,8 @@ export const BillboardSprite: SpriteDefinition = {
         " |||| ",
       ],
       colors: [
-        [PK, PK, PK, PK, PK, PK],
-        [PK, CY, GD, GD, CY, PK],
+        [ST, ST, ST, ST, ST, ST],
+        [ST, CY, CY, CY, CY, ST],
         ['', ST, ST, ST, ST, ''],
       ],
     },

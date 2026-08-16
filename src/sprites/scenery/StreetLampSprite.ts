@@ -1,103 +1,115 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const lampColors = {
-  Y: '#fef08a', // Halogen bulb glow
-  G: '#fbbf24', // Warm lamp housing
-  P: '#94a3b8', // Brushed steel pole
-  '*': '#fbbf24',
-};
+const GL = '#fef08a'; // Halogen Glowing Bulb
+const HL = '#fde047'; // Warm Light Corona
+const ST = '#94a3b8'; // Brushed Steel Arm / Fixture
+const DK = '#475569'; // Steel Pole Shadow
+const BS = '#1e293b'; // Base Concrete Mount
 
-export const StreetLampSprite: SpriteDefinition = Sprite.define(
-  'scenery_street_lamp',
-  'Coastal Highway Street Lamp',
-  '#fbbf24',
-  {
-    close: Sprite.createColoredVariant(
-      `
-            .---.    
-           / (o) \\   
-          '---.---'  
-              |      
-              |      
-              |      
-              |      
-              |      
-              |      
-              |      
-             _|_     
-      `,
-      lampColors,
-      `
-            GGGGG    
-           G YYY G   
-          GGGGGGGGG  
-              P      
-              P      
-              P      
-              P      
-              P      
-              P      
-              P      
-             PPP     
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-           .---.  
-          '-(o)-' 
-             |    
-             |    
-             |    
-             |    
-             |    
-            _|_   
-      `,
-      lampColors,
-      `
-           GGGGG  
-          GGYYYGG 
-             P    
-             P    
-             P    
-             P    
-             P    
-            PPP   
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-          .(o). 
-            |   
-            |   
-            |   
-      `,
-      lampColors,
-      `
-          GYYYG 
-            P   
-            P   
-            P   
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-          (o)
-           | 
-           | 
-      `,
-      lampColors,
-      `
-          YYY
-           P 
-           P 
-      `
-    ),
+export const StreetLampSprite: SpriteDefinition = {
+  id: 'street_lamp',
+  name: 'Highway Street Lamp',
+  category: 'ROADSIDE',
+  defaultColor: '#fde047',
+  worldWidth: 45,
+  worldHeight: 110,
+  visualScale: 1.0,
+  variants: {
+    close: {
+      width: 12,
+      height: 12,
+      anchorX: 6,
+      anchorY: 11,
+      lines: [
+        "   .------. ",
+        "  /  (GL)  \\",
+        " '---.-----'",
+        "      |     ",
+        "      |     ",
+        "      |     ",
+        "      |     ",
+        "      |     ",
+        "      |     ",
+        "      |     ",
+        "     _|_    ",
+        "    :===:   ",
+      ],
+      colors: [
+        ['', '', '', ST, ST, ST, ST, ST, ST, ST, '', ''],
+        ['', '', ST, ST, GL, GL, GL, GL, ST, ST, '', ''],
+        ['', ST, ST, ST, HL, HL, HL, HL, ST, ST, ST, ''],
+        ['', '', '', '', '', ST, '', '', '', '', '', ''],
+        ['', '', '', '', '', ST, '', '', '', '', '', ''],
+        ['', '', '', '', '', ST, '', '', '', '', '', ''],
+        ['', '', '', '', '', ST, '', '', '', '', '', ''],
+        ['', '', '', '', '', ST, '', '', '', '', '', ''],
+        ['', '', '', '', '', ST, '', '', '', '', '', ''],
+        ['', '', '', '', '', DK, '', '', '', '', '', ''],
+        ['', '', '', '', DK, DK, DK, '', '', '', '', ''],
+        ['', '', '', BS, BS, BS, BS, BS, '', '', '', ''],
+      ],
+    },
+    near: {
+      width: 8,
+      height: 8,
+      anchorX: 4,
+      anchorY: 7,
+      lines: [
+        "  .---. ",
+        " / (GL)\\",
+        "'--.---'",
+        "    |   ",
+        "    |   ",
+        "    |   ",
+        "   _|_  ",
+        "  :===: ",
+      ],
+      colors: [
+        ['', '', ST, ST, ST, ST, ST, ''],
+        ['', ST, ST, GL, GL, ST, ST, ''],
+        [ST, ST, HL, HL, HL, ST, ST, ST],
+        ['', '', '', ST, '', '', '', ''],
+        ['', '', '', ST, '', '', '', ''],
+        ['', '', '', DK, '', '', '', ''],
+        ['', '', DK, DK, DK, '', '', ''],
+        ['', BS, BS, BS, BS, BS, '', ''],
+      ],
+    },
+    medium: {
+      width: 6,
+      height: 5,
+      anchorX: 3,
+      anchorY: 4,
+      lines: [
+        " .--. ",
+        "'(GL)'",
+        "  |   ",
+        " _|_  ",
+        ":===: ",
+      ],
+      colors: [
+        ['', ST, ST, ST, ST, ''],
+        [ST, GL, GL, GL, GL, ST],
+        ['', '', ST, '', '', ''],
+        ['', DK, DK, DK, '', ''],
+        [BS, BS, BS, BS, BS, ''],
+      ],
+    },
+    far: {
+      width: 4,
+      height: 3,
+      anchorX: 2,
+      anchorY: 2,
+      lines: [
+        "(GL)",
+        " || ",
+        ":==:",
+      ],
+      colors: [
+        [GL, GL, GL, GL],
+        ['', ST, ST, ''],
+        [BS, BS, BS, BS],
+      ],
+    },
   },
-  {
-    category: 'ROADSIDE',
-    worldWidth: 90,
-    worldHeight: 170,
-    visualScale: 1.0,
-  }
-);
+};
