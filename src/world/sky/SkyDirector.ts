@@ -46,6 +46,7 @@ export class SkyDirector {
     this.forcedDayPhase = phase;
     this.specialEvent = event;
     this.specialEventIntensity = event !== 'NONE' ? 1.0 : 0.0;
+    this.weather.setSpecialEvent(event, this.specialEventIntensity);
 
     if (weather) {
       this.weather.setTargetWeather(weather, true);
@@ -74,8 +75,10 @@ export class SkyDirector {
   }
 
   public setSpecialEvent(event: SpecialSkyEvent, intensity: number = 1.0): void {
+    // Single-event exclusivity
     this.specialEvent = event;
     this.specialEventIntensity = intensity;
+    this.weather.setSpecialEvent(event, intensity);
   }
 
   /**
@@ -105,15 +108,17 @@ export class SkyDirector {
     const phaseProgress = timeRampResult.phaseProgress;
 
     // 2. Weather Update
-    this.weather.update(dt, this.timeSeconds, screenWidth, screenHeight, !this.isVisualTestMode);
+    this.weather.update(dt, this.timeSeconds, screenWidth, screenHeight, biomeId, !this.isVisualTestMode);
     const activeWeather = this.weather.getCurrentWeather();
     const targetWeather = this.weather.getTargetWeather();
     const weatherTransition = this.weather.getTransitionProgress();
+    const wind = this.weather.getWind();
+    const roadWetness = this.weather.getRoadWetness();
 
-    // 3. Cloud Coverage & Drift
+    // 3. Cloud Coverage & Drift with Wind influence
     const coverageInfo = CloudManager.evaluateCoverage(targetWeather);
     const cloudSpeedMult = musicParams ? (1.0 + (musicParams.targetSpeedBonus || 0) * 0.2) : 1.0;
-    this.clouds.update(dt, cloudSpeedMult);
+    this.clouds.update(dt, cloudSpeedMult, wind.strength);
 
     // 4. Celestial Calculations
     const sunPos = this.celestial.calculateSunPosition(normalizedCycle);
@@ -126,7 +131,7 @@ export class SkyDirector {
     // Star visibility: attenuated by daylight, cloud coverage, fog, and moon brightness
     let starVisibility = 0.0;
     if (isNight) {
-      starVisibility = 1.0 - (coverageInfo.ratio * 0.85);
+      starVisibility = (1.0 - (coverageInfo.ratio * 0.85)) * (1.1 - moonPhaseInfo.moonlightFactor * 0.25);
     } else if (isTwilight) {
       const twilightFactor = timePhase === 'DUSK' || timePhase === 'DAWN' ? 0.45 : 0.20;
       starVisibility = twilightFactor * (1.0 - coverageInfo.ratio);
@@ -134,7 +139,7 @@ export class SkyDirector {
 
     this.celestial.update(dt, this.timeSeconds, isNight, coverageInfo.ratio, this.specialEvent);
 
-    // Special event: Aurora check
+    // Special event: Aurora check (respects exclusivity)
     if (this.specialEvent === 'NONE') {
       if (AuroraSystem.canTriggerAurora(biomeId, timePhase, coverageInfo.ratio)) {
         this.specialEvent = 'AURORA';
@@ -166,6 +171,17 @@ export class SkyDirector {
         ambientLight: 1.0,
       };
     }
+
+    // 6. Compute Comprehensive AmbientAtmosphere World Lighting Factors
+    const ambientAtmosphere = AtmospherePalette.evaluateAmbientAtmosphere(
+      timePhase,
+      ramp.ambientLight,
+      this.weather.getWeatherDarkeningFactor(),
+      roadWetness,
+      wind,
+      isLightning,
+      biomeId
+    );
 
     return {
       timeSeconds: this.timeSeconds,
@@ -209,6 +225,8 @@ export class SkyDirector {
       specialEvent: this.specialEvent,
       specialEventIntensity: this.specialEventIntensity,
       biomeId,
+
+      ambientAtmosphere,
     };
   }
 
@@ -282,22 +300,19 @@ export class SkyDirector {
 
     for (let y = 0; y < horizonRow; y++) {
       if (y < gradientLimit) {
-        // Multi-stop gradient: top -> mid -> bottom
         const t = y / gradientLimit;
         const rowColor = t < 0.5
           ? ColorPalette.lerp(state.skyTopColor, state.skyMidColor, t * 2.0)
           : ColorPalette.lerp(state.skyMidColor, state.skyBottomColor, (t - 0.5) * 2.0);
 
         const rowBg = ColorPalette.scaleBrightness(rowColor, 0.32);
-        // Dithered transition glyph at lower third of sky
         const skyChar = t > 0.82 ? '░' : ' ';
 
         for (let x = 0; x < width; x++) {
           fb.setCell(x, y, skyChar, rowColor, 10000, rowBg, false);
         }
       } else {
-        // Dynamic Atmospheric Horizon Glow Band
-        const glowIndex = y - gradientLimit; // 0, 1, 2
+        const glowIndex = y - gradientLimit;
         const glowFactor = (glowIndex + 1) / horizonGlowRows;
         const glowColor = ColorPalette.lerp(state.skyBottomColor, state.horizonGlowColor, glowFactor * 0.85);
         const glowBg = ColorPalette.scaleBrightness(glowColor, 0.40);
@@ -312,5 +327,13 @@ export class SkyDirector {
 
   public getWeatherManager(): WeatherManager {
     return this.weather;
+  }
+
+  public getCelestialSystem(): CelestialSystem {
+    return this.celestial;
+  }
+
+  public getCloudManager(): CloudManager {
+    return this.clouds;
   }
 }

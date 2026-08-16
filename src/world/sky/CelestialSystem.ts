@@ -119,22 +119,57 @@ export class CelestialSystem {
   }
 
   /**
-   * Initializes a stable deterministic 128-star procedural field.
+   * Initializes a stable deterministic 128-star procedural field with 4-tier hierarchy and non-uniform clustering.
    */
   private initStarfield(): void {
     this.stars = [];
-    const starChars = ['.', '.', '.', '*', '*', '+', '✦', '✧'];
+    const totalStars = 128;
 
-    for (let i = 0; i < 128; i++) {
+    for (let i = 0; i < totalStars; i++) {
+      // Non-uniform clustering: apply subtle sinusoidal density warping to avoid a uniform grid
+      const rawX = this.rng.next();
+      const clusterBias = Math.sin(rawX * Math.PI * 4) * 0.12;
+      const xNorm = Math.max(0.01, Math.min(0.99, rawX + clusterBias));
+      const yNorm = this.rng.range(0.01, 0.44); // Upper 44% of sky
+
+      // Exact Hierarchy: 75% dim, 20% medium, 4% bright, 1% hero sparkle
+      const roll = this.rng.next();
+      let char: string;
+      let tier: 'DIM' | 'MEDIUM' | 'BRIGHT' | 'HERO';
+      let baseBrightness: number;
+
+      if (roll < 0.75) {
+        tier = 'DIM';
+        char = '.';
+        baseBrightness = this.rng.range(0.30, 0.55);
+      } else if (roll < 0.95) {
+        tier = 'MEDIUM';
+        char = '*';
+        baseBrightness = this.rng.range(0.60, 0.80);
+      } else if (roll < 0.99) {
+        tier = 'BRIGHT';
+        char = '+';
+        baseBrightness = this.rng.range(0.85, 0.95);
+      } else {
+        tier = 'HERO';
+        char = this.rng.choice(['✦', '✧']);
+        baseBrightness = 1.0;
+      }
+
       this.stars.push({
-        xNorm: this.rng.next(),
-        yNorm: this.rng.range(0.01, 0.44), // Upper 44% of sky
-        char: this.rng.choice(starChars),
-        baseBrightness: this.rng.range(0.4, 1.0),
-        twinkleSpeed: this.rng.range(1.5, 4.5),
+        xNorm,
+        yNorm,
+        char,
+        tier,
+        baseBrightness,
+        twinkleSpeed: this.rng.range(0.8, 2.2), // Slow, subtle twinkle
         twinkleOffset: this.rng.range(0, Math.PI * 2),
       });
     }
+  }
+
+  public getStars(): StarInstance[] {
+    return this.stars;
   }
 
   /**
@@ -166,7 +201,6 @@ export class CelestialSystem {
 
   /**
    * Calculates Sun trajectory across the diurnal cycle [0.0, 1.0).
-   * Sun rises in the East (heading ~ 0.15), peaks at South apex (heading 0.50), sets in West (heading ~ 0.85).
    */
   public calculateSunPosition(normalizedDay: number): {
     elevation: number;    // [-1, 1] (-1 = nadir midnight, 0 = horizon, 1 = apex midday)
@@ -174,7 +208,6 @@ export class CelestialSystem {
     visible: boolean;
     color: string;
   } {
-    // Sun is above horizon between 0.15 (dawn) and 0.85 (dusk)
     const daylightDuration = 0.70;
     const sunriseStart = 0.15;
 
@@ -188,7 +221,6 @@ export class CelestialSystem {
       headingNorm = 0.15 + progress * 0.70;    // 0.15 (east) -> 0.85 (west)
       visible = true;
     } else {
-      // Night: sun is below horizon
       const nightProgress = normalizedDay < sunriseStart
         ? (normalizedDay + (1.0 - (sunriseStart + daylightDuration))) / (1.0 - daylightDuration)
         : (normalizedDay - (sunriseStart + daylightDuration)) / (1.0 - daylightDuration);
@@ -197,16 +229,12 @@ export class CelestialSystem {
       visible = false;
     }
 
-    // Color based on elevation
     let color: string;
     if (elevation < 0.25) {
-      // Near horizon: fiery orange-red
       color = ColorPalette.lerp('#ef4444', '#f97316', Math.max(0, elevation / 0.25));
     } else if (elevation < 0.60) {
-      // Low to mid sky: warm golden amber
       color = ColorPalette.lerp('#f97316', '#fde047', (elevation - 0.25) / 0.35);
     } else {
-      // High midday: intense pale solar yellow
       color = ColorPalette.lerp('#fde047', '#fef08a', (elevation - 0.60) / 0.40);
     }
 
@@ -220,22 +248,20 @@ export class CelestialSystem {
 
   /**
    * Calculates Moon trajectory across the nocturnal cycle.
-   * Moon rises around dusk (0.75), peaks at midnight (0.00 / 1.00), sets around dawn (0.25).
    */
   public calculateMoonPosition(normalizedDay: number): {
     elevation: number;    // [-1, 1]
     headingNorm: number;  // [0, 1]
     visible: boolean;
   } {
-    // Nocturnal window is from 0.72 to 0.28 across the day wrap
     let nightProgress: number;
     let visible = false;
 
     if (normalizedDay >= 0.70) {
-      nightProgress = (normalizedDay - 0.70) / 0.55; // 0.70 -> 1.00 (halfway to apex)
+      nightProgress = (normalizedDay - 0.70) / 0.55;
       visible = true;
     } else if (normalizedDay <= 0.25) {
-      nightProgress = (normalizedDay + 0.30) / 0.55; // 0.00 -> 0.25 (apex to set)
+      nightProgress = (normalizedDay + 0.30) / 0.55;
       visible = true;
     } else {
       nightProgress = (normalizedDay - 0.25) / 0.45;
@@ -262,7 +288,6 @@ export class CelestialSystem {
     cloudCoverageRatio: number,
     specialEvent: SpecialSkyEvent
   ): void {
-    // Update existing shooting stars
     for (let i = this.shootingStars.length - 1; i >= 0; i--) {
       const star = this.shootingStars[i];
       star.progress += dt / star.duration;
@@ -272,16 +297,16 @@ export class CelestialSystem {
     }
 
     // Spawn shooting stars during clear nights
-    const canSpawn = isNight && cloudCoverageRatio < 0.35;
+    const canSpawn = isNight && cloudCoverageRatio < 0.30;
     const isShower = specialEvent === 'METEOR_SHOWER';
-    const interval = isShower ? 4.0 : 35.0;
+    const interval = isShower ? 3.5 : 30.0;
 
     if (canSpawn && (worldTime - this.lastShootingStarTime > interval)) {
       this.lastShootingStarTime = worldTime;
       const startX = this.rng.range(0.1, 0.85);
-      const startY = this.rng.range(0.02, 0.20);
+      const startY = this.rng.range(0.02, 0.18);
       const length = this.rng.range(0.08, 0.18);
-      const angle = this.rng.range(0.4, 0.85); // Downward diagonal
+      const angle = this.rng.range(0.4, 0.85);
 
       this.shootingStars.push({
         startX,
@@ -296,7 +321,7 @@ export class CelestialSystem {
   }
 
   /**
-   * Renders celestial stars, sun, moon, and shooting stars with cloud occlusion.
+   * Renders celestial stars, sun, moon, and shooting stars with cloud occlusion and organic halo.
    */
   public renderCelestialBodies(
     fb: FrameBuffer,
@@ -324,10 +349,11 @@ export class CelestialSystem {
 
         if (sy >= horizonRow || isOccluded(sx, sy)) continue;
 
-        const twinkle = 0.7 + 0.3 * Math.sin(worldTime * star.twinkleSpeed + star.twinkleOffset);
+        // Subtle slow twinkle (0.8 - 1.0)
+        const twinkle = 0.82 + 0.18 * Math.sin(worldTime * star.twinkleSpeed + star.twinkleOffset);
         const brightness = star.baseBrightness * starVisibility * twinkle;
 
-        if (brightness > 0.15) {
+        if (brightness > 0.18) {
           const starColor = ColorPalette.scaleBrightness('#ffffff', Math.min(1.0, brightness));
           fb.setCell(sx, sy, star.char, starColor, 9990, undefined, true);
         }
@@ -340,7 +366,6 @@ export class CelestialSystem {
 
         if (curY < horizonRow && !isOccluded(curX, curY)) {
           fb.setCell(curX, curY, '✦', s.color, 9985, undefined, true);
-          // Faint tail
           const tailX = Math.floor((s.startX + (s.endX - s.startX) * Math.max(0, s.progress - 0.2)) * width);
           const tailY = Math.floor((s.startY + (s.endY - s.startY) * Math.max(0, s.progress - 0.2)) * horizonRow);
           if (tailY < horizonRow) {
@@ -364,18 +389,24 @@ export class CelestialSystem {
       const halfW = Math.floor(shape[0].length / 2);
       const halfH = Math.floor(shape.length / 2);
 
-      // Low-density halo glow dots around sun
-      if (sunElev > 0.15) {
-        const haloRadius = 6;
-        for (let dy = -haloRadius; dy <= haloRadius; dy += 2) {
-          for (let dx = -haloRadius * 2; dx <= haloRadius * 2; dx += 3) {
-            const hx = sunX + dx;
-            const hy = sunY + dy;
-            if (hy >= 0 && hy < horizonRow && !isOccluded(hx, hy)) {
-              if (Math.abs(dx) > halfW || Math.abs(dy) > halfH) {
-                fb.setCell(hx, hy, '.', ColorPalette.scaleBrightness(sunColor, 0.35), 9988, undefined, true);
-              }
-            }
+      // Organic, irregular halo glow (prominent at Sunrise/Golden Hour/Sunset, minimal at Midday)
+      const haloProminence = (dayPhase === 'GOLDEN_HOUR' || dayPhase === 'SUNRISE' || dayPhase === 'SUNSET') ? 1.0 : (sunElev < 0.4 ? 0.6 : 0.2);
+      if (haloProminence > 0.1) {
+        const offsets = [
+          { dx: -halfW - 2, dy: 0, ch: '.' },
+          { dx: halfW + 2, dy: 0, ch: '.' },
+          { dx: 0, dy: -halfH - 1, ch: '.' },
+          { dx: -halfW - 4, dy: -1, ch: '·' },
+          { dx: halfW + 4, dy: 1, ch: '·' },
+          { dx: -halfW - 1, dy: -halfH - 1, ch: '·' },
+          { dx: halfW + 1, dy: -halfH - 1, ch: '·' },
+        ];
+
+        for (const o of offsets) {
+          const hx = (sunX + o.dx + width) % width;
+          const hy = sunY + o.dy;
+          if (hy >= 0 && hy < horizonRow && !isOccluded(hx, hy)) {
+            fb.setCell(hx, hy, o.ch, ColorPalette.scaleBrightness(sunColor, 0.4 * haloProminence), 9988, undefined, true);
           }
         }
       }
@@ -409,6 +440,22 @@ export class CelestialSystem {
 
       const isLowMoon = specialEvent === 'LOW_FULL_MOON' && moonPhase === 'FULL_MOON';
       const moonColor = isLowMoon ? '#fde047' : '#e2e8f0';
+
+      // Full Moon subtle lunar halo
+      if (moonPhase === 'FULL_MOON') {
+        const haloOffsets = [
+          { dx: -halfW - 2, dy: 0 },
+          { dx: halfW + 2, dy: 0 },
+          { dx: 0, dy: -halfH - 1 },
+        ];
+        for (const o of haloOffsets) {
+          const hx = (moonX + o.dx + width) % width;
+          const hy = moonY + o.dy;
+          if (hy >= 0 && hy < horizonRow && !isOccluded(hx, hy)) {
+            fb.setCell(hx, hy, '·', '#64748b', 9988, undefined, true);
+          }
+        }
+      }
 
       for (let r = 0; r < shape.length; r++) {
         const line = shape[r];

@@ -1,6 +1,13 @@
 import { ColorPalette } from '../../ascii/ColorPalette';
 import { BiomeId, WorldMusicParameters } from '../types';
-import { DayPhase, SkyColorRamp, SpecialSkyEvent } from './SkyTypes';
+import {
+  AmbientAtmosphere,
+  DayPhase,
+  RoadWetnessState,
+  SkyColorRamp,
+  SpecialSkyEvent,
+  WorldWindState,
+} from './SkyTypes';
 
 export class AtmospherePalette {
   /**
@@ -174,6 +181,76 @@ export class AtmospherePalette {
   }
 
   /**
+   * Evaluates AmbientAtmosphere world-lighting response factors.
+   */
+  public static evaluateAmbientAtmosphere(
+    phase: DayPhase,
+    ambientLight: number,
+    weatherDarkening: number,
+    roadWetness: number,
+    wind: WorldWindState,
+    lightningActive: boolean,
+    biomeId: BiomeId
+  ): AmbientAtmosphere {
+    let ambientWarmth = 0.0;
+    let ambientCoolness = 0.0;
+
+    switch (phase) {
+      case 'GOLDEN_HOUR':
+        ambientWarmth = 0.85;
+        break;
+      case 'SUNSET':
+        ambientWarmth = 0.70;
+        break;
+      case 'SUNRISE':
+        ambientWarmth = 0.60;
+        break;
+      case 'DAWN':
+        ambientWarmth = 0.35;
+        break;
+      case 'DEEP_NIGHT':
+        ambientCoolness = 0.90;
+        break;
+      case 'NIGHT':
+        ambientCoolness = 0.75;
+        break;
+      case 'PRE_DAWN':
+        ambientCoolness = 0.60;
+        break;
+      case 'DUSK':
+        ambientCoolness = 0.40;
+        break;
+      default:
+        break;
+    }
+
+    if (biomeId === 'ALPINE') ambientCoolness = Math.min(1.0, ambientCoolness + 0.25);
+    if (biomeId === 'DESERT') ambientWarmth = Math.min(1.0, ambientWarmth + 0.20);
+
+    let fogTint = '#94a3b8';
+    if (ambientWarmth > 0.4) fogTint = '#fed7aa'; // Warm peach/gold haze
+    else if (ambientCoolness > 0.4) fogTint = '#334155'; // Cool slate/indigo haze
+    if (biomeId === 'NEON_CITY') fogTint = '#701a75'; // Cyber purple haze
+    if (biomeId === 'VOLCANIC') fogTint = '#78350f'; // Smoky amber haze
+
+    let roadWetnessState: RoadWetnessState = 'DRY';
+    if (roadWetness > 0.65) roadWetnessState = 'WET';
+    else if (roadWetness > 0.15) roadWetnessState = 'DAMP';
+
+    return {
+      ambientBrightness: Math.max(0.22, ambientLight * (1.0 - weatherDarkening * 0.45)),
+      ambientWarmth,
+      ambientCoolness,
+      fogTint,
+      fogDensity: weatherDarkening,
+      roadWetness,
+      roadWetnessState,
+      wind,
+      lightningFlashIntensity: lightningActive ? 1.0 : 0.0,
+    };
+  }
+
+  /**
    * Applies biome color bias to the sky ramp.
    */
   public static applyBiomeTint(
@@ -309,6 +386,36 @@ export class AtmospherePalette {
       default:
         return ramp;
     }
+  }
+
+  /**
+   * Modulates terrain and scenery colors with ambient warmth / coolness / weather.
+   */
+  public static modulateWorldColor(
+    baseColor: string,
+    atmosphere: AmbientAtmosphere
+  ): string {
+    let color = baseColor;
+
+    // Apply brightness
+    color = ColorPalette.scaleBrightness(color, atmosphere.ambientBrightness);
+
+    // Apply warmth during golden hour/sunset
+    if (atmosphere.ambientWarmth > 0.05) {
+      color = ColorPalette.lerp(color, '#f59e0b', atmosphere.ambientWarmth * 0.22);
+    }
+
+    // Apply coolness during night/deep night
+    if (atmosphere.ambientCoolness > 0.05) {
+      color = ColorPalette.lerp(color, '#1e1b4b', atmosphere.ambientCoolness * 0.28);
+    }
+
+    // Apply lightning illumination
+    if (atmosphere.lightningFlashIntensity > 0.05) {
+      color = ColorPalette.lerp(color, '#e0f2fe', atmosphere.lightningFlashIntensity * 0.75);
+    }
+
+    return color;
   }
 
   /**

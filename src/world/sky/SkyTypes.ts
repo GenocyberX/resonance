@@ -31,12 +31,15 @@ export type CloudCoverage =
   | 'OVERCAST';
 
 export type CloudFormationType =
-  | 'SMALL_FAIR_WEATHER'
-  | 'MEDIUM_CUMULUS'
-  | 'LARGE_CUMULUS'
-  | 'THIN_HIGH_CLOUD'
-  | 'STORM_CLOUD'
-  | 'OVERCAST_FRAGMENT';
+  | 'FAIR_SMALL'
+  | 'FAIR_MEDIUM'
+  | 'CUMULUS_SMALL'
+  | 'CUMULUS_LARGE'
+  | 'HIGH_THIN'
+  | 'STRATUS'
+  | 'OVERCAST'
+  | 'STORM'
+  | 'FOG_BANK';
 
 export type WeatherType =
   | 'CLEAR'
@@ -60,7 +63,28 @@ export type SpecialSkyEvent =
   | 'RED_SUNSET'
   | 'GOLDEN_SUNSET'
   | 'VIOLET_DUSK'
-  | 'RED_DAWN';
+  | 'RED_DAWN'
+  | 'RAINBOW'
+  | 'FOG_BANK_ENCOUNTER';
+
+export type RoadWetnessState = 'DRY' | 'DAMP' | 'WET';
+
+export interface WorldWindState {
+  direction: number; // [-1.0, 1.0] (-1 = strong wind from right to left, +1 = left to right)
+  strength: number;  // [0.0, 1.0] (0 = calm, 1.0 = gale / blizzard wind)
+}
+
+export interface AmbientAtmosphere {
+  ambientBrightness: number; // [0.22, 1.0]
+  ambientWarmth: number;     // [0.0, 1.0] (Golden hour, sunrise, sunset warmth)
+  ambientCoolness: number;   // [0.0, 1.0] (Night, polar, storm cold tint)
+  fogTint: string;           // Hex color of ambient atmospheric haze
+  fogDensity: number;        // [0.0, 1.0]
+  roadWetness: number;       // [0.0, 1.0] (0 = dry, 0.5 = damp, 1.0 = wet)
+  roadWetnessState: RoadWetnessState;
+  wind: WorldWindState;
+  lightningFlashIntensity: number; // [0.0, 1.0]
+}
 
 export interface CloudFormation {
   id: string;
@@ -83,6 +107,7 @@ export interface StarInstance {
   xNorm: number;
   yNorm: number;
   char: string;
+  tier: 'DIM' | 'MEDIUM' | 'BRIGHT' | 'HERO';
   baseBrightness: number; // [0.2, 1.0]
   twinkleSpeed: number;   // Radians / sec
   twinkleOffset: number;  // Phase offset
@@ -150,4 +175,6 @@ export interface SkyState {
   specialEvent: SpecialSkyEvent;
   specialEventIntensity: number; // [0, 1]
   biomeId: BiomeId;
+
+  ambientAtmosphere: AmbientAtmosphere;
 }

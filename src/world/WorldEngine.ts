@@ -9,6 +9,7 @@ import { CollisionSystem } from '../driving/CollisionSystem';
 import { BiomeTransitionSystem } from './transitions/BiomeTransitionSystem';
 import { DayNightCycle } from './transitions/DayNightCycle';
 import { SkyDirector } from './sky/SkyDirector';
+import { AtmospherePalette } from './sky/AtmospherePalette';
 import { DayPhase, SpecialSkyEvent, WeatherType } from './sky/SkyTypes';
 import { WorldDirector } from './WorldDirector';
 import { WorldState } from './WorldState';
@@ -466,9 +467,7 @@ export class WorldEngine {
         const proj = Perspective.project(obj.x, this.road.getElevationAt(obj.z), obj.z, this.state.camera, width, height, 0.40);
         if (proj.visible) {
           let sceneryColor = obj.colorOverride || obj.sprite.defaultColor;
-          if (dayNight.phase === 'NIGHT' || dayNight.phase === 'DUSK') {
-            sceneryColor = ColorPalette.scaleBrightness(sceneryColor, Math.max(0.4, dayNight.ambientLight));
-          }
+          sceneryColor = AtmospherePalette.modulateWorldColor(sceneryColor, this.state.sky.ambientAtmosphere);
           this.depthSorter.add({
             screenX: proj.screenX,
             screenY: proj.screenY,
@@ -487,9 +486,7 @@ export class WorldEngine {
         const proj = Perspective.project(vehicle.x, this.road.getElevationAt(vehicle.z), vehicle.z, this.state.camera, width, height, 0.40);
         if (proj.visible) {
           let vehicleColor = vehicle.colorOverride || vehicle.sprite.defaultColor;
-          if (dayNight.phase === 'NIGHT') {
-            vehicleColor = ColorPalette.scaleBrightness(vehicleColor, 0.75);
-          }
+          vehicleColor = AtmospherePalette.modulateWorldColor(vehicleColor, this.state.sky.ambientAtmosphere);
           this.depthSorter.add({
             screenX: proj.screenX,
             screenY: proj.screenY,
@@ -534,14 +531,17 @@ export class WorldEngine {
     const isDesert = biomeId === 'DESERT';
     const isForest = biomeId === 'FOREST';
 
-    const mountainColor = ColorPalette.scaleBrightness(
+    let mountainColor = ColorPalette.scaleBrightness(
       palette.mountains,
       Math.max(0.4, dayNight.ambientLight)
     );
-    const groundSilhouetteColor = ColorPalette.scaleBrightness(
+    let groundSilhouetteColor = ColorPalette.scaleBrightness(
       palette.ground,
       Math.max(0.45, dayNight.ambientLight)
     );
+
+    mountainColor = AtmospherePalette.modulateWorldColor(mountainColor, this.state.sky.ambientAtmosphere);
+    groundSilhouetteColor = AtmospherePalette.modulateWorldColor(groundSilhouetteColor, this.state.sky.ambientAtmosphere);
 
     if (isTropical) {
       // World-space anchored landmark island profiles with proper camera parallax
@@ -683,13 +683,25 @@ export class WorldEngine {
     const time = this.state.worldTime;
     const energy = this.state.musicParams.environmentalGlow;
 
-    // Palette tokens for World-Space Terrain
-    const oceanBg = isNight ? '#051026' : (isDusk ? '#3b0764' : '#0369a1');
-    const oceanRippleColor = isNight ? '#1e3a8a' : (isDusk ? '#fb7185' : '#38bdf8');
-    const sandBg = isNight ? '#1c1917' : (isDusk ? '#78350f' : '#d97706');
-    const sandDetailColor = '#fde68a';
-    const inlandBg = isNight ? '#022c22' : (isDusk ? '#14532d' : '#064e3b');
-    const inlandGrassColor = '#34d399';
+    const atmosphere = this.state.sky.ambientAtmosphere;
+    const roadWetness = atmosphere ? atmosphere.roadWetness : 0.0;
+
+    // Palette tokens for World-Space Terrain modulated by AmbientAtmosphere
+    let oceanBg = isNight ? '#051026' : (isDusk ? '#3b0764' : '#0369a1');
+    let oceanRippleColor = isNight ? '#1e3a8a' : (isDusk ? '#fb7185' : '#38bdf8');
+    let sandBg = isNight ? '#1c1917' : (isDusk ? '#78350f' : '#d97706');
+    let sandDetailColor = '#fde68a';
+    let inlandBg = isNight ? '#022c22' : (isDusk ? '#14532d' : '#064e3b');
+    let inlandGrassColor = '#34d399';
+
+    if (atmosphere) {
+      oceanBg = AtmospherePalette.modulateWorldColor(oceanBg, atmosphere);
+      oceanRippleColor = AtmospherePalette.modulateWorldColor(oceanRippleColor, atmosphere);
+      sandBg = AtmospherePalette.modulateWorldColor(sandBg, atmosphere);
+      sandDetailColor = AtmospherePalette.modulateWorldColor(sandDetailColor, atmosphere);
+      inlandBg = AtmospherePalette.modulateWorldColor(inlandBg, atmosphere);
+      inlandGrassColor = AtmospherePalette.modulateWorldColor(inlandGrassColor, atmosphere);
+    }
 
     const drawDistance = 1050;
     const stepZ = this.road.segmentLength;
@@ -830,6 +842,11 @@ export class WorldEngine {
             if (((x * 5 + y * 7) % 8) === 0) char = '·';
           }
 
+          if (atmosphere) {
+            bg = AtmospherePalette.modulateWorldColor(bg, atmosphere);
+            color = AtmospherePalette.modulateWorldColor(color, atmosphere);
+          }
+
           fb.setCell(x, y, char, color, depth + 15, bg, false);
         }
 
@@ -841,6 +858,11 @@ export class WorldEngine {
           ? palette.road
           : ColorPalette.scaleBrightness(palette.road, 1.18);
 
+        // Road Wetness Darkening
+        if (roadWetness > 0.15) {
+          baseRoadColor = ColorPalette.scaleBrightness(baseRoadColor, 1.0 - roadWetness * 0.22);
+        }
+
         if (isNight) {
           const distFromPlayer = sliceZ - playerZ;
           if (distFromPlayer > 0 && distFromPlayer < 350) {
@@ -851,11 +873,17 @@ export class WorldEngine {
           }
         }
 
-        const roadFog = ColorPalette.applyFog(baseRoadColor, palette.fog, Math.min(1.0, depth / 950) * 0.45);
-        const shoulderColor = ColorPalette.applyFog(palette.roadShoulder, palette.fog, Math.min(1.0, depth / 950) * 0.45);
-        const markingColor = beatPulse
+        const fogDensityFactor = atmosphere ? atmosphere.fogDensity : 0.0;
+        const depthFogFactor = Math.min(1.0, (depth / 950) * (0.40 + fogDensityFactor * 0.60));
+        const roadFog = ColorPalette.applyFog(baseRoadColor, palette.fog, depthFogFactor);
+        const shoulderColor = ColorPalette.applyFog(palette.roadShoulder, palette.fog, depthFogFactor);
+        let markingColor = beatPulse
           ? '#ffffff'
-          : ColorPalette.applyFog(palette.roadMarking, palette.fog, Math.min(1.0, depth / 950) * 0.4);
+          : ColorPalette.applyFog(palette.roadMarking, palette.fog, depthFogFactor * 0.9);
+
+        if (roadWetness > 0.15) {
+          markingColor = ColorPalette.lerp(markingColor, '#ffffff', roadWetness * 0.5);
+        }
 
         // A. Continuous Rumble Curbs
         const curbWidth = Math.max(2, Math.round(roadSpan * 0.055));

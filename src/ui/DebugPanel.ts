@@ -215,6 +215,18 @@ export class DebugPanel {
           <span class="debug-val" style="color: #06b6d4">${worldState.sky ? worldState.sky.activeWeather : worldState.weather.type}</span>
         </div>
         <div class="debug-row">
+          <span class="debug-label">ROAD WETNESS</span>
+          <span class="debug-val" style="color: #38bdf8">${worldState.sky && worldState.sky.ambientAtmosphere ? `${worldState.sky.ambientAtmosphere.roadWetnessState} (${Math.round(worldState.sky.ambientAtmosphere.roadWetness * 100)}%)` : '-'}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">WIND</span>
+          <span class="debug-val">${worldState.sky && worldState.sky.ambientAtmosphere ? `${(worldState.sky.ambientAtmosphere.wind.direction > 0 ? '+' : '') + worldState.sky.ambientAtmosphere.wind.direction.toFixed(2)} (${Math.round(worldState.sky.ambientAtmosphere.wind.strength * 100)}%)` : '-'}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">ATMOS WARM / COOL</span>
+          <span class="debug-val">${worldState.sky && worldState.sky.ambientAtmosphere ? `+${Math.round(worldState.sky.ambientAtmosphere.ambientWarmth * 100)}% / -${Math.round(worldState.sky.ambientAtmosphere.ambientCoolness * 100)}%` : '-'}</span>
+        </div>
+        <div class="debug-row">
           <span class="debug-label">SKY EVENT</span>
           <span class="debug-val" style="color: #ec4899">${worldState.sky ? worldState.sky.specialEvent : 'NONE'}</span>
         </div>
