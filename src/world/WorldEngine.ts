@@ -23,6 +23,8 @@ interface Cloud {
   speed: number;
 }
 
+export type VisualTestTime = 'day' | 'sunset' | 'night' | 'dawn';
+
 // Chase Camera & Lateral Presentation Constants
 export const PLAYER_CAMERA_LATERAL_FOLLOW = 0.85;
 export const PLAYER_SCREEN_LATERAL_RESIDUAL = 0.15;
@@ -48,13 +50,14 @@ export class WorldEngine {
   // Visual Test Mode state
   private isVisualTest: boolean = false;
   private testScenario: RoadTestMode = 'NORMAL';
+  private testTimeOfDay: VisualTestTime = 'day';
 
   // Cached scanline geometry for player anchoring, debug telemetry and continuity verification
   private scanlineCenter: Float32Array = new Float32Array(100);
   private scanlineHalfWidth: Float32Array = new Float32Array(100);
   private scanlineDepth: Float32Array = new Float32Array(100);
 
-  // Telemetry telemetry state
+  // Telemetry state
   private lastTargetCamX: number = 0;
   private lastPlayerScreenX: number = 0;
   private lastRoadCenterAtPlayerRow: number = 0;
@@ -85,15 +88,19 @@ export class WorldEngine {
     this.initClouds();
   }
 
-  public setVisualTestMode(enabled: boolean, scenario: RoadTestMode = 'FLAT_STRAIGHT'): void {
+  public setVisualTestMode(
+    enabled: boolean,
+    scenario: RoadTestMode = 'FLAT_STRAIGHT',
+    time: VisualTestTime = 'day'
+  ): void {
     this.isVisualTest = enabled;
     this.testScenario = scenario;
+    this.testTimeOfDay = time;
     this.road.setTestMode(scenario);
 
     if (enabled) {
       this.state.cameraShake = 0;
-      this.state.dayNight.ambientLight = 1.0;
-      this.state.dayNight.phase = 'DAY';
+      this.setVisualTestTime(time);
       this.traffic.maxTrafficCount = 2;
     } else {
       this.road.setTestMode('NORMAL');
@@ -101,8 +108,19 @@ export class WorldEngine {
     }
   }
 
-  public getVisualTestMode(): { isVisualTest: boolean; scenario: RoadTestMode } {
-    return { isVisualTest: this.isVisualTest, scenario: this.testScenario };
+  public setVisualTestTime(time: VisualTestTime): void {
+    this.testTimeOfDay = time;
+    let normTime = 0.35; // DAY
+    if (time === 'sunset') normTime = 0.60;
+    if (time === 'night') normTime = 0.85;
+    if (time === 'dawn') normTime = 0.10;
+
+    this.dayNightCycle.setNormalizedTime(normTime);
+    this.state.dayNight = this.dayNightCycle.calculateState(normTime);
+  }
+
+  public getVisualTestMode(): { isVisualTest: boolean; scenario: RoadTestMode; time: VisualTestTime } {
+    return { isVisualTest: this.isVisualTest, scenario: this.testScenario, time: this.testTimeOfDay };
   }
 
   public getScanlineDataAt(y: number): { center: number; halfWidth: number; depth: number } {
@@ -145,10 +163,10 @@ export class WorldEngine {
   private initClouds(): void {
     this.clouds = [
       {
-        xNorm: 0.15,
-        yNorm: 0.08,
-        width: 22,
-        speed: 0.004,
+        xNorm: 0.12,
+        yNorm: 0.06,
+        width: 24,
+        speed: 0.003,
         shape: [
           '     .-------.    ',
           '  .-(         )-. ',
@@ -156,10 +174,10 @@ export class WorldEngine {
         ],
       },
       {
-        xNorm: 0.65,
-        yNorm: 0.16,
-        width: 28,
-        speed: 0.006,
+        xNorm: 0.58,
+        yNorm: 0.14,
+        width: 32,
+        speed: 0.005,
         shape: [
           '       .--------.       ',
           '   .--(          )---.  ',
@@ -167,10 +185,10 @@ export class WorldEngine {
         ],
       },
       {
-        xNorm: 0.88,
-        yNorm: 0.05,
-        width: 18,
-        speed: 0.003,
+        xNorm: 0.85,
+        yNorm: 0.04,
+        width: 20,
+        speed: 0.002,
         shape: [
           '   .----.   ',
           ' .-(      )-.',
@@ -211,9 +229,6 @@ export class WorldEngine {
         particleDensity: 0,
         environmentalGlow: 0,
       };
-      this.state.dayNight.phase = 'DAY';
-      this.state.dayNight.ambientLight = 1.0;
-      this.state.dayNight.sunElevation = 0.8;
       this.state.biomeBlend = this.biomeSystem.evaluate(0);
     } else {
       this.state.musicParams = musicParams;
@@ -294,7 +309,7 @@ export class WorldEngine {
   private updateAmbientParticles(dt: number, musicParams: WorldMusicParameters): void {
     if (musicParams.particleDensity > 0.15 && this.rng.boolean(musicParams.particleDensity * 0.8)) {
       const isLeft = this.rng.boolean();
-      const offset = isLeft ? -this.rng.range(500, 900) : this.rng.range(500, 900);
+      const offset = isLeft ? -this.rng.range(480, 850) : this.rng.range(480, 850);
       const spawnZ = this.state.player.z + this.rng.range(80, 600);
       this.ambientParticles.push({
         x: this.road.getCurveAt(spawnZ) + offset,
@@ -336,17 +351,17 @@ export class WorldEngine {
     const dayNight = this.state.dayNight;
     const glow = this.state.musicParams.environmentalGlow;
 
-    // 1. SKY RENDERING
+    // 1. HIGH-FIDELITY SKY RENDERING (Background multi-band gradients)
     this.renderSky(frameBuffer, width, horizonRow, palette, dayNight, glow);
 
-    // 2. PARALLAX HORIZON & MOUNTAIN SILHOUETTES
+    // 2. MULTI-LAYER PARALLAX HORIZON & DISTANT SILHOUETTES
     this.renderHorizonSilhouettes(frameBuffer, width, horizonRow, palette, dayNight);
 
-    // 3. PROCEDURAL GROUND RENDERING
-    this.renderGround(frameBuffer, width, height, horizonRow, palette, dayNight);
-
-    // 4. CONTINUOUS PSEUDO-3D ROAD SCANLINE RASTERIZATION
+    // 3. CONTINUOUS PSEUDO-3D ROAD SCANLINE RASTERIZATION (Calculates scanline boundaries)
     this.renderRoad(frameBuffer, width, height, horizonRow, palette, dayNight);
+
+    // 4. PROCEDURAL OCEAN, BEACH & INLAND TERRAIN RENDERING (Uses real road scanline bounds)
+    this.renderGround(frameBuffer, width, height, horizonRow, palette, dayNight);
 
     // 5. DEPTH-SORTED SCENERY & TRAFFIC RENDERING
     this.depthSorter.clear();
@@ -413,6 +428,9 @@ export class WorldEngine {
     }
   }
 
+  /**
+   * Sky Rendering with multi-band background gradients and drifting clouds.
+   */
   private renderSky(
     fb: FrameBuffer,
     width: number,
@@ -430,13 +448,14 @@ export class WorldEngine {
       0.85 + glow * 0.25
     );
 
-    // Multi-band sky gradient
+    // Background color gradient across the upper sky
     for (let y = 0; y < horizonRow; y++) {
       const t = y / Math.max(1, horizonRow);
       const rowColor = ColorPalette.lerp(skyTop, skyBottom, t);
-      const skyChar = t > 0.82 ? '░' : ' ';
+      const rowBg = ColorPalette.scaleBrightness(rowColor, 0.35);
+      const skyChar = t > 0.85 ? '░' : ' ';
       for (let x = 0; x < width; x++) {
-        fb.setCell(x, y, skyChar, rowColor, 10000, undefined, false);
+        fb.setCell(x, y, skyChar, rowColor, 10000, rowBg, false);
       }
     }
 
@@ -455,11 +474,12 @@ export class WorldEngine {
       }
     }
 
-    // Drifting Procedural Clouds
+    // Drifting Procedural Clouds with multi-color volume
     if (dayNight.phase !== 'NIGHT') {
       const cloudColor = dayNight.phase === 'DUSK'
         ? '#f472b6'
-        : (dayNight.phase === 'DAWN' ? '#fde047' : '#e0f2fe');
+        : (dayNight.phase === 'DAWN' ? '#fde047' : '#f0f9ff');
+      const cloudShadow = dayNight.phase === 'DUSK' ? '#be185d' : '#93c5fd';
 
       for (const cloud of this.clouds) {
         const startX = Math.floor(cloud.xNorm * width);
@@ -470,11 +490,13 @@ export class WorldEngine {
           const cy = startY + r;
           if (cy >= horizonRow) continue;
 
+          const rowTint = r === cloud.shape.length - 1 ? cloudShadow : cloudColor;
+
           for (let c = 0; c < line.length; c++) {
             const ch = line[c];
             if (ch !== ' ') {
               const cx = (startX + c) % width;
-              fb.setCell(cx, cy, ch, cloudColor, 9970, undefined, true);
+              fb.setCell(cx, cy, ch, rowTint, 9970, undefined, true);
             }
           }
         }
@@ -519,6 +541,9 @@ export class WorldEngine {
     }
   }
 
+  /**
+   * Multi-Layer Parallax Horizon (Distant Islands, Ocean Line, and Headland Silhouettes).
+   */
   private renderHorizonSilhouettes(
     fb: FrameBuffer,
     width: number,
@@ -526,43 +551,73 @@ export class WorldEngine {
     palette: typeof this.state.biomeBlend.blendedPalette,
     dayNight: typeof this.state.dayNight
   ): void {
-    const biome = this.state.biomeBlend.currentBiome;
-    const mountainChar = biome.mountainChar || '^';
-    const mountainColor = ColorPalette.scaleBrightness(
+    const isTropical = this.state.biomeBlend.currentBiome.id === 'TROPICAL';
+    const islandColor = ColorPalette.scaleBrightness(
       palette.mountains,
       Math.max(0.4, dayNight.ambientLight)
     );
-    const camXOffset = (this.state.camera.x * 0.012) % width;
+    const headlandColor = ColorPalette.scaleBrightness(
+      palette.ground,
+      Math.max(0.45, dayNight.ambientLight)
+    );
 
-    for (let x = 0; x < width; x++) {
-      const worldCol = (x + camXOffset + width * 10) % width;
+    // Far Parallax Layer (Rate: 0.006) - Distant Islands & Ocean Line
+    const farOffset = (this.state.camera.x * 0.006) % width;
+    // Mid Parallax Layer (Rate: 0.016) - Coastal Headlands & Palm Silhouettes
+    const midOffset = (this.state.camera.x * 0.016) % width;
 
-      let h1: number;
-      if (biome.id === 'NEON_CITY') {
-        const towerSlot = Math.floor(worldCol / 5);
-        const isTower = (towerSlot * 7) % 3 !== 0;
-        h1 = isTower ? ((towerSlot * 11) % 6 + 4) : 2;
-      } else {
+    if (isTropical) {
+      // 1. Far Calm Ocean Horizon Line & Distant Tropical Island Peaks
+      for (let x = 0; x < width; x++) {
+        const farCol = (x + farOffset + width * 10) % width;
+        // Natural curved mountain ridges
+        const peak1 = Math.sin(farCol * 0.05) * 3.5;
+        const peak2 = Math.cos(farCol * 0.12) * 1.8;
+        const islandH = Math.max(0, Math.floor(peak1 + peak2 + 2));
+
+        for (let dy = 0; dy < islandH; dy++) {
+          const my = horizonRow - 1 - dy;
+          if (my >= 0 && my < horizonRow) {
+            const char = dy === islandH - 1 ? (peak1 > 0 ? '^' : '/') : '░';
+            fb.setCell(x, my, char, islandColor, 9200, undefined, false);
+          }
+        }
+
+        // 2. Mid Parallax Headland & Distant Palm Promontories
+        const midCol = (x + midOffset + width * 10) % width;
+        const headlandH = Math.max(0, Math.floor(Math.sin(midCol * 0.08) * 2.2 + 1));
+
+        for (let dy = 0; dy < headlandH; dy++) {
+          const my = horizonRow - 1 - dy;
+          if (my >= 0 && my < horizonRow) {
+            const char = dy === headlandH - 1 ? 'n' : '█';
+            fb.setCell(x, my, char, headlandColor, 9000, undefined, false);
+          }
+        }
+      }
+    } else {
+      // Generic Biome Horizon Fallback
+      const mountainColor = islandColor;
+      for (let x = 0; x < width; x++) {
+        const worldCol = (x + farOffset + width * 10) % width;
         const p1 = Math.sin(worldCol * 0.06) * 4.5;
         const p2 = Math.sin(worldCol * 0.18) * 2.2;
-        h1 = Math.max(1, Math.floor(p1 + p2 + 5));
-      }
+        const h1 = Math.max(1, Math.floor(p1 + p2 + 5));
 
-      for (let dy = 0; dy < h1; dy++) {
-        const my = horizonRow - 1 - dy;
-        if (my >= 0 && my < horizonRow) {
-          let char = mountainChar;
-          if (biome.id === 'NEON_CITY') {
-            char = dy === h1 - 1 ? '|' : (dy % 2 === 0 ? '::' : '||')[dy % 2];
-          } else {
-            char = dy === h1 - 1 ? '^' : mountainChar;
+        for (let dy = 0; dy < h1; dy++) {
+          const my = horizonRow - 1 - dy;
+          if (my >= 0 && my < horizonRow) {
+            const char = dy === h1 - 1 ? '^' : '░';
+            fb.setCell(x, my, char, mountainColor, 9000, undefined, false);
           }
-          fb.setCell(x, my, char, mountainColor, 9000, undefined, false);
         }
       }
     }
   }
 
+  /**
+   * Procedural Ocean, Beach & Inland Terrain (Eliminates single-character wallpapers).
+   */
   private renderGround(
     fb: FrameBuffer,
     width: number,
@@ -571,31 +626,138 @@ export class WorldEngine {
     palette: typeof this.state.biomeBlend.blendedPalette,
     dayNight: typeof this.state.dayNight
   ): void {
-    const groundChar = this.state.biomeBlend.currentBiome.groundChar || '.';
-    const groundBaseColor = ColorPalette.scaleBrightness(
-      palette.ground,
-      Math.max(0.35, dayNight.ambientLight)
-    );
-    const groundDetailColor = ColorPalette.scaleBrightness(
-      palette.groundDetail,
-      Math.max(0.45, dayNight.ambientLight)
-    );
+    const isTropical = this.state.biomeBlend.currentBiome.id === 'TROPICAL';
+    const time = this.state.worldTime;
+    const energy = this.state.musicParams.environmentalGlow;
+
+    // Ocean Water Colors
+    const isNight = dayNight.phase === 'NIGHT';
+    const isDusk = dayNight.phase === 'DUSK';
+    const oceanBg = isNight
+      ? '#051026'
+      : (isDusk ? '#3b0764' : '#0369a1');
+    const oceanRippleColor = isNight
+      ? '#1e3a8a'
+      : (isDusk ? '#fb7185' : '#38bdf8');
+    const surfFoamColor = '#ffffff';
+
+    // Beach Sand Colors
+    const sandBg = isNight
+      ? '#1c1917'
+      : (isDusk ? '#78350f' : '#d97706');
+    const sandDetailColor = '#fde68a';
+
+    // Inland Turf Colors
+    const inlandBg = isNight
+      ? '#022c22'
+      : (isDusk ? '#14532d' : '#064e3b');
+    const inlandGrassColor = '#34d399';
 
     for (let y = horizonRow; y < height; y++) {
-      const depthFactor = (y - horizonRow) / Math.max(1, height - horizonRow);
-      const rowColor = ColorPalette.lerp(palette.horizon, groundBaseColor, depthFactor);
+      const centerX = this.scanlineCenter[y];
+      const halfW = this.scanlineHalfWidth[y];
+      const depth = this.scanlineDepth[y];
 
-      for (let x = 0; x < width; x++) {
-        const isDetail = ((x * 5 + y * 11 + Math.floor(this.state.player.z * 0.04)) % 9) === 0;
-        const char = isDetail ? groundChar : ' ';
-        const charColor = isDetail ? groundDetailColor : rowColor;
-        fb.setCell(x, y, char, charColor, 8000 - (y - horizonRow) * 80, undefined, false);
+      const roadLeft = Math.round(centerX - halfW);
+      const roadRight = Math.round(centerX + halfW);
+
+      const depthFactor = (y - horizonRow) / Math.max(1, height - horizonRow);
+
+      if (isTropical) {
+        // --- 1. LEFT SIDE: INLAND COASTAL BOULEVARD & LUSH TURF ---
+        for (let x = 0; x < roadLeft; x++) {
+          const distFromRoad = roadLeft - x;
+          const isShoulderTransition = distFromRoad <= 3;
+
+          let char = ' ';
+          let color = inlandGrassColor;
+          let bg = inlandBg;
+
+          if (isShoulderTransition) {
+            bg = ColorPalette.scaleBrightness(inlandBg, 1.25);
+            char = '░';
+            color = inlandGrassColor;
+          } else {
+            // Sparse grass tufts and terrain micro-accents
+            const isTuft = ((x * 7 + y * 13 + Math.floor(time * 2)) % 11) === 0;
+            if (isTuft) {
+              char = depthFactor > 0.5 ? '"' : '·';
+              color = inlandGrassColor;
+            }
+          }
+
+          fb.setCell(x, y, char, color, depth + 10, bg, false);
+        }
+
+        // --- 2. RIGHT SIDE: GOLDEN BEACH & ANIMATED OCEAN SWELLS ---
+        const beachWidth = Math.max(3, Math.round(halfW * 0.28));
+        const beachRight = roadRight + beachWidth;
+
+        // A. Golden Sand Beach Band
+        for (let x = roadRight; x <= beachRight && x < width; x++) {
+          const distToWater = beachRight - x;
+          let char = ' ';
+          let color = sandDetailColor;
+          const bg = sandBg;
+
+          if (distToWater === 0) {
+            // White surf foam along shoreline
+            char = '~';
+            color = surfFoamColor;
+          } else if (distToWater === 1) {
+            char = '≈';
+            color = '#bae6fd';
+          } else {
+            // Sand ripples
+            const isSandDot = ((x * 5 + y * 9) % 7) === 0;
+            if (isSandDot) {
+              char = '.';
+            }
+          }
+
+          fb.setCell(x, y, char, color, depth + 8, bg, false);
+        }
+
+        // B. Open Ocean Surface (Rhythmic animated wave crests)
+        for (let x = beachRight + 1; x < width; x++) {
+          const wavePhase = (x * 0.22) - (time * 3.5) + (y * 0.45);
+          const waveVal = Math.sin(wavePhase);
+          const waveSparkle = energy > 0.2 && Math.sin(wavePhase * 2 + time * 6) > 0.7;
+
+          let char = ' ';
+          let color = oceanRippleColor;
+          const bg = oceanBg;
+
+          if (waveVal > 0.75) {
+            // Wave crest swell
+            char = depthFactor > 0.6 ? '_/\\_' : (depthFactor > 0.3 ? '~~' : '~');
+            color = waveSparkle ? '#ffffff' : oceanRippleColor;
+          } else if (waveVal > 0.45) {
+            char = depthFactor > 0.5 ? '·' : ' ';
+          }
+
+          fb.setCell(x, y, char, color, depth + 12, bg, false);
+        }
+      } else {
+        // Generic ground fallback
+        const groundBaseColor = ColorPalette.scaleBrightness(palette.ground, Math.max(0.35, dayNight.ambientLight));
+        const groundDetailColor = ColorPalette.scaleBrightness(palette.groundDetail, Math.max(0.45, dayNight.ambientLight));
+        const rowColor = ColorPalette.lerp(palette.horizon, groundBaseColor, depthFactor);
+
+        for (let x = 0; x < width; x++) {
+          if (x < roadLeft || x > roadRight) {
+            const isDetail = ((x * 5 + y * 11) % 9) === 0;
+            const char = isDetail ? '·' : ' ';
+            const charColor = isDetail ? groundDetailColor : rowColor;
+            fb.setCell(x, y, char, charColor, depth + 10, undefined, false);
+          }
+        }
       }
     }
   }
 
   /**
-   * Continuous Pseudo-3D Road Scanline Rasterizer.
+   * Continuous Pseudo-3D Road Scanline Rasterizer (Clean asphalt surface & gold markings).
    */
   private renderRoad(
     fb: FrameBuffer,
@@ -694,7 +856,7 @@ export class WorldEngine {
         const isAltTarmac = Math.floor(sliceZ / 35) % 2 === 0;
         let baseRoadColor = isAltTarmac
           ? palette.road
-          : ColorPalette.scaleBrightness(palette.road, 1.22);
+          : ColorPalette.scaleBrightness(palette.road, 1.18);
 
         if (isNight) {
           const distFromPlayer = sliceZ - playerZ;
@@ -726,19 +888,20 @@ export class WorldEngine {
           fb.setCell(x, y, curbChar, curbColor, depth, undefined, false);
         }
 
-        // 2. Asphalt Road Surface
+        // 2. Clean Asphalt Road Surface with Cell Background
+        const asphaltBg = ColorPalette.scaleBrightness(roadColor, 0.65);
         const tarmacChar = depth > 700 ? '·' : (depth > 400 ? '.' : ' ');
         for (let x = xL + 1; x < xR; x++) {
-          fb.setCell(x, y, tarmacChar, roadColor, depth, undefined, false);
+          fb.setCell(x, y, tarmacChar, roadColor, depth, asphaltBg, false);
         }
 
-        // 3. Dashed Lane Dividers (positioned at 1/3 and 2/3 road span)
+        // 3. Dashed Gold Lane Dividers (positioned at 1/3 and 2/3 road span)
         const isDashed = Math.floor(sliceZ / 25) % 2 === 0;
         if (isDashed) {
           const lane1X = Math.round(xL + roadSpan * 0.333);
           const lane2X = Math.round(xL + roadSpan * 0.667);
-          fb.setCell(lane1X, y, '║', markingColor, depth - 0.5, undefined, false);
-          fb.setCell(lane2X, y, '║', markingColor, depth - 0.5, undefined, false);
+          fb.setCell(lane1X, y, '║', markingColor, depth - 0.5, asphaltBg, false);
+          fb.setCell(lane2X, y, '║', markingColor, depth - 0.5, asphaltBg, false);
         }
       }
     }
@@ -864,7 +1027,7 @@ export class WorldEngine {
     // Shadow underneath player car
     const shadowY = playerScreenY + 1;
     if (shadowY < height) {
-      const shadowSpan = 13;
+      const shadowSpan = 14;
       for (let sx = Math.round(playerScreenX - shadowSpan); sx <= Math.round(playerScreenX + shadowSpan); sx++) {
         fb.setCell(sx, shadowY, '▄', '#05060a', 25, undefined, false);
       }

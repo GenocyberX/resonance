@@ -1,6 +1,6 @@
 import { AudioEngine } from '../audio/AudioEngine';
 import { MusicWorldMapper } from '../music-world/MusicWorldMapper';
-import { WorldEngine } from '../world/WorldEngine';
+import { WorldEngine, VisualTestTime } from '../world/WorldEngine';
 import { AsciiRenderer } from '../ascii/AsciiRenderer';
 import { AudioControls } from '../ui/AudioControls';
 import { Hud } from '../ui/Hud';
@@ -63,10 +63,11 @@ export class ResonanceApp {
     if (typeof window === 'undefined') return;
 
     const params = new URLSearchParams(window.location.search);
-    const hasVisualTest = params.has('visualTest') || params.has('scene');
+    const hasVisualTest = params.has('visualTest') || params.has('scene') || params.has('time');
 
     if (hasVisualTest) {
       const sceneParam = (params.get('scene') || 'straight').toLowerCase();
+      const timeParam = (params.get('time') || 'day').toLowerCase() as VisualTestTime;
       let scenario: RoadTestMode = 'FLAT_STRAIGHT';
 
       if (sceneParam.includes('curve_left') || sceneParam === 'left') {
@@ -79,13 +80,16 @@ export class ResonanceApp {
         scenario = 'S_CURVE';
       }
 
-      this.worldEngine.setVisualTestMode(true, scenario);
-      console.info(`[Resonance] Visual Test Mode active. Scenario: ${scenario}`);
+      this.worldEngine.setVisualTestMode(true, scenario, ['day', 'sunset', 'night', 'dawn'].includes(timeParam) ? timeParam : 'day');
+      console.info(`[Resonance] Visual Test Mode active. Scenario: ${scenario}, Time: ${timeParam}`);
     }
   }
 
   private setupKeybindings(): void {
     if (typeof window === 'undefined') return;
+
+    const timePhases: VisualTestTime[] = ['day', 'sunset', 'night', 'dawn'];
+    let timeIndex = 0;
 
     window.addEventListener('keydown', (e: KeyboardEvent) => {
       // Don't intercept when user is typing in an input
@@ -111,6 +115,12 @@ export class ResonanceApp {
         case '5':
           this.worldEngine.setVisualTestMode(true, 'S_CURVE');
           console.info('[Resonance Test] Scenario: S_CURVE');
+          break;
+        case 't':
+        case 'T':
+          timeIndex = (timeIndex + 1) % timePhases.length;
+          this.worldEngine.setVisualTestTime(timePhases[timeIndex]);
+          console.info(`[Resonance Test] Time of Day: ${timePhases[timeIndex]}`);
           break;
         case '0':
         case 'Escape':

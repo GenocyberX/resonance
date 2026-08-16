@@ -1,56 +1,88 @@
 import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
+const lampColors = {
+  Y: '#fef08a', // Halogen bulb glow
+  G: '#fbbf24', // Warm lamp housing
+  P: '#94a3b8', // Brushed steel pole
+  '*': '#fbbf24',
+};
+
 export const StreetLampSprite: SpriteDefinition = Sprite.define(
   'scenery_street_lamp',
-  'Highway Overhead Street Lamp',
-  '#fde047', // Warm Light Yellow
+  'Coastal Highway Street Lamp',
+  '#fbbf24',
   {
-    close: Sprite.createVariant(
+    close: Sprite.createColoredVariant(
       `
-            .---------(***)
-           /
-          ||
-          ||
-          ||
-          ||
-          ||
-          ||
-          ||
-          ||
-          ||
-         /||\\
-        ======
+            .---.
+           / (o) \\
+          '---.---'
+              |
+              |
+              |
+              |
+              |
+              |
+      `,
+      lampColors,
       `
-    ),
-    near: Sprite.createVariant(
-      `
-          .-----(**)
-         /
-        ||
-        ||
-        ||
-        ||
-        ||
-        ||
-       /||\\
+            GGGGG
+           G YYY G
+          GGGGGGGGG
+              P
+              P
+              P
+              P
+              P
+              P
       `
     ),
-    medium: Sprite.createVariant(
+    near: Sprite.createColoredVariant(
       `
-        .--(*)
-       /
-      ||
-      ||
-      ||
-      ||
+           .---.
+          '-(o)-'
+             |
+             |
+             |
+             |
+      `,
+      lampColors,
+      `
+           GGGGG
+          GGYYYGG
+             P
+             P
+             P
+             P
       `
     ),
-    far: Sprite.createVariant(
+    medium: Sprite.createColoredVariant(
       `
-       .-(o)
-      ||
-      ||
+          .(o).
+            |
+            |
+            |
+      `,
+      lampColors,
+      `
+          GYYYG
+            P
+            P
+            P
+      `
+    ),
+    far: Sprite.createColoredVariant(
+      `
+          (o)
+           |
+           |
+      `,
+      lampColors,
+      `
+          YYY
+           P
+           P
       `
     ),
   }

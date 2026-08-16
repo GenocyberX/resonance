@@ -16,9 +16,9 @@ export class DepthSorter {
    * Automatically determines appropriate Level of Detail (LOD) based on distance Z.
    */
   public static calculateLOD(z: number): LODLevel {
-    if (z > 350) return 'far';
-    if (z > 180) return 'medium';
-    if (z > 70) return 'near';
+    if (z > 650) return 'far';
+    if (z > 350) return 'medium';
+    if (z > 160) return 'near';
     return 'close';
   }
 

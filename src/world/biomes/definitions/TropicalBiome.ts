@@ -1,6 +1,18 @@
 import { BiomeDefinition } from '../../types';
 import { PalmTreeSprite } from '../../../sprites/scenery/PalmTreeSprite';
+import { ShortPalmSprite } from '../../../sprites/scenery/ShortPalmSprite';
+import { TropicalBushSprite } from '../../../sprites/scenery/TropicalBushSprite';
+import { CoastalGrassSprite } from '../../../sprites/scenery/CoastalGrassSprite';
+import { BeachShackSprite } from '../../../sprites/scenery/BeachShackSprite';
+import { RoadsideCafeSprite } from '../../../sprites/scenery/RoadsideCafeSprite';
+import { CoastalHotelSprite } from '../../../sprites/scenery/CoastalHotelSprite';
+import { LifeguardHutSprite } from '../../../sprites/scenery/LifeguardHutSprite';
+import { PierSprite } from '../../../sprites/scenery/PierSprite';
+import { SailboatSprite } from '../../../sprites/scenery/SailboatSprite';
+import { SmallBoatSprite } from '../../../sprites/scenery/SmallBoatSprite';
+import { LighthouseSprite } from '../../../sprites/scenery/LighthouseSprite';
 import { BillboardSprite } from '../../../sprites/scenery/BillboardSprite';
+import { DirectionSignSprite } from '../../../sprites/scenery/DirectionSignSprite';
 import { StreetLampSprite } from '../../../sprites/scenery/StreetLampSprite';
 import { TrafficConeSprite } from '../../../sprites/obstacles/TrafficConeSprite';
 
@@ -10,26 +22,38 @@ export const TropicalBiome: BiomeDefinition = {
   palette: {
     skyTop: '#0369a1',       // Deep Ocean Blue
     skyBottom: '#38bdf8',    // Cyan Breeze
-    horizon: '#2dd4bf',      // Turquoise Horizon
-    road: '#1e293b',         // Dark Asphalt
-    roadMarking: '#fde047',  // Sun Gold Line
-    roadShoulder: '#059669', // Emerald Shoulder
-    ground: '#064e3b',       // Deep Flora
-    groundDetail: '#34d399', // Coastal Palms/Reef
-    mountains: '#0e7490',    // Distant Tropical Islands
-    fog: '#a5f3fc',
+    horizon: '#0284c7',      // Sapphire Ocean Line
+    road: '#0f172a',         // Deep Clean Asphalt
+    roadMarking: '#fde047',  // Sun Gold Lane Dashes
+    roadShoulder: '#059669', // Emerald/Sand Shoulder
+    ground: '#064e3b',       // Lush Coastal Ground
+    groundDetail: '#d97706', // Warm Golden Sand
+    mountains: '#0284c7',    // Distant Tropical Islands
+    fog: '#bae6fd',
   },
   vegetationPool: [
     { sprite: PalmTreeSprite, weight: 1.0 },
+    { sprite: ShortPalmSprite, weight: 0.8 },
+    { sprite: TropicalBushSprite, weight: 0.7 },
+    { sprite: CoastalGrassSprite, weight: 0.6 },
   ],
   structurePool: [
-    { sprite: StreetLampSprite, weight: 0.4 },
-    { sprite: BillboardSprite, weight: 0.2 },
+    { sprite: CoastalHotelSprite, weight: 0.5 },
+    { sprite: RoadsideCafeSprite, weight: 0.5 },
+    { sprite: BeachShackSprite, weight: 0.6 },
+    { sprite: LifeguardHutSprite, weight: 0.5 },
+    { sprite: PierSprite, weight: 0.4 },
+    { sprite: SailboatSprite, weight: 0.4 },
+    { sprite: SmallBoatSprite, weight: 0.3 },
+    { sprite: LighthouseSprite, weight: 0.2 },
+    { sprite: BillboardSprite, weight: 0.4 },
+    { sprite: DirectionSignSprite, weight: 0.3 },
+    { sprite: StreetLampSprite, weight: 0.7 },
   ],
   obstaclePool: [
     { sprite: TrafficConeSprite, weight: 0.5 },
   ],
-  density: 1.1,
+  density: 1.2,
   groundChar: '~',
   mountainChar: '^',
 };

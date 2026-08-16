@@ -23,6 +23,7 @@ export interface UiTelemetryData {
   visualTestMode?: {
     isVisualTest: boolean;
     scenario: string;
+    time?: string;
   };
   containment?: PlayerContainmentTelemetry;
 }

@@ -1,56 +1,90 @@
 import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
+const sedanColors = {
+  B: '#f59e0b', // Amber body
+  W: '#0f172a', // Rear window
+  R: '#ef4444', // Taillights
+  C: '#e2e8f0', // Chrome plate / bumper
+  T: '#0f172a', // Tires
+  '*': '#f59e0b',
+};
+
 export const TrafficSedanSprite: SpriteDefinition = Sprite.define(
   'vehicle_traffic_sedan',
   'Traffic Sedan',
-  '#f59e0b', // Amber
+  '#f59e0b',
   {
-    close: Sprite.createVariant(
+    close: Sprite.createColoredVariant(
       `
-          .--------------------.
-        .-'   ______________   '-.
-       /    /|              |\\    \\
-      |   /  |    TRAFFIC   |  \\   |
-      |  |   |______________|   |  |
-      |   \\  |              |  /   |
-     /====='------------------'=====\\
-    |  [==]     [  8888  ]      [==]  |
-    |  [==]    ============     [==]  |
-     \\______________________________/
-       [OO]                    [OO]
+            .------------.
+           /   ________   \\
+          /   /        \\   \\
+         .------------------.
+        | [==]  [CALIF]  [==] |
+        |_____________________|
+          (O)(O)       (O)(O)
+      `,
+      sedanColors,
       `
-    ),
-    near: Sprite.createVariant(
-      `
-        .----------------.
-      .-'  ____________  '-.
-     /   /|            |\\   \\
-    |   [ |____________| ]   |
-   /==========================\\
-  |  [=]    [ 8888 ]      [=]  |
-   \\__________________________/
-     [O]                  [O]
+            BBBBBBBBBBBB
+           B   WWWWWWWW   B
+          B   W        W   B
+         BBBBBBBBBBBBBBBBBBBB
+        B RRR   CCCCCC   RRR  B
+        BBBBBBBBBBBBBBBBBBBBBBB
+          TTTT         TTTT
       `
     ),
-    medium: Sprite.createVariant(
+    near: Sprite.createColoredVariant(
       `
-       .------------.
-      /  /________\\  \\
-     |  [==========]  |
-    /==================\\
-   |  [=]   [==]   [=]  |
-    \\__________________/
-      (o)          (o)
+           .----------.
+          /  ________  \\
+         .--------------.
+        | [=]  [CAL] [=] |
+        |________________|
+          (O)        (O)
+      `,
+      sedanColors,
+      `
+           BBBBBBBBBB
+          B  WWWWWWWW  B
+         BBBBBBBBBBBBBBBB
+        B RR   CCCCC  RR B
+        BBBBBBBBBBBBBBBBBB
+          TT          TT
       `
     ),
-    far: Sprite.createVariant(
+    medium: Sprite.createColoredVariant(
       `
-      .--------.
-     / [======] \\
-    |  [=]  [=]  |
-     \\__________/
-       (o)  (o)
+          .--------.
+         /  ______  \\
+        | [=][CAL][=] |
+        |_____________|
+          (o)      (o)
+      `,
+      sedanColors,
+      `
+          BBBBBBBB
+         B  WWWWWW  B
+        B R  CCCC  R B
+        BBBBBBBBBBBBBB
+          T        T
+      `
+    ),
+    far: Sprite.createColoredVariant(
+      `
+         .------.
+        |[=]  [=]|
+        |________|
+          (o)  (o)
+      `,
+      sedanColors,
+      `
+         BBBBBB
+        BR R  R B
+        BBBBBBBBB
+          T    T
       `
     ),
   }

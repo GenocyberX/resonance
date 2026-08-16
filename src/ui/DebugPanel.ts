@@ -55,7 +55,9 @@ export class DebugPanel {
       ? `${biomeBlend.currentBiome.id} → ${biomeBlend.nextBiome.id} (${transitionPct}%)`
       : biomeBlend.currentBiome.id;
 
-    const testLabel = visualTestMode?.isVisualTest ? `<span style="color:#fbbf24">${visualTestMode.scenario}</span>` : 'OFF';
+    const testLabel = visualTestMode?.isVisualTest
+      ? `<span style="color:#fbbf24">${visualTestMode.scenario} (${visualTestMode.time || 'day'})</span>`
+      : 'OFF';
 
     const maxDriveable = containment ? `±${containment.maxDriveableOffset.toFixed(1)}` : '±270.0';
     const camTargetX = containment ? containment.cameraTargetX.toFixed(1) : worldState.camera.x.toFixed(1);
