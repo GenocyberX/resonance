@@ -66,8 +66,8 @@ export const LighthouseSprite: SpriteDefinition = Sprite.define(
          |=======|
          /       \\
         |=========|
-        | [door]  |
-        |_________|
+        |  |===|  |
+        |__|___|__|
       `,
       lighthouseColors,
       `
@@ -80,8 +80,8 @@ export const LighthouseSprite: SpriteDefinition = Sprite.define(
          RRRRRRRRR
          R       R
         WWWWWWWWWWW
-        B BBBBB B
-        BBBBBBBBB
+        B  BBBBBB B
+        BBBBBBBBBBB
       `
     ),
     medium: Sprite.createColoredVariant(

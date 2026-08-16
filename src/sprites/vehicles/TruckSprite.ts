@@ -2,108 +2,105 @@ import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
 const truckColors = {
-  B: '#ef4444', // Red cab / container
-  W: '#f8fafc', // White rollup cargo door
-  H: '#fbbf24', // High amber marker lights
-  R: '#ef4444', // Taillights
-  M: '#334155', // Heavy rubber mudflaps
-  T: '#0f172a', // Dual rear tires
-  '*': '#ef4444',
+  B: '#64748b', // Slate gray cargo box
+  M: '#f59e0b', // Amber clearance roof markers
+  D: '#334155', // Shadow framing
+  S: '#94a3b8', // Roll-up shutter door
+  R: '#ef4444', // Red bumper lights
+  E: '#e2e8f0', // Chrome step bar
+  T: '#0f172a', // Dual heavy duty tires
+  '*': '#64748b',
 };
 
 export const TruckSprite: SpriteDefinition = Sprite.define(
   'vehicle_truck',
   'Commercial Delivery Truck',
-  '#ef4444',
+  '#64748b',
   {
     close: Sprite.createColoredVariant(
       `
-         .--------------------.
-        |  (o)   (o)   (o)   (o)  |
-        | .------------------. |
-        | | ================ | |
-        | | ================ | |
-        | | ================ | |
-        | '------------------' |
-        |  [===]  [CARGO]  [===]  |
-        |___|__|___________|__|___|
-           (O)(O)         (O)(O)
+          .--------------.
+          | [*]  [*] [*] |
+          |==============|
+          | |==========| |
+          | |==========| |
+          | |==========| |
+          |==============|
+          | [*]      [*] |
+          |==============|
+           (OO)(O)  (O)(OO)
       `,
       truckColors,
       `
-         BBBBBBBBBBBBBBBBBBBBBB
-        B  H H   H H   H H   H H  B
-        B BBBBBBBBBBBBBBBBBBBB B
-        B B WWWWWWWWWWWWWWWW B B
-        B B WWWWWWWWWWWWWWWW B B
-        B B WWWWWWWWWWWWWWWW B B
-        B BBBBBBBBBBBBBBBBBBBB B
-        B  RRR   MMMMMM    RRR  B
-        BBBM MMBBBBBBBBBBBM MMBBBB
-           TTTT           TTTT
+          BBBBBBBBBBBBBB
+          B M    M   M B
+          DDDDDDDDDDDDDD
+          D SSSSSSSSSS D
+          D SSSSSSSSSS D
+          D SSSSSSSSSS D
+          DDDDDDDDDDDDDD
+          D R        R D
+          EEEEEEEEEEEEEE
+           TTTTTT    TTTTTT
       `
     ),
     near: Sprite.createColoredVariant(
       `
-        .------------------.
-       | (o)   (o)   (o)   (o) |
-       | .--------------.  |
-       | | ============ |  |
-       | | ============ |  |
-       | '--------------'  |
-       |  [==]  [  ]  [==] |
-       |___|__|_______|__|___|
-          (O)           (O)
+          .------------.
+          | [*]    [*] |
+          |============|
+          | |========| |
+          | |========| |
+          |============|
+          | [*]    [*] |
+           (OO)    (OO)
       `,
       truckColors,
       `
-        BBBBBBBBBBBBBBBBBBBB
-       B H H   H H   H H   H B
-       B BBBBBBBBBBBBBBBB  B
-       B B WWWWWWWWWWWW B  B
-       B B WWWWWWWWWWWW B  B
-       B BBBBBBBBBBBBBBBB  B
-       B  RR   MMMM   RR   B
-       BBBM MMBBBBBBBBM MMBB
-          TT             TT
+          BBBBBBBBBBBB
+          B M      M B
+          DDDDDDDDDDDD
+          D SSSSSSSS D
+          D SSSSSSSS D
+          DDDDDDDDDDDD
+          D R      R D
+           TTTT    TTTT
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-        .-------------.
-       | (o)  (o)  (o) |
-       | [===========] |
-       | [===========] |
-       |  [=]     [=]  |
-       |_______________|
-          (o)     (o)
+          .----------.
+          |[*]    [*]|
+          |==========|
+          | |======| |
+          |==========|
+          |[*]    [*]|
+           (o)    (o)
       `,
       truckColors,
       `
-        BBBBBBBBBBBBBBB
-       B H H  H H  H H B
-       B WWWWWWWWWWWWW B
-       B WWWWWWWWWWWWW B
-       B  R       R    B
-       BBBBBBBBBBBBBBBBB
-          T       T
+          BBBBBBBBBB
+          B M    M B
+          DDDDDDDDDD
+          D SSSSSS D
+          DDDDDDDDDD
+          D R    R D
+           TT    TT
       `
     ),
     far: Sprite.createColoredVariant(
       `
-        .---------.
-       | [=======] |
-       | [=]   [=] |
-       |___________|
-         (o)   (o)
+          [========]
+          | [====] |
+          |========|
+           --    --
       `,
       truckColors,
       `
-        BBBBBBBBBBB
-       B WWWWWWWWW B
-       B R     R   B
-       BBBBBBBBBBBBB
-         T     T
+          BBBBBBBB
+          D SSSS D
+          D R  R D
+           TT  TT
       `
     ),
   }

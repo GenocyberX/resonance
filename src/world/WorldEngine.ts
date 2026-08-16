@@ -283,7 +283,7 @@ export class WorldEngine {
     this.lastMaxDriveableOffset = normResult.maxDriveableOffset;
 
     // 5. Chase Camera Follow Model (aims at the player's road heading trajectory)
-    const camZ = this.state.player.z - 130;
+    const camZ = this.state.player.z - 145;
     const curveAtPlayerZ = this.road.getCurveAt(this.state.player.z);
     const curveAtCamZ = this.road.getCurveAt(camZ);
 
@@ -298,7 +298,7 @@ export class WorldEngine {
     const alpha = 1.0 - Math.exp(-CAMERA_SMOOTH_RATE * dt);
     this.state.camera.x += (targetCamX - this.state.camera.x) * alpha;
     this.state.camera.z = camZ;
-    this.state.camera.y = 280 + camElevation + this.state.musicParams.cameraBounce + shakeOffset;
+    this.state.camera.y = 310 + camElevation + this.state.musicParams.cameraBounce + shakeOffset;
     this.state.camera.distanceToPlane = 0.44;
     this.state.camera.fovPulse = this.isVisualTest ? 0 : this.state.musicParams.fovPulse;
 
@@ -555,7 +555,7 @@ export class WorldEngine {
   }
 
   /**
-   * World-Space Horizon Silhouettes & Landmarks (Islands, Headlands, and Distant Horizon Profiles).
+   * World-Space Horizon Silhouettes & Landmarks (Islands, Headlands, Canyon Mesas, and Pine Ridges).
    */
   private renderHorizonSilhouettes(
     fb: FrameBuffer,
@@ -564,12 +564,16 @@ export class WorldEngine {
     palette: typeof this.state.biomeBlend.blendedPalette,
     dayNight: typeof this.state.dayNight
   ): void {
-    const isTropical = this.state.biomeBlend.currentBiome.id === 'TROPICAL';
-    const islandColor = ColorPalette.scaleBrightness(
+    const biomeId = this.state.biomeBlend.currentBiome.id;
+    const isTropical = biomeId === 'TROPICAL';
+    const isDesert = biomeId === 'DESERT';
+    const isForest = biomeId === 'FOREST';
+
+    const mountainColor = ColorPalette.scaleBrightness(
       palette.mountains,
       Math.max(0.4, dayNight.ambientLight)
     );
-    const headlandColor = ColorPalette.scaleBrightness(
+    const groundSilhouetteColor = ColorPalette.scaleBrightness(
       palette.ground,
       Math.max(0.45, dayNight.ambientLight)
     );
@@ -583,7 +587,6 @@ export class WorldEngine {
       ];
 
       for (const lm of landmarks) {
-        // Project landmark onto screen horizon with parallax factor 0.014
         const screenCenterX = Math.round((width * 0.5) + (lm.worldX - this.state.camera.x) * 0.014);
         const halfSpan = Math.round(lm.baseWidth * 0.5);
 
@@ -591,7 +594,6 @@ export class WorldEngine {
           const sx = screenCenterX + dx;
           if (sx < 0 || sx >= width) continue;
 
-          // Natural organic island slope
           const t = 1.0 - Math.abs(dx) / halfSpan;
           const h = Math.max(0, Math.floor(Math.sin(t * Math.PI * 0.5) * lm.maxHeight));
 
@@ -599,7 +601,7 @@ export class WorldEngine {
             const sy = horizonRow - 1 - dy;
             if (sy >= 0 && sy < horizonRow) {
               const char = dy === h - 1 ? lm.charPeak : '░';
-              fb.setCell(sx, sy, char, islandColor, 9200, undefined, false);
+              fb.setCell(sx, sy, char, mountainColor, 9200, undefined, false);
             }
           }
         }
@@ -615,14 +617,58 @@ export class WorldEngine {
           for (let dy = 0; dy < h; dy++) {
             const sy = horizonRow - 1 - dy;
             if (sy >= 0 && sy < horizonRow) {
-              fb.setCell(sx, sy, '█', headlandColor, 9000, undefined, false);
+              fb.setCell(sx, sy, '█', groundSilhouetteColor, 9000, undefined, false);
             }
+          }
+        }
+      }
+    } else if (isDesert) {
+      // Flat-topped Red Rock Canyon Mesas and Buttes
+      const mesas = [
+        { worldX: -1200, width: 45, height: 7 },
+        { worldX: 200, width: 35, height: 5 },
+        { worldX: 1600, width: 55, height: 9 },
+      ];
+
+      for (const mesa of mesas) {
+        const screenCenterX = Math.round((width * 0.5) + (mesa.worldX - this.state.camera.x) * 0.016);
+        const halfSpan = Math.round(mesa.width * 0.5);
+
+        for (let dx = -halfSpan; dx <= halfSpan; dx++) {
+          const sx = screenCenterX + dx;
+          if (sx < 0 || sx >= width) continue;
+
+          const isSteep = Math.abs(dx) > halfSpan - 3;
+          const h = isSteep ? Math.floor(mesa.height * 0.5) : mesa.height;
+
+          for (let dy = 0; dy < h; dy++) {
+            const sy = horizonRow - 1 - dy;
+            if (sy >= 0 && sy < horizonRow) {
+              const char = dy === h - 1 ? (isSteep ? '/' : '‾') : '█';
+              fb.setCell(sx, sy, char, mountainColor, 9100, undefined, false);
+            }
+          }
+        }
+      }
+    } else if (isForest) {
+      // Layered Jagged Pine Mountain Ridges with Misty Atmosphere
+      const camXOffset = (this.state.camera.x * 0.014) % width;
+      for (let x = 0; x < width; x++) {
+        const worldCol = (x + camXOffset + width * 10) % width;
+        const p1 = Math.sin(worldCol * 0.08) * 4.0;
+        const p2 = Math.sin(worldCol * 0.22) * 2.5;
+        const h1 = Math.max(2, Math.floor(p1 + p2 + 5));
+
+        for (let dy = 0; dy < h1; dy++) {
+          const my = horizonRow - 1 - dy;
+          if (my >= 0 && my < horizonRow) {
+            const char = dy === h1 - 1 ? '▲' : '░';
+            fb.setCell(x, my, char, mountainColor, 9000, undefined, false);
           }
         }
       }
     } else {
       // Generic Biome Horizon Fallback
-      const mountainColor = islandColor;
       const camXOffset = (this.state.camera.x * 0.012) % width;
       for (let x = 0; x < width; x++) {
         const worldCol = (x + camXOffset + width * 10) % width;
@@ -658,6 +704,11 @@ export class WorldEngine {
       this.scanlineShoreline = new Float32Array(height);
       this.scanlineDepth = new Float32Array(height);
     }
+
+    const biomeId = this.state.biomeBlend.currentBiome.id;
+    const isTropical = biomeId === 'TROPICAL';
+    const isDesert = biomeId === 'DESERT';
+    const isForest = biomeId === 'FOREST';
 
     const halfRoadWidth = this.road.defaultRoadWidth * 0.5; // 400
     const isNight = dayNight.phase === 'NIGHT';
@@ -779,18 +830,41 @@ export class WorldEngine {
           const distFromRoad = xL - x;
           const isShoulder = distFromRoad <= 3;
           let char = ' ';
-          const color = inlandGrassColor;
+          let color = inlandGrassColor;
           let bg = inlandBg;
 
-          if (isShoulder) {
-            bg = ColorPalette.scaleBrightness(inlandBg, 1.25);
-            char = '░';
-          } else {
-            const isTuft = ((x * 7 + y * 13 + Math.floor(time * 2)) % 11) === 0;
-            if (isTuft) {
-              char = depthFactor > 0.5 ? '"' : '·';
+          if (isTropical) {
+            if (isShoulder) {
+              bg = ColorPalette.scaleBrightness(inlandBg, 1.25);
+              char = '░';
+            } else {
+              const isTuft = ((x * 7 + y * 13 + Math.floor(time * 2)) % 11) === 0;
+              if (isTuft) {
+                char = depthFactor > 0.5 ? '"' : '·';
+              }
             }
+          } else if (isDesert) {
+            bg = ColorPalette.scaleBrightness(palette.ground, 0.9);
+            color = palette.groundDetail;
+            if (isShoulder) {
+              char = '▒';
+            } else if (((x * 5 + y * 9) % 7) === 0) {
+              char = '.';
+            }
+          } else if (isForest) {
+            bg = ColorPalette.scaleBrightness(palette.ground, 0.85);
+            color = palette.groundDetail;
+            if (isShoulder) {
+              char = '░';
+            } else if (((x * 7 + y * 11) % 9) === 0) {
+              char = '"';
+            }
+          } else {
+            bg = palette.ground;
+            color = palette.groundDetail;
+            if (((x * 5 + y * 7) % 8) === 0) char = '·';
           }
+
           fb.setCell(x, y, char, color, depth + 15, bg, false);
         }
 
@@ -848,56 +922,82 @@ export class WorldEngine {
         }
 
         // ==========================================
-        // 3. PROJECTED GOLDEN BEACH & SHORELINE
+        // 3. RIGHT SIDE TERRAIN / SHORELINE / DUNES
         // ==========================================
         const shoreScreenX = Math.max(xR + 3, Math.round(shorelineX));
 
-        // A. Sand Beach Band
-        for (let x = xR + curbWidth + 1; x < shoreScreenX && x < width; x++) {
-          const distToShore = shoreScreenX - x;
-          let char = ' ';
-          let color = sandDetailColor;
-          const bg = sandBg;
+        if (isTropical) {
+          // A. Sand Beach Band
+          for (let x = xR + curbWidth + 1; x < shoreScreenX && x < width; x++) {
+            const distToShore = shoreScreenX - x;
+            let char = ' ';
+            let color = sandDetailColor;
+            const bg = sandBg;
 
-          if (distToShore <= 2) {
-            // Wet Sand near surf
-            char = '░';
-            color = ColorPalette.scaleBrightness(sandBg, 1.35);
-          } else {
-            const isSandDot = ((x * 5 + y * 9) % 7) === 0;
-            if (isSandDot) char = '.';
-          }
-          fb.setCell(x, y, char, color, depth + 8, bg, false);
-        }
-
-        // B. Dynamic Surf Foam on Projected Shoreline
-        const foamLeft = Math.max(0, shoreScreenX - 1);
-        const foamRight = Math.min(width - 1, shoreScreenX + 2);
-        for (let x = foamLeft; x <= foamRight; x++) {
-          const isFoam = ((x + Math.floor(time * 4)) % 2) === 0;
-          const foamChar = isFoam ? '≈' : '~';
-          fb.setCell(x, y, foamChar, '#ffffff', depth + 6, '#0284c7', false);
-        }
-
-        // ==========================================
-        // 4. PROJECTED OCEAN SURFACE (Animated Waves)
-        // ==========================================
-        for (let x = foamRight + 1; x < width; x++) {
-          const wavePhase = (x * 0.22) - (time * 3.5) + (y * 0.45);
-          const waveVal = Math.sin(wavePhase);
-          const waveSparkle = energy > 0.2 && Math.sin(wavePhase * 2 + time * 6) > 0.7;
-
-          let char = ' ';
-          let color = oceanRippleColor;
-
-          if (waveVal > 0.75) {
-            char = depthFactor > 0.6 ? '_/\\_' : (depthFactor > 0.3 ? '~~' : '~');
-            color = waveSparkle ? '#ffffff' : oceanRippleColor;
-          } else if (waveVal > 0.45) {
-            char = depthFactor > 0.5 ? '·' : ' ';
+            if (distToShore <= 2) {
+              char = '░';
+              color = ColorPalette.scaleBrightness(sandBg, 1.35);
+            } else {
+              const isSandDot = ((x * 5 + y * 9) % 7) === 0;
+              if (isSandDot) char = '.';
+            }
+            fb.setCell(x, y, char, color, depth + 8, bg, false);
           }
 
-          fb.setCell(x, y, char, color, depth + 12, oceanBg, false);
+          // B. Dynamic Surf Foam on Projected Shoreline
+          const foamLeft = Math.max(0, shoreScreenX - 1);
+          const foamRight = Math.min(width - 1, shoreScreenX + 2);
+          for (let x = foamLeft; x <= foamRight; x++) {
+            const isFoam = ((x + Math.floor(time * 4)) % 2) === 0;
+            const foamChar = isFoam ? '≈' : '~';
+            fb.setCell(x, y, foamChar, '#ffffff', depth + 6, '#0284c7', false);
+          }
+
+          // C. Projected Ocean Surface (Animated Waves)
+          for (let x = foamRight + 1; x < width; x++) {
+            const wavePhase = (x * 0.22) - (time * 3.5) + (y * 0.45);
+            const waveVal = Math.sin(wavePhase);
+            const waveSparkle = energy > 0.2 && Math.sin(wavePhase * 2 + time * 6) > 0.7;
+
+            let char = ' ';
+            let color = oceanRippleColor;
+
+            if (waveVal > 0.75) {
+              char = depthFactor > 0.6 ? '_/\\_' : (depthFactor > 0.3 ? '~~' : '~');
+              color = waveSparkle ? '#ffffff' : oceanRippleColor;
+            } else if (waveVal > 0.45) {
+              char = depthFactor > 0.5 ? '·' : ' ';
+            }
+
+            fb.setCell(x, y, char, color, depth + 12, oceanBg, false);
+          }
+        } else if (isDesert) {
+          // Right Desert Canyon Floor & Sand Dunes
+          for (let x = xR + curbWidth + 1; x < width; x++) {
+            const isDune = ((x * 3 + y * 7) % 11) === 0;
+            const char = isDune ? '~' : ' ';
+            const bg = ColorPalette.scaleBrightness(palette.ground, 1.15);
+            fb.setCell(x, y, char, palette.groundDetail, depth + 10, bg, false);
+          }
+        } else if (isForest) {
+          // Right Forest Verge & River Stream
+          const riverStart = Math.min(width - 1, xR + 18);
+          for (let x = xR + curbWidth + 1; x < riverStart; x++) {
+            const isMoss = ((x * 7 + y * 9) % 8) === 0;
+            const char = isMoss ? '"' : ' ';
+            fb.setCell(x, y, char, palette.groundDetail, depth + 10, palette.ground, false);
+          }
+          for (let x = riverStart; x < width; x++) {
+            const isRipple = ((x + Math.floor(time * 3)) % 5) === 0;
+            const char = isRipple ? '~' : ' ';
+            fb.setCell(x, y, char, '#38bdf8', depth + 12, '#0369a1', false);
+          }
+        } else {
+          // General Right Ground
+          for (let x = xR + curbWidth + 1; x < width; x++) {
+            const char = ((x * 7 + y * 5) % 9) === 0 ? '·' : ' ';
+            fb.setCell(x, y, char, palette.groundDetail, depth + 10, palette.ground, false);
+          }
         }
       }
     }
@@ -909,7 +1009,6 @@ export class WorldEngine {
   public getStableRoadGeometryAtRow(targetY: number, height: number, horizonRow: number): { center: number; halfWidth: number } {
     const clampedY = Math.max(horizonRow + 1, Math.min(height - 1, Math.round(targetY)));
 
-    // 1. Try a 3-row local average if target row has valid road geometry
     if (this.scanlineHalfWidth[clampedY] > 10) {
       let sumCenter = 0;
       let sumWidth = 0;
@@ -927,7 +1026,6 @@ export class WorldEngine {
       }
     }
 
-    // 2. Search vertically for closest valid scanline with width > 10
     for (let r = 1; r <= 8; r++) {
       const yBelow = clampedY + r;
       if (yBelow < height && this.scanlineHalfWidth[yBelow] > 10) {
@@ -939,10 +1037,9 @@ export class WorldEngine {
       }
     }
 
-    // 3. Fallback to center screen and calibrated base width
     return {
       center: this.scanlineCenter[clampedY] || 60,
-      halfWidth: Math.max(25, this.scanlineHalfWidth[clampedY] || 35),
+      halfWidth: Math.max(20, this.scanlineHalfWidth[clampedY] || 25),
     };
   }
 
@@ -956,7 +1053,7 @@ export class WorldEngine {
     horizonRow: number
   ): void {
     const player = this.state.player;
-    const playerScreenY = Math.floor(height * 0.82);
+    const playerScreenY = Math.floor(height * 0.78);
 
     if (playerScreenY < horizonRow || playerScreenY >= height) return;
 
@@ -980,8 +1077,8 @@ export class WorldEngine {
                     player.sprite.variants.far;
 
     // Strict containment clamp: keep the full sprite body safely on the road tarmac
-    const spriteHalfW = (variant ? variant.width : 28) * 0.5;
-    const visualMargin = 3;
+    const spriteHalfW = (variant ? variant.width : 22) * 0.5;
+    const visualMargin = 2;
     const minCarCenter = (roadCenterX - halfW) + spriteHalfW + visualMargin;
     const maxCarCenter = (roadCenterX + halfW) - spriteHalfW - visualMargin;
 
@@ -996,9 +1093,9 @@ export class WorldEngine {
       isVisualClamped = true;
     }
 
-    // Additional safety clamp: ensure car stays within 35%-65% of screen width
-    const screenMin = width * 0.35;
-    const screenMax = width * 0.65;
+    // Additional safety clamp: ensure car stays within 28%-72% of screen width
+    const screenMin = width * 0.28;
+    const screenMax = width * 0.72;
     if (playerScreenX < screenMin) {
       playerScreenX = screenMin;
       isVisualClamped = true;
@@ -1023,7 +1120,7 @@ export class WorldEngine {
     // Shadow underneath player car
     const shadowY = playerScreenY + 1;
     if (shadowY < height) {
-      const shadowSpan = 14;
+      const shadowSpan = Math.round(spriteHalfW + 1);
       for (let sx = Math.round(playerScreenX - shadowSpan); sx <= Math.round(playerScreenX + shadowSpan); sx++) {
         fb.setCell(sx, shadowY, '▄', '#05060a', 25, undefined, false);
       }

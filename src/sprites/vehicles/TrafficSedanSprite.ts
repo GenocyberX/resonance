@@ -2,10 +2,12 @@ import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
 const sedanColors = {
-  B: '#f59e0b', // Amber body
-  W: '#0f172a', // Rear window
-  R: '#ef4444', // Taillights
-  C: '#e2e8f0', // Chrome plate / bumper
+  B: '#f59e0b', // Amber body panels
+  D: '#b45309', // Dark amber shadow
+  W: '#0f172a', // Tinted rear window glass
+  G: '#fef3c7', // Glass highlight
+  R: '#f43f5e', // Ruby taillights
+  E: '#cbd5e1', // Chrome bumper
   T: '#0f172a', // Tires
   '*': '#f59e0b',
 };
@@ -17,74 +19,72 @@ export const TrafficSedanSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-            .------------.
-           /   ________   \\
-          /   /        \\   \\
-         .------------------.
-        | [==]  [CALIF]  [==] |
-        |_____________________|
-          (O)(O)       (O)(O)
+            .--------.
+          ./  ______  \\.
+         /===/   __   \\===\\
+        |====[========]====|
+        |[*]|  [SED]  |[*]|
+        |====[========]====|
+         (O)   (==)(==)  (O)
       `,
       sedanColors,
       `
-            BBBBBBBBBBBB
-           B   WWWWWWWW   B
-          B   W        W   B
-         BBBBBBBBBBBBBBBBBBBB
-        B RRR   CCCCCC   RRR  B
-        BBBBBBBBBBBBBBBBBBBBBBB
-          TTTT         TTTT
+            BBBBBBBB
+          BB  GGGGGG  BB
+         DDDW   GG   WDDD
+        BBBBBBRRRRRRRRBBBBBB
+        B R B  E EEE  B R B
+        DDDDDDEEEEEEEEDDDDDD
+         TTT   EEEEEE    TTT
       `
     ),
     near: Sprite.createColoredVariant(
       `
-           .----------.
-          /  ________  \\
-         .--------------.
-        | [=]  [CAL] [=] |
-        |________________|
-          (O)        (O)
+           .------.
+          /  ____  \\
+         |==[====]==|
+         |[*][SED][*]|
+         |==[====]==|
+          (o) -- (o)
       `,
       sedanColors,
       `
-           BBBBBBBBBB
-          B  WWWWWWWW  B
-         BBBBBBBBBBBBBBBB
-        B RR   CCCCC  RR B
-        BBBBBBBBBBBBBBBBBB
-          TT          TT
+           BBBBBB
+          B  GGGG  B
+         BBBRRRRRRBBB
+         B R EEEE R B
+         DDDEEEEEEDDD
+          T  EE  T
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-          .--------.
-         /  ______  \\
-        | [=][CAL][=] |
-        |_____________|
-          (o)      (o)
+          .----.
+         |[====]|
+         |[*][*]|
+         |______|
+           -  -
       `,
       sedanColors,
       `
-          BBBBBBBB
-         B  WWWWWW  B
-        B R  CCCC  R B
-        BBBBBBBBBBBBBB
-          T        T
+          BBBB
+         BRRRRB
+         B R  B
+         DDDDDD
+           TT
       `
     ),
     far: Sprite.createColoredVariant(
       `
-         .------.
-        |[=]  [=]|
-        |________|
-          (o)  (o)
+         [==]
+         [**]
+          --
       `,
       sedanColors,
       `
-         BBBBBB
-        BR R  R B
-        BBBBBBBBB
-          T    T
+         BB
+         RR
+         TT
       `
     ),
   }

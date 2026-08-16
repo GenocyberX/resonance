@@ -3,9 +3,9 @@ import { SpriteDefinition } from '../../ascii/types';
 
 const carColors = {
   B: '#38bdf8', // Sports Cyan body panels
-  D: '#0284c7', // Body shadow / intake vents
+  D: '#0284c7', // Shadow / intake vents
   W: '#0f172a', // Tinted dark rear windshield glass
-  G: '#38bdf8', // Glass highlight reflection line
+  G: '#bae6fd', // Glass highlight reflection
   R: '#ef4444', // Brilliant LED taillight bar
   L: '#fde047', // Gold license plate
   E: '#94a3b8', // Chrome exhaust tips
@@ -20,36 +20,11 @@ export const SportsCarSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-             .------------.
-           ./   ________   \\.
-         ./   /          \\   \\.
-        /====/   ======   \\====\\
-       /====|              |====\\
-      |=====[==============]=====|
-      | [*] |  [  RES  ]   | [*] |
-      |=====[==============]=====|
-       (O)(O)    (==)(==)    (O)(O)
-      `,
-      carColors,
-      `
-             BBBBBBBBBBBB
-           BB   GGGGGGGG   BB
-         BB   W          W   BB
-        DDDDW   GGGGGG   WDDDD
-       DDDDW              WDDDD
-      BBBBBBRRRRRRRRRRRRRRBBBBBB
-      B RRR B  L  LLL  L   B RRR B
-      DDDDDDEEEEEEEEEEEEEEDDDDDD
-       TTTTT     EEEEEEEE    TTTTT
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
             .----------.
           ./  ________  \\.
-         /===/        \\===\\
+         /===/   __   \\===\\
         |====[========]====|
-        |[*]| [  RES ] |[*]|
+        |[*]|  [RES]  |[*]|
         |====[========]====|
          (O)   (==)(==)  (O)
       `,
@@ -57,14 +32,14 @@ export const SportsCarSprite: SpriteDefinition = Sprite.define(
       `
             BBBBBBBBBB
           BB  GGGGGGGG  BB
-         DDDW          WDDD
+         DDDW   GG   WDDD
         BBBBBBRRRRRRRRBBBBBB
-        B R B L  LLL L B R B
+        B R B  L LLL  B R B
         DDDDDDEEEEEEEEDDDDDD
          TTT   EEEEEE    TTT
       `
     ),
-    medium: Sprite.createColoredVariant(
+    near: Sprite.createColoredVariant(
       `
            .--------.
           /  ______  \\
@@ -83,7 +58,7 @@ export const SportsCarSprite: SpriteDefinition = Sprite.define(
           T    EE    T
       `
     ),
-    far: Sprite.createColoredVariant(
+    medium: Sprite.createColoredVariant(
       `
           .------.
          |[======]|
@@ -98,6 +73,19 @@ export const SportsCarSprite: SpriteDefinition = Sprite.define(
          B R L R B
          DDDDDDDD
            T    T
+      `
+    ),
+    far: Sprite.createColoredVariant(
+      `
+         [====]
+         |[==]|
+          -  -
+      `,
+      carColors,
+      `
+         BBBB
+         BRRB
+          TT
       `
     ),
   }

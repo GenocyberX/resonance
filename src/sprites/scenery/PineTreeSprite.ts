@@ -1,49 +1,90 @@
 import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
+const pineColors = {
+  G: '#10b981', // Sunlit Pine Needle Green
+  D: '#047857', // Deep Evergreen Shadow
+  T: '#78350f', // Pine Bark Trunk
+  '*': '#10b981',
+};
+
 export const PineTreeSprite: SpriteDefinition = Sprite.define(
   'scenery_pine_tree',
-  'Alpine / Forest Pine Tree',
-  '#10b981', // Forest Green
+  'Misty Pine Tree',
+  '#10b981',
   {
-    close: Sprite.createVariant(
+    close: Sprite.createColoredVariant(
+      `
+               /\\
+              /  \\
+             / /\\ \\
+            / /__\\ \\
+           /   /\\   \\
+          /   /__\\   \\
+         /     /\\     \\
+        /_____/__\\_____\\
+              |  |
+              |__|
+      `,
+      pineColors,
+      `
+               GG
+              GGGG
+             GGDDEG
+            GDDDDDDEG
+           GGDGDDDEGGG
+          GDDDDDDDDDDEG
+         GGDDGDDDDDEGGEG
+        GDDDDDDDDDDDDDDG
+              TTTT
+              TTTT
+      `
+    ),
+    near: Sprite.createColoredVariant(
+      `
+             /\\
+            /  \\
+           / /\\ \\
+          / /__\\ \\
+         /________\\
+            |  |
+      `,
+      pineColors,
+      `
+             GG
+            GGGG
+           GGDDEG
+          GDDDDDDEG
+         GDDDDDDDDG
+            TTTT
+      `
+    ),
+    medium: Sprite.createColoredVariant(
       `
             /\\
            /  \\
-          /++++\\
-         /  ++  \\
-        /++++++++\\
-       /   ++++   \\
-      /++++++++++++\\
-     /     ++++     \\
-    /++++++++++++++++\\
-           |  |
-           |__|
+          /____\\
+            ||
+      `,
+      pineColors,
+      `
+            GG
+           GGDG
+          GDDDDG
+            TT
       `
     ),
-    near: Sprite.createVariant(
+    far: Sprite.createColoredVariant(
       `
-          /\\
-         /++\\
-        /++++\\
-       /++++++\\
-      /++++++++\\
-         |  |
+            /\\
+           /__\\
+            ||
+      `,
+      pineColors,
       `
-    ),
-    medium: Sprite.createVariant(
-      `
-         /\\
-        /++\\
-       /++++\\
-         ||
-      `
-    ),
-    far: Sprite.createVariant(
-      `
-        /\\
-       /++\\
-        ||
+            GG
+           GGGG
+            TT
       `
     ),
   }
