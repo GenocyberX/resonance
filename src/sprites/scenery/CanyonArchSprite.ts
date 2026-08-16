@@ -1,0 +1,128 @@
+import { SpriteDefinition } from '../../ascii/types';
+
+const SH = '#4c0519'; // Deep Burgundy Shadow Face
+const TC = '#9a3412'; // Terracotta Sandstone Midtone
+const OC = '#d97706'; // Desert Ochre Strata
+const HL = '#fde047'; // Sunlit Canyon Ridge Highlight
+const SK = '#38bdf8'; // Sky through Natural Arch Window
+const BS = '#78350f'; // Scree Base
+
+export const CanyonArchSprite: SpriteDefinition = {
+  id: 'scenery_canyon_arch',
+  name: 'Natural Sandstone Arch',
+  category: 'LANDMARK',
+  defaultColor: '#d97706',
+  worldWidth: 240,
+  worldHeight: 260,
+  visualScale: 1.1,
+  variants: {
+    close: {
+      width: 26,
+      height: 15,
+      anchorX: 13,
+      anchorY: 14,
+      lines: [
+        "      .------------.      ",
+        "    ./==============\\.    ",
+        "   /░░░░░░░░░░░░░░░░░░\\   ",
+        "  /▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\\  ",
+        " /▓▓▓▓▓▓/        \\▓▓▓▓▓▓\\ ",
+        "|░░░░░░/  (~~~~)  \\░░░░░░|",
+        "|▒▒▒▒▒|  ~~~~~~~~  |▒▒▒▒▒|",
+        "|▓▓▓▓▓|            |▓▓▓▓▓|",
+        "|░░░░░|            |░░░░░|",
+        "|▒▒▒▒▒|            |▒▒▒▒▒|",
+        "|▓▓▓▓▓|            |▓▓▓▓▓|",
+        "|░░░░░|            |░░░░░|",
+        "/=====\\            /=====\\",
+        "|_____|            |_____|",
+        "::..::..          ..::..::",
+      ],
+      colors: [
+        ['', '', '', '', '', '', HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', OC, OC, OC, OC, OC, OC, OC, OC, OC, OC, OC, OC, OC, OC, OC, OC, '', '', '', '', '', ''],
+        ['', '', '', TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, '', '', '', '', ''],
+        ['', '', TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, TC, '', '', '', ''],
+        ['', SH, SH, SH, SH, SH, SH, '', '', '', '', '', '', '', '', SH, SH, SH, SH, SH, SH, '', '', '', '', ''],
+        [OC, OC, OC, OC, OC, OC, '', '', '', SK, SK, SK, SK, '', '', '', OC, OC, OC, OC, OC, OC, '', '', '', ''],
+        [TC, TC, TC, TC, TC, '', '', SK, SK, SK, SK, SK, SK, SK, '', '', '', TC, TC, TC, TC, TC, '', '', '', ''],
+        [SH, SH, SH, SH, SH, '', '', '', '', '', '', '', '', '', '', '', '', SH, SH, SH, SH, SH, '', '', '', ''],
+        [HL, HL, HL, HL, HL, '', '', '', '', '', '', '', '', '', '', '', '', HL, HL, HL, HL, HL, '', '', '', ''],
+        [TC, TC, TC, TC, TC, '', '', '', '', '', '', '', '', '', '', '', '', TC, TC, TC, TC, TC, '', '', '', ''],
+        [SH, SH, SH, SH, SH, '', '', '', '', '', '', '', '', '', '', '', '', SH, SH, SH, SH, SH, '', '', '', ''],
+        [OC, OC, OC, OC, OC, '', '', '', '', '', '', '', '', '', '', '', '', OC, OC, OC, OC, OC, '', '', '', ''],
+        [BS, BS, BS, BS, BS, BS, BS, '', '', '', '', '', '', '', '', '', BS, BS, BS, BS, BS, BS, BS, '', '', ''],
+        [BS, BS, BS, BS, BS, BS, BS, '', '', '', '', '', '', '', '', '', BS, BS, BS, BS, BS, BS, BS, '', '', ''],
+        [BS, BS, BS, BS, BS, BS, BS, BS, '', '', '', '', '', '', '', '', BS, BS, BS, BS, BS, BS, BS, BS, '', ''],
+      ],
+    },
+    near: {
+      width: 18,
+      height: 10,
+      anchorX: 9,
+      anchorY: 9,
+      lines: [
+        "    .--------.    ",
+        "  ./==========\\.  ",
+        " /▒▒▒▒/    \\▒▒▒▒\\ ",
+        "|░░░░/ (~~) \\░░░░|",
+        "|▓▓▓| ~~~~~~ |▓▓▓|",
+        "|▒▒▒|        |▒▒▒|",
+        "|░░░|        |░░░|",
+        "|▓▓▓|        |▓▓▓|",
+        "/===\\        /===\\",
+        "::..:        :..::",
+      ],
+      colors: [
+        ['', '', '', '', HL, HL, HL, HL, HL, HL, HL, HL, '', '', '', '', '', ''],
+        ['', '', OC, OC, OC, OC, OC, OC, OC, OC, OC, OC, OC, OC, '', '', '', ''],
+        ['', TC, TC, TC, TC, '', '', '', '', '', '', TC, TC, TC, TC, '', '', ''],
+        [OC, OC, OC, OC, '', '', SK, SK, SK, SK, '', '', OC, OC, OC, OC, '', ''],
+        [SH, SH, SH, '', '', SK, SK, SK, SK, SK, SK, '', '', SH, SH, SH, '', ''],
+        [TC, TC, TC, '', '', '', '', '', '', '', '', '', '', TC, TC, TC, '', ''],
+        [HL, HL, HL, '', '', '', '', '', '', '', '', '', '', HL, HL, HL, '', ''],
+        [SH, SH, SH, '', '', '', '', '', '', '', '', '', '', SH, SH, SH, '', ''],
+        [BS, BS, BS, BS, BS, '', '', '', '', '', '', '', BS, BS, BS, BS, BS, ''],
+        [BS, BS, BS, BS, BS, '', '', '', '', '', '', '', BS, BS, BS, BS, BS, ''],
+      ],
+    },
+    medium: {
+      width: 10,
+      height: 6,
+      anchorX: 5,
+      anchorY: 5,
+      lines: [
+        "  .----.  ",
+        " /░░░░░░\\ ",
+        "/▒▒/  \\▒▒\\",
+        "|▓| ~~ |▓|",
+        "|░|    |░|",
+        ":::    :::",
+      ],
+      colors: [
+        ['', '', HL, HL, HL, HL, HL, HL, '', ''],
+        ['', OC, OC, OC, OC, OC, OC, OC, OC, ''],
+        [TC, TC, TC, '', '', '', '', TC, TC, TC],
+        [SH, SH, SH, SK, SK, SK, SK, SH, SH, SH],
+        [HL, HL, HL, '', '', '', '', HL, HL, HL],
+        [BS, BS, BS, '', '', '', '', BS, BS, BS],
+      ],
+    },
+    far: {
+      width: 6,
+      height: 3,
+      anchorX: 3,
+      anchorY: 2,
+      lines: [
+        " .--. ",
+        "/▒/\\▒\\",
+        "::  ::",
+      ],
+      colors: [
+        ['', HL, HL, HL, HL, ''],
+        [OC, TC, '', '', TC, OC],
+        [BS, BS, '', '', BS, BS],
+      ],
+    },
+  },
+};

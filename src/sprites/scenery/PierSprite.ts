@@ -22,7 +22,7 @@ export const PierSprite: SpriteDefinition = {
       anchorX: 13,
       anchorY: 9,
       lines: [
-        "          (GL)            ",
+        "          (☼)             ",
         "           ||             ",
         "     .=====||===========. ",
         "    /|  |  ||  |  |  |  |\\",
@@ -52,7 +52,7 @@ export const PierSprite: SpriteDefinition = {
       anchorX: 9,
       anchorY: 6,
       lines: [
-        "       (GL)       ",
+        "       (☼)        ",
         "        ||        ",
         "   .====||======. ",
         "  /_|___||___|__|\\",
@@ -76,7 +76,7 @@ export const PierSprite: SpriteDefinition = {
       anchorX: 6,
       anchorY: 4,
       lines: [
-        "    (GL)    ",
+        "    (☼)     ",
         " .===||===. ",
         "/_||_||_||_\\",
         "~~|~~||~~|~~",
@@ -96,7 +96,7 @@ export const PierSprite: SpriteDefinition = {
       anchorX: 3,
       anchorY: 2,
       lines: [
-        " (GL) ",
+        " (☼)  ",
         ".====.",
         "~~~~~~",
       ],

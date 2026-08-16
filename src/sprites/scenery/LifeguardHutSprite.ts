@@ -24,7 +24,7 @@ export const LifeguardHutSprite: SpriteDefinition = {
         "    .----/\\----.    ",
         "  ./____________\\.  ",
         "  /==============\\  ",
-        "  | [GL](RD)[GL] |  ",
+        "  | [[]] (O) [[]] | ",
         "  |______________|  ",
         "   /|   |  |   |\\   ",
         "  / |   |  |   | \\  ",
@@ -57,7 +57,7 @@ export const LifeguardHutSprite: SpriteDefinition = {
       lines: [
         "  .--/\\--.    ",
         "./________\\.  ",
-        "| [GL] [GL] | ",
+        "| [[]] [[]] | ",
         "|___________| ",
         " /|  ||  |\\   ",
         "/ |  ||  | \\  ",
@@ -83,7 +83,7 @@ export const LifeguardHutSprite: SpriteDefinition = {
       lines: [
         " .-/\\-. ",
         "./____\\.",
-        "|[GL] [|",
+        "|[]  []|",
         " /|  |\\ ",
         "::..::..",
       ],
@@ -102,7 +102,7 @@ export const LifeguardHutSprite: SpriteDefinition = {
       anchorY: 2,
       lines: [
         ".--.",
-        "|GL|",
+        "|[]|",
         "::..",
       ],
       colors: [

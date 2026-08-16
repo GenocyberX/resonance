@@ -21,7 +21,7 @@ export const OceanBuoySprite: SpriteDefinition = {
       anchorX: 6,
       anchorY: 7,
       lines: [
-        "    (GL)    ",
+        "    (☼)     ",
         "     ||     ",
         "    /==\\    ",
         "   /====\\   ",
@@ -47,7 +47,7 @@ export const OceanBuoySprite: SpriteDefinition = {
       anchorX: 4,
       anchorY: 5,
       lines: [
-        "  (GL)  ",
+        "  (☼)   ",
         "   ||   ",
         "  /==\\  ",
         " /====\\ ",
@@ -69,7 +69,7 @@ export const OceanBuoySprite: SpriteDefinition = {
       anchorX: 3,
       anchorY: 3,
       lines: [
-        " (GL) ",
+        " (☼)  ",
         " /==\\ ",
         "|____|",
         "~~~~~~",
@@ -87,7 +87,7 @@ export const OceanBuoySprite: SpriteDefinition = {
       anchorX: 2,
       anchorY: 1,
       lines: [
-        "(GL)",
+        "(☼) ",
         "~~~~",
       ],
       colors: [

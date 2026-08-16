@@ -24,9 +24,9 @@ export const VolcanicVentSprite: SpriteDefinition = {
         "     (  )   ( )   ",
         "    (____) (___)  ",
         "   /  .------.  \\ ",
-        "  /  / (YL)   \\  \\",
-        " /  / (OG)(RD) \\  ",
-        "|  |  (RD)(RD)  | ",
+        "  /  / *░░*   \\  \\",
+        " /  / *▒▒▒▒*   \\  ",
+        "|  |  *▓▓▓▓*   |  ",
         "|__|____________|_",
         "::..::..::..::..::",
       ],
@@ -49,8 +49,8 @@ export const VolcanicVentSprite: SpriteDefinition = {
       lines: [
         "   ( ) ( )  ",
         "  / .---. \\ ",
-        " / / (YL) \\ ",
-        "| | (OG)  | ",
+        " / / *░░* \\ ",
+        "| | *▒▒*  | ",
         "::..::..::..",
       ],
       colors: [
@@ -67,8 +67,8 @@ export const VolcanicVentSprite: SpriteDefinition = {
       anchorX: 4,
       anchorY: 2,
       lines: [
-        "  (YL)  ",
-        " / (OG)\\",
+        "  *░░*  ",
+        " / *▒▒*\\",
         "::..::..",
       ],
       colors: [
@@ -83,7 +83,7 @@ export const VolcanicVentSprite: SpriteDefinition = {
       anchorX: 2,
       anchorY: 1,
       lines: [
-        "(YL)",
+        "*░░*",
         "::..",
       ],
       colors: [

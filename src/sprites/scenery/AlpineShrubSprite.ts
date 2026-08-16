@@ -21,7 +21,7 @@ export const AlpineShrubSprite: SpriteDefinition = {
       anchorY: 5,
       lines: [
         "   .--------.   ",
-        " .*(SN)(SN)*.   ",
+        " .*░░░░░░░░*.   ",
         "/░░░/\\▒▒▒▒▒\\░░░\\",
         "|▒▒/  \\▓▓▓▓▓\\▒▒|",
         "/==============\\",
@@ -43,7 +43,7 @@ export const AlpineShrubSprite: SpriteDefinition = {
       anchorY: 3,
       lines: [
         "  .------.  ",
-        ".*(SN)(SN)*.",
+        ".*░░░░░░░░*.",
         "|░░/\\▒▒▒▒▒▒|",
         "::..::..::..",
       ],
@@ -61,7 +61,7 @@ export const AlpineShrubSprite: SpriteDefinition = {
       anchorY: 2,
       lines: [
         " .----. ",
-        ".*(SN)*.",
+        ".*░░░░*.",
         "::..::..",
       ],
       colors: [

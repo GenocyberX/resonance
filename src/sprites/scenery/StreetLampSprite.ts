@@ -22,7 +22,7 @@ export const StreetLampSprite: SpriteDefinition = {
       anchorY: 11,
       lines: [
         "   .------. ",
-        "  /  (GL)  \\",
+        "  /  (☼)   \\",
         " '---.-----'",
         "      |     ",
         "      |     ",
@@ -56,7 +56,7 @@ export const StreetLampSprite: SpriteDefinition = {
       anchorY: 7,
       lines: [
         "  .---. ",
-        " / (GL)\\",
+        " / (☼) \\",
         "'--.---'",
         "    |   ",
         "    |   ",
@@ -82,7 +82,7 @@ export const StreetLampSprite: SpriteDefinition = {
       anchorY: 4,
       lines: [
         " .--. ",
-        "'(GL)'",
+        "'(☼)' ",
         "  |   ",
         " _|_  ",
         ":===: ",
@@ -101,7 +101,7 @@ export const StreetLampSprite: SpriteDefinition = {
       anchorX: 2,
       anchorY: 2,
       lines: [
-        "(GL)",
+        "(☼) ",
         " || ",
         ":==:",
       ],

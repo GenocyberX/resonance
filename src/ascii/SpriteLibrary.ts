@@ -7,13 +7,17 @@ import { TruckSprite } from '../sprites/vehicles/TruckSprite';
 
 // Vegetation
 import { PalmTreeSprite } from '../sprites/scenery/PalmTreeSprite';
+import { LeanPalmSprite } from '../sprites/scenery/LeanPalmSprite';
 import { ShortPalmSprite } from '../sprites/scenery/ShortPalmSprite';
 import { TropicalBushSprite } from '../sprites/scenery/TropicalBushSprite';
 import { CoastalGrassSprite } from '../sprites/scenery/CoastalGrassSprite';
 import { PineTreeSprite } from '../sprites/scenery/PineTreeSprite';
+import { TallPineSprite } from '../sprites/scenery/TallPineSprite';
 import { DeciduousTreeSprite } from '../sprites/scenery/DeciduousTreeSprite';
 import { SnowPineSprite } from '../sprites/scenery/SnowPineSprite';
+import { DenseSnowPineSprite } from '../sprites/scenery/DenseSnowPineSprite';
 import { CactusSprite } from '../sprites/scenery/CactusSprite';
+import { GiantCactusSprite } from '../sprites/scenery/GiantCactusSprite';
 import { DeadTreeSprite } from '../sprites/scenery/DeadTreeSprite';
 import { ForestFernSprite } from '../sprites/scenery/ForestFernSprite';
 import { WildflowerPatchSprite } from '../sprites/scenery/WildflowerPatchSprite';
@@ -29,8 +33,12 @@ import { PierSprite } from '../sprites/scenery/PierSprite';
 import { LifeguardHutSprite } from '../sprites/scenery/LifeguardHutSprite';
 import { CanyonMesaSprite } from '../sprites/scenery/CanyonMesaSprite';
 import { CanyonButteSprite } from '../sprites/scenery/CanyonButteSprite';
+import { CanyonArchSprite } from '../sprites/scenery/CanyonArchSprite';
 import { AlpinePeakSprite } from '../sprites/scenery/AlpinePeakSprite';
+import { MountainCabinSprite } from '../sprites/scenery/MountainCabinSprite';
 import { NeonTowerSprite } from '../sprites/scenery/NeonTowerSprite';
+import { CyberSpireSprite } from '../sprites/scenery/CyberSpireSprite';
+import { CyberGridBuildingSprite } from '../sprites/scenery/CyberGridBuildingSprite';
 import { HoloAdTotemSprite } from '../sprites/scenery/HoloAdTotemSprite';
 import { CyberGantrySprite } from '../sprites/scenery/CyberGantrySprite';
 
@@ -72,13 +80,17 @@ export class SpriteLibrary {
 
       // Vegetation
       PalmTreeSprite,
+      LeanPalmSprite,
       ShortPalmSprite,
       TropicalBushSprite,
       CoastalGrassSprite,
       PineTreeSprite,
+      TallPineSprite,
       DeciduousTreeSprite,
       SnowPineSprite,
+      DenseSnowPineSprite,
       CactusSprite,
+      GiantCactusSprite,
       DeadTreeSprite,
       ForestFernSprite,
       WildflowerPatchSprite,
@@ -94,8 +106,12 @@ export class SpriteLibrary {
       LifeguardHutSprite,
       CanyonMesaSprite,
       CanyonButteSprite,
+      CanyonArchSprite,
       AlpinePeakSprite,
+      MountainCabinSprite,
       NeonTowerSprite,
+      CyberSpireSprite,
+      CyberGridBuildingSprite,
       HoloAdTotemSprite,
       CyberGantrySprite,
 

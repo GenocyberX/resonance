@@ -22,7 +22,7 @@ export const CyberStreetLampSprite: SpriteDefinition = {
       anchorY: 11,
       lines: [
         "  .======.  ",
-        " / (CY)(M) \\",
+        " / [**][*] \\",
         "'---.--.---'",
         "    |  |    ",
         "    |  |    ",
@@ -56,7 +56,7 @@ export const CyberStreetLampSprite: SpriteDefinition = {
       anchorY: 7,
       lines: [
         " .====. ",
-        "/(CYMG)\\",
+        "/(=**=)\\",
         "'--.-.-'",
         "   | |  ",
         "   | |  ",
@@ -82,7 +82,7 @@ export const CyberStreetLampSprite: SpriteDefinition = {
       anchorY: 4,
       lines: [
         ".====.",
-        "'(CY)'",
+        "'(=)' ",
         "  ||  ",
         " /==\\ ",
         ":====:",
@@ -101,7 +101,7 @@ export const CyberStreetLampSprite: SpriteDefinition = {
       anchorX: 2,
       anchorY: 2,
       lines: [
-        "(CY)",
+        ":**:",
         " || ",
         ":==:",
       ],

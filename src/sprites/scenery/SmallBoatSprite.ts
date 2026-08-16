@@ -23,7 +23,7 @@ export const SmallBoatSprite: SpriteDefinition = {
       anchorY: 6,
       lines: [
         "     .----.     ",
-        "    / [GL] \\    ",
+        "    / [[]] \\    ",
         "  .============.",
         " ~\\____________/",
         " ~~~~~~~~~~~~~~~",

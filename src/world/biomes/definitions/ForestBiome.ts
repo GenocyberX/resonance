@@ -1,5 +1,6 @@
 import { BiomeDefinition } from '../../types';
 import { PineTreeSprite } from '../../../sprites/scenery/PineTreeSprite';
+import { TallPineSprite } from '../../../sprites/scenery/TallPineSprite';
 import { DeciduousTreeSprite } from '../../../sprites/scenery/DeciduousTreeSprite';
 import { ForestFernSprite } from '../../../sprites/scenery/ForestFernSprite';
 import { WildflowerPatchSprite } from '../../../sprites/scenery/WildflowerPatchSprite';
@@ -27,7 +28,8 @@ export const ForestBiome: BiomeDefinition = {
     fog: '#d1fae5',
   },
   vegetationPool: [
-    { sprite: PineTreeSprite, weight: 0.8 },
+    { sprite: PineTreeSprite, weight: 0.7 },
+    { sprite: TallPineSprite, weight: 0.7 },
     { sprite: DeciduousTreeSprite, weight: 0.5 },
     { sprite: ForestFernSprite, weight: 0.6 },
     { sprite: WildflowerPatchSprite, weight: 0.4 },

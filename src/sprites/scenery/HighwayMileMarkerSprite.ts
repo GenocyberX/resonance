@@ -21,7 +21,7 @@ export const HighwayMileMarkerSprite: SpriteDefinition = {
       anchorY: 8,
       lines: [
         "  .---. ",
-        "  |(RF)|",
+        "  |[*] |",
         "  |====|",
         "  |    |",
         "  |    |",
@@ -49,7 +49,7 @@ export const HighwayMileMarkerSprite: SpriteDefinition = {
       anchorY: 5,
       lines: [
         " .--. ",
-        "|(RF)|",
+        "|[*]| ",
         "|    |",
         "|    |",
         "|____|",
@@ -70,7 +70,7 @@ export const HighwayMileMarkerSprite: SpriteDefinition = {
       anchorX: 2,
       anchorY: 3,
       lines: [
-        "(RF)",
+        ":*: ",
         " || ",
         " || ",
         ":==:",
@@ -88,8 +88,8 @@ export const HighwayMileMarkerSprite: SpriteDefinition = {
       anchorX: 1,
       anchorY: 1,
       lines: [
-        "RF",
         "::",
+        "||",
       ],
       colors: [
         [RF, RF],

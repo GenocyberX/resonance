@@ -1,5 +1,7 @@
 import { BiomeDefinition } from '../../types';
 import { NeonTowerSprite } from '../../../sprites/scenery/NeonTowerSprite';
+import { CyberSpireSprite } from '../../../sprites/scenery/CyberSpireSprite';
+import { CyberGridBuildingSprite } from '../../../sprites/scenery/CyberGridBuildingSprite';
 import { HoloAdTotemSprite } from '../../../sprites/scenery/HoloAdTotemSprite';
 import { CyberGantrySprite } from '../../../sprites/scenery/CyberGantrySprite';
 import { BillboardSprite } from '../../../sprites/scenery/BillboardSprite';
@@ -24,8 +26,10 @@ export const NeonCityBiome: BiomeDefinition = {
   },
   vegetationPool: [],
   structurePool: [
-    { sprite: NeonTowerSprite, weight: 0.6 },
-    { sprite: HoloAdTotemSprite, weight: 0.55 },
+    { sprite: NeonTowerSprite, weight: 0.5 },
+    { sprite: CyberSpireSprite, weight: 0.45 },
+    { sprite: CyberGridBuildingSprite, weight: 0.5 },
+    { sprite: HoloAdTotemSprite, weight: 0.5 },
     { sprite: CyberGantrySprite, weight: 0.35 },
     { sprite: CyberStreetLampSprite, weight: 0.65 },
     { sprite: BillboardSprite, weight: 0.35 },

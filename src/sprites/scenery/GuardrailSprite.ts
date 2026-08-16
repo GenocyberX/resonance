@@ -22,7 +22,7 @@ export const GuardrailSprite: SpriteDefinition = {
       anchorY: 5,
       lines: [
         " .==================. ",
-        " |(RF)=====|====(RF)| ",
+        " |[*]======|=====[*]| ",
         " '==================' ",
         "   ||      ||     ||  ",
         "   ||      ||     ||  ",
@@ -44,7 +44,7 @@ export const GuardrailSprite: SpriteDefinition = {
       anchorY: 3,
       lines: [
         ".==============.",
-        "|(RF)====|=(RF)|",
+        "|[*]====|==[*]| ",
         "'=============='",
         "  ||   ||   ||  ",
       ],
@@ -62,7 +62,7 @@ export const GuardrailSprite: SpriteDefinition = {
       anchorY: 2,
       lines: [
         ".========.",
-        "|==(RF)==|",
+        "|==[*]===|",
         " ||   ||  ",
       ],
       colors: [

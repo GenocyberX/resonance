@@ -23,9 +23,9 @@ export const BillboardSprite: SpriteDefinition = {
       anchorY: 9,
       lines: [
         ".========================.",
-        "| (GD) PACIFIC SUNSET :: |",
+        "| (O) PACIFIC SUNSET ::  |",
         "|  /\\   * SYNTHWAVE *    |",
-        "| /CY\\  ~~~~~~~~~~~~~    |",
+        "| /==\\  ~~~~~~~~~~~~~    |",
         "'========================'",
         "    ||              ||    ",
         "    ||              ||    ",
@@ -53,7 +53,7 @@ export const BillboardSprite: SpriteDefinition = {
       anchorY: 6,
       lines: [
         ".================.",
-        "|(GD) PACIFIC :: |",
+        "|(O) PACIFIC ::  |",
         "| /\\  ~~~~~~~~~~ |",
         "'================'",
         "   ||        ||   ",
@@ -77,7 +77,7 @@ export const BillboardSprite: SpriteDefinition = {
       anchorY: 4,
       lines: [
         ".==========.",
-        "|(GD)SUN ::|",
+        "|(O) SUN ::|",
         "'=========='",
         "  ||    ||  ",
         " :==:  :==: ",

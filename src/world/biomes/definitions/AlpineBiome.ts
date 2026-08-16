@@ -1,8 +1,10 @@
 import { BiomeDefinition } from '../../types';
 import { SnowPineSprite } from '../../../sprites/scenery/SnowPineSprite';
+import { DenseSnowPineSprite } from '../../../sprites/scenery/DenseSnowPineSprite';
 import { AlpineShrubSprite } from '../../../sprites/scenery/AlpineShrubSprite';
 import { WildflowerPatchSprite } from '../../../sprites/scenery/WildflowerPatchSprite';
 import { AlpinePeakSprite } from '../../../sprites/scenery/AlpinePeakSprite';
+import { MountainCabinSprite } from '../../../sprites/scenery/MountainCabinSprite';
 import { IceSpireSprite } from '../../../sprites/scenery/IceSpireSprite';
 import { BoulderClusterSprite } from '../../../sprites/scenery/BoulderClusterSprite';
 import { HighwayMileMarkerSprite } from '../../../sprites/scenery/HighwayMileMarkerSprite';
@@ -26,12 +28,14 @@ export const AlpineBiome: BiomeDefinition = {
     fog: '#e0f2fe',
   },
   vegetationPool: [
-    { sprite: SnowPineSprite, weight: 0.8 },
+    { sprite: SnowPineSprite, weight: 0.7 },
+    { sprite: DenseSnowPineSprite, weight: 0.7 },
     { sprite: AlpineShrubSprite, weight: 0.6 },
     { sprite: WildflowerPatchSprite, weight: 0.3 },
   ],
   structurePool: [
     { sprite: AlpinePeakSprite, weight: 0.5 },
+    { sprite: MountainCabinSprite, weight: 0.4 },
     { sprite: IceSpireSprite, weight: 0.55 },
     { sprite: BoulderClusterSprite, weight: 0.45 },
     { sprite: GuardrailSprite, weight: 0.5 },

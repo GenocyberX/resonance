@@ -1,5 +1,6 @@
 import { BiomeDefinition } from '../../types';
 import { PalmTreeSprite } from '../../../sprites/scenery/PalmTreeSprite';
+import { LeanPalmSprite } from '../../../sprites/scenery/LeanPalmSprite';
 import { ShortPalmSprite } from '../../../sprites/scenery/ShortPalmSprite';
 import { TropicalBushSprite } from '../../../sprites/scenery/TropicalBushSprite';
 import { CoastalGrassSprite } from '../../../sprites/scenery/CoastalGrassSprite';
@@ -37,6 +38,7 @@ export const TropicalBiome: BiomeDefinition = {
   },
   vegetationPool: [
     { sprite: PalmTreeSprite, weight: 1.0 },
+    { sprite: LeanPalmSprite, weight: 0.8 },
     { sprite: ShortPalmSprite, weight: 0.8 },
     { sprite: TropicalBushSprite, weight: 0.7 },
     { sprite: CoastalGrassSprite, weight: 0.6 },
@@ -59,9 +61,9 @@ export const TropicalBiome: BiomeDefinition = {
     { sprite: HighwayMileMarkerSprite, weight: 0.5 },
   ],
   obstaclePool: [
-    { sprite: TrafficConeSprite, weight: 0.5 },
+    { sprite: TrafficConeSprite, weight: 1.0 },
   ],
-  density: 1.2,
-  groundChar: '~',
+  density: 1.0,
+  groundChar: '.',
   mountainChar: '^',
 };

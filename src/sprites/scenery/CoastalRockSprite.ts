@@ -23,7 +23,7 @@ export const CoastalRockSprite: SpriteDefinition = {
       anchorY: 6,
       lines: [
         "      .----.      ",
-        "   .*(FM)(FM)*.   ",
+        "   .*~~~~~~~~*.   ",
         "  /░░░/\\▒▒▒▒▒▒\\   ",
         " |▒▒▒/  \\▓▓▓▓▓▓|  ",
         "~|▓▓▓▓▓▓▓▓▓▓▓▓▓|~~",
@@ -47,7 +47,7 @@ export const CoastalRockSprite: SpriteDefinition = {
       anchorY: 4,
       lines: [
         "   .----.   ",
-        " .*(FM)(FM)*",
+        " .*~~~~~~*. ",
         " |▒▒/\\▓▓▓▓| ",
         "~~~~~~~~~~~~",
         " ~  ~   ~  ~",
@@ -67,7 +67,7 @@ export const CoastalRockSprite: SpriteDefinition = {
       anchorY: 2,
       lines: [
         " .----. ",
-        ".*(FM)*.",
+        ".*~~~~*.",
         "~~~~~~~~",
       ],
       colors: [
@@ -82,7 +82,7 @@ export const CoastalRockSprite: SpriteDefinition = {
       anchorX: 2,
       anchorY: 1,
       lines: [
-        "(FM)",
+        "****",
         "~~~~",
       ],
       colors: [

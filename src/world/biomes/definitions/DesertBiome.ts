@@ -1,9 +1,11 @@
 import { BiomeDefinition } from '../../types';
 import { CactusSprite } from '../../../sprites/scenery/CactusSprite';
+import { GiantCactusSprite } from '../../../sprites/scenery/GiantCactusSprite';
 import { JoshuaTreeSprite } from '../../../sprites/scenery/JoshuaTreeSprite';
 import { DeadTreeSprite } from '../../../sprites/scenery/DeadTreeSprite';
 import { CanyonMesaSprite } from '../../../sprites/scenery/CanyonMesaSprite';
 import { CanyonButteSprite } from '../../../sprites/scenery/CanyonButteSprite';
+import { CanyonArchSprite } from '../../../sprites/scenery/CanyonArchSprite';
 import { DesertDuneSprite } from '../../../sprites/scenery/DesertDuneSprite';
 import { BoulderClusterSprite } from '../../../sprites/scenery/BoulderClusterSprite';
 import { BillboardSprite } from '../../../sprites/scenery/BillboardSprite';
@@ -28,12 +30,14 @@ export const DesertBiome: BiomeDefinition = {
   },
   vegetationPool: [
     { sprite: CactusSprite, weight: 0.6 },
+    { sprite: GiantCactusSprite, weight: 0.5 },
     { sprite: JoshuaTreeSprite, weight: 0.5 },
     { sprite: DeadTreeSprite, weight: 0.4 },
   ],
   structurePool: [
     { sprite: CanyonMesaSprite, weight: 0.45 },
-    { sprite: CanyonButteSprite, weight: 0.55 },
+    { sprite: CanyonButteSprite, weight: 0.5 },
+    { sprite: CanyonArchSprite, weight: 0.4 },
     { sprite: DesertDuneSprite, weight: 0.5 },
     { sprite: BoulderClusterSprite, weight: 0.5 },
     { sprite: BillboardSprite, weight: 0.3 },
