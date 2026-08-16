@@ -3,7 +3,7 @@ import { SpriteDefinition } from '../../ascii/types';
 
 const hotelColors = {
   P: '#fb7185', // Pastel Coral pink facade
-  N: '#fde047', // Hotel rooftop neon gold sign
+  N: '#fde047', // Art Deco gold spire / crown
   G: '#38bdf8', // Cyan window glow
   T: '#0d9488', // Teal accent trims
   B: '#881337', // Shadow / framing
@@ -17,86 +17,92 @@ export const CoastalHotelSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-               .---[ HOTEL RESORT ]---.
-             .--------------------------.
-            /  ________________________  \\
-           /  /  [+]  [+]    [+]  [+]  \\  \\
-          |  |   [#]  [#]    [#]  [#]   |  |
-          |==|==========================|==|
-          |  |   [#]  [#]    [#]  [#]   |  |
-          |  |   [#]  [#]    [#]  [#]   |  |
-          |==|======[ ENTRANCE ]========|==|
-          |  |       |  ||  |           |  |
-          |__|_______|__||__|___________|__|
+                    .---.
+                 .-'  |  '-.
+               .-------------.
+             .-----------------.
+            /  _______________  \\
+           /  /  [+] [+] [+]  \\  \\
+          |  |   [#] [#] [#]   |  |
+          |==|=================|==|
+          |  |   [#] [#] [#]   |  |
+          |  |   [#] [#] [#]   |  |
+          |==|=====[===]=======|==|
+          |  |     |   |       |  |
+          |__|_____|___|_______|__|
       `,
       hotelColors,
       `
-               NNNN NNNNN NNNNNN NNNN
-             TTTTTTTTTTTTTTTTTTTTTTTTTTTT
-            P  TTTTTTTTTTTTTTTTTTTTTTTT  P
-           P  P  GGG  GGG    GGG  GGG  P  P
-          B  P   GGG  GGG    GGG  GGG   P  B
-          TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-          B  P   GGG  GGG    GGG  GGG   P  B
-          B  P   GGG  GGG    GGG  GGG   P  B
-          TTTTTTTTTTNNNNNNNNNNTTTTTTTTTTTTTT
-          B  P       B  GG  B           P  B
-          BBBPBBBBBBBBBBGGBBBBBBBBBBBBBBPBBB
+                    NNNNN
+                 NNN  N  NNN
+               TTTTTTTTTTTTTTT
+             TTTTTTTTTTTTTTTTTTT
+            P  TTTTTTTTTTTTTTT  P
+           P  P  GGG GGG GGG  P  P
+          B  P   GGG GGG GGG   P  B
+          TTTTTTTTTTTTTTTTTTTTTTTTT
+          B  P   GGG GGG GGG   P  B
+          B  P   GGG GGG GGG   P  B
+          TTTTTTTTTNNNNNTTTTTTTTTTT
+          B  P     B   B       P  B
+          BBBPBBBBBBGGGBBBBBBBBPBBB
       `
     ),
     near: Sprite.createColoredVariant(
       `
-            .-[ HOTEL ]-.
-          .---------------.
-         /  [#] [#]  [#]   \\
-        |==|=============|==|
-        |  | [#] [#] [#] |  |
-        |==|==[ENTER]====|==|
-        |__|___|  |______|__|
+                 .-+-.
+               .-------.
+             .-----------.
+            / [#] [#] [#] \\
+           |==|=========|==|
+           |  | [#] [#] |  |
+           |==|==[===]==|==|
+           |__|__|   |__|__|
       `,
       hotelColors,
       `
-            NN NNNNN NN
-          TTTTTTTTTTTTTTTTT
-         P  GGG GGG  GGG   P
-        TTTTTTTTTTTTTTTTTTTTT
-        B  P GGG GGG GGG P  B
-        TTTTTTNNNNNNNTTTTTTTT
-        BBBPBBBG  GBBBBBBPBBB
+                 NNNNN
+               TTTTTTTTT
+             TTTTTTTTTTTTT
+            P GGG GGG GGG P
+           TTTTTTTTTTTTTTTTT
+           B  P GGG GGG P  B
+           TTTTTTNNNNNTTTTTT
+           BBBPBBBG GBBPBBBB
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-         .[HOTEL].
-        .---------.
-        | [#] [#] |
-        |========-|
-        | [#] [#] |
-        |_________|
+              .-+-.
+             .-----.
+             |[#][#]|
+             |==|==-|
+             |[#][#]|
+             |______|
       `,
       hotelColors,
       `
-         NNNNNNNNN
-        TTTTTTTTTTT
-        P GGG GGG P
-        TTTTTTTTTTT
-        P GGG GGG P
-        BBBBBBBBBBB
+              NNNNN
+             TTTTTTT
+             PGGGGGGP
+             TTTTTTTT
+             PGGGGGGP
+             BBBBBBBB
       `
     ),
     far: Sprite.createColoredVariant(
       `
-        .-----.
-        |[][] |
-        |[][] |
-        |_____|
+             .-+-.
+             |[][]|
+             |[][]|
+             |____|
       `,
       hotelColors,
       `
-        TTTTTTT
-        PGGG  P
-        PGGG  P
-        BBBBBBB
+             NNNNN
+             PGGG P
+             PGGG P
+             BBBBBB
       `
     ),
   }

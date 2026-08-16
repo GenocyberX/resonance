@@ -17,74 +17,74 @@ export const BeachShackSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-            .------------.
-        .--/   TIKI BAR   \\--.
-      ./______________________\\.
-       |  (o)   [MENU]   (o)  |
-       |                      |
-       |====[BAR COUNTER]=====|
-       |  |   |        |   |  |
-       |  |   |        |   |  |
+              .--------------.
+          .--/   /\\  /\\  /\\   \\--.
+        ./______/__\\/__\\/__\\______\\.
+         |   (o)              (o)   |
+         |    |====[======]====|    |
+         |====|                |====|
+         |  | |   |        |   | |  |
+         |  | |   |        |   | |  |
       `,
       shackColors,
       `
-            WWWWWWWWWWWW
-        RRRR   WWWWWWWW   RRRR
-      RRRRRRRRRRRRRRRRRRRRRRRRRR
-       T  YYY   CCCCCC   YYY  T
-       T                      T
-       TTTTTCCCCCCCCCCCCCTTTTTT
-       T  T   T        T   T  T
-       T  T   T        T   T  T
+              WWWWWWWWWWWWWW
+          RRRR   WW  WW  WW   RRRR
+        RRRRRRRRRRRRRRRRRRRRRRRRRRRR
+         T   YYY              YYY   T
+         T    TCCCCCCCCCCCCCCCT     T
+         TTTTTT                TTTTTT
+         T  T T   T        T   T T  T
+         T  T T   T        T   T T  T
       `
     ),
     near: Sprite.createColoredVariant(
       `
-          .----------.
-        ./  TIKI BAR  \\.
-       ./________________\\.
-        | (o) [MENU] (o) |
-        |===BAR COUNTER==|
-        | |            | |
+            .------------.
+          ./  /\\  /\\  /\\  \\.
+         ./________________\\.
+          | (o)        (o) |
+          |===[========]===|
+          | |            | |
       `,
       shackColors,
       `
-          WWWWWWWWWW
-        RR  WWWWWWWW  RR
-       RRRRRRRRRRRRRRRRRR
-        T YYY CCCCCC YYY T
-        TTTTTCCCCCCCTTTTT
-        T T            T T
+            WWWWWWWWWWWW
+          RR  WW  WW  WW  RR
+         RRRRRRRRRRRRRRRRRRRR
+          T YYY        YYY T
+          TTTCCCCCCCCCCCCCTTT
+          T T            T T
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-         .--------.
-        /__________\\
-        | (o)  (o) |
-        |==========|
-        |          |
+           .----------.
+          /____________\\
+          | (o)    (o) |
+          |============|
+          |            |
       `,
       shackColors,
       `
-         WWWWWWWW
-        RRRRRRRRRRRR
-        T YYY  YYY T
-        TTTTTCCCCCCCT
-        T          T
+           WWWWWWWWWW
+          RRRRRRRRRRRRRR
+          T YYY    YYY T
+          TTTCCCCCCCCCTTT
+          T            T
       `
     ),
     far: Sprite.createColoredVariant(
       `
-        /----\\
-        |====|
-        |    |
+          /------\\
+          |======|
+          |      |
       `,
       shackColors,
       `
-        RRRR
-        TTTT
-        TTTT
+          RRRRRR
+          TTTTTT
+          TTTTTT
       `
     ),
   }

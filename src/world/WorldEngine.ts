@@ -49,12 +49,14 @@ export class WorldEngine {
 
   // Visual Test Mode state
   private isVisualTest: boolean = false;
+  private isGoldenMode: boolean = false;
   private testScenario: RoadTestMode = 'NORMAL';
   private testTimeOfDay: VisualTestTime = 'day';
 
-  // Cached scanline geometry for player anchoring, debug telemetry and continuity verification
+  // Cached scanline geometry for player anchoring, debug telemetry and projected terrain boundaries
   private scanlineCenter: Float32Array = new Float32Array(100);
   private scanlineHalfWidth: Float32Array = new Float32Array(100);
+  private scanlineShoreline: Float32Array = new Float32Array(100);
   private scanlineDepth: Float32Array = new Float32Array(100);
 
   // Telemetry state
@@ -91,9 +93,11 @@ export class WorldEngine {
   public setVisualTestMode(
     enabled: boolean,
     scenario: RoadTestMode = 'FLAT_STRAIGHT',
-    time: VisualTestTime = 'day'
+    time: VisualTestTime = 'day',
+    golden: boolean = false
   ): void {
     this.isVisualTest = enabled;
+    this.isGoldenMode = golden;
     this.testScenario = scenario;
     this.testTimeOfDay = time;
     this.road.setTestMode(scenario);
@@ -101,7 +105,10 @@ export class WorldEngine {
     if (enabled) {
       this.state.cameraShake = 0;
       this.setVisualTestTime(time);
-      this.traffic.maxTrafficCount = 2;
+      this.traffic.maxTrafficCount = golden ? 1 : 2;
+      if (golden) {
+        this.director.reset(2026);
+      }
     } else {
       this.road.setTestMode('NORMAL');
       this.traffic.maxTrafficCount = 4;
@@ -119,8 +126,13 @@ export class WorldEngine {
     this.state.dayNight = this.dayNightCycle.calculateState(normTime);
   }
 
-  public getVisualTestMode(): { isVisualTest: boolean; scenario: RoadTestMode; time: VisualTestTime } {
-    return { isVisualTest: this.isVisualTest, scenario: this.testScenario, time: this.testTimeOfDay };
+  public getVisualTestMode(): { isVisualTest: boolean; scenario: RoadTestMode; time: VisualTestTime; isGolden: boolean } {
+    return {
+      isVisualTest: this.isVisualTest,
+      scenario: this.testScenario,
+      time: this.testTimeOfDay,
+      isGolden: this.isGoldenMode,
+    };
   }
 
   public getScanlineDataAt(y: number): { center: number; halfWidth: number; depth: number } {
@@ -204,6 +216,10 @@ export class WorldEngine {
 
   public getRoad(): RoadGenerator {
     return this.road;
+  }
+
+  public getDirector(): WorldDirector {
+    return this.director;
   }
 
   public getCollisionSystem(): CollisionSystem {
@@ -351,19 +367,16 @@ export class WorldEngine {
     const dayNight = this.state.dayNight;
     const glow = this.state.musicParams.environmentalGlow;
 
-    // 1. HIGH-FIDELITY SKY RENDERING (Background multi-band gradients)
+    // 1. SKY RENDERING
     this.renderSky(frameBuffer, width, horizonRow, palette, dayNight, glow);
 
-    // 2. MULTI-LAYER PARALLAX HORIZON & DISTANT SILHOUETTES
+    // 2. WORLD-SPACE PARALLAX HORIZON SILHOUETTES
     this.renderHorizonSilhouettes(frameBuffer, width, horizonRow, palette, dayNight);
 
-    // 3. CONTINUOUS PSEUDO-3D ROAD SCANLINE RASTERIZATION (Calculates scanline boundaries)
-    this.renderRoad(frameBuffer, width, height, horizonRow, palette, dayNight);
+    // 3. CONTINUOUS PSEUDO-3D ROAD & WORLD-SPACE PROJECTED SHORELINE
+    this.renderRoadAndTerrain(frameBuffer, width, height, horizonRow, palette, dayNight);
 
-    // 4. PROCEDURAL OCEAN, BEACH & INLAND TERRAIN RENDERING (Uses real road scanline bounds)
-    this.renderGround(frameBuffer, width, height, horizonRow, palette, dayNight);
-
-    // 5. DEPTH-SORTED SCENERY & TRAFFIC RENDERING
+    // 4. DEPTH-SORTED SCENERY & TRAFFIC RENDERING
     this.depthSorter.clear();
 
     // Add scenery objects
@@ -411,10 +424,10 @@ export class WorldEngine {
     // Render sorted scenery & traffic
     this.depthSorter.render(frameBuffer);
 
-    // 6. PROTAGONIST PLAYER VEHICLE (ARCADE SCREEN-SPACE ANCHOR WITH HARD CONTAINMENT CLAMP)
+    // 5. PROTAGONIST PLAYER VEHICLE (ARCADE SCREEN-SPACE ANCHOR WITH HARD CONTAINMENT CLAMP)
     this.renderPlayerVehicle(frameBuffer, width, height, horizonRow);
 
-    // 7. AMBIENT PARTICLES
+    // 6. AMBIENT PARTICLES
     for (const p of this.ambientParticles) {
       const proj = Perspective.project(p.x, p.y, p.z, this.state.camera, width, height, 0.40);
       if (proj.visible) {
@@ -422,7 +435,7 @@ export class WorldEngine {
       }
     }
 
-    // 8. WEATHER PARTICLES
+    // 7. WEATHER PARTICLES
     for (const p of this.state.weather.particles) {
       frameBuffer.setCell(p.x, p.y, p.char, p.color, 5, undefined, true);
     }
@@ -542,7 +555,7 @@ export class WorldEngine {
   }
 
   /**
-   * Multi-Layer Parallax Horizon (Distant Islands, Ocean Line, and Headland Silhouettes).
+   * World-Space Horizon Silhouettes & Landmarks (Islands, Headlands, and Distant Horizon Profiles).
    */
   private renderHorizonSilhouettes(
     fb: FrameBuffer,
@@ -561,45 +574,58 @@ export class WorldEngine {
       Math.max(0.45, dayNight.ambientLight)
     );
 
-    // Far Parallax Layer (Rate: 0.006) - Distant Islands & Ocean Line
-    const farOffset = (this.state.camera.x * 0.006) % width;
-    // Mid Parallax Layer (Rate: 0.016) - Coastal Headlands & Palm Silhouettes
-    const midOffset = (this.state.camera.x * 0.016) % width;
-
     if (isTropical) {
-      // 1. Far Calm Ocean Horizon Line & Distant Tropical Island Peaks
-      for (let x = 0; x < width; x++) {
-        const farCol = (x + farOffset + width * 10) % width;
-        // Natural curved mountain ridges
-        const peak1 = Math.sin(farCol * 0.05) * 3.5;
-        const peak2 = Math.cos(farCol * 0.12) * 1.8;
-        const islandH = Math.max(0, Math.floor(peak1 + peak2 + 2));
+      // World-space anchored landmark island profiles with proper camera parallax
+      const landmarks = [
+        { worldX: -900, baseWidth: 35, maxHeight: 6, charPeak: '^', charSlope: '/' },
+        { worldX: 1800, baseWidth: 50, maxHeight: 8, charPeak: '^', charSlope: '\\' },
+        { worldX: 3200, baseWidth: 40, maxHeight: 5, charPeak: '^', charSlope: '/' },
+      ];
 
-        for (let dy = 0; dy < islandH; dy++) {
-          const my = horizonRow - 1 - dy;
-          if (my >= 0 && my < horizonRow) {
-            const char = dy === islandH - 1 ? (peak1 > 0 ? '^' : '/') : '░';
-            fb.setCell(x, my, char, islandColor, 9200, undefined, false);
+      for (const lm of landmarks) {
+        // Project landmark onto screen horizon with parallax factor 0.014
+        const screenCenterX = Math.round((width * 0.5) + (lm.worldX - this.state.camera.x) * 0.014);
+        const halfSpan = Math.round(lm.baseWidth * 0.5);
+
+        for (let dx = -halfSpan; dx <= halfSpan; dx++) {
+          const sx = screenCenterX + dx;
+          if (sx < 0 || sx >= width) continue;
+
+          // Natural organic island slope
+          const t = 1.0 - Math.abs(dx) / halfSpan;
+          const h = Math.max(0, Math.floor(Math.sin(t * Math.PI * 0.5) * lm.maxHeight));
+
+          for (let dy = 0; dy < h; dy++) {
+            const sy = horizonRow - 1 - dy;
+            if (sy >= 0 && sy < horizonRow) {
+              const char = dy === h - 1 ? lm.charPeak : '░';
+              fb.setCell(sx, sy, char, islandColor, 9200, undefined, false);
+            }
           }
         }
+      }
 
-        // 2. Mid Parallax Headland & Distant Palm Promontories
-        const midCol = (x + midOffset + width * 10) % width;
-        const headlandH = Math.max(0, Math.floor(Math.sin(midCol * 0.08) * 2.2 + 1));
-
-        for (let dy = 0; dy < headlandH; dy++) {
-          const my = horizonRow - 1 - dy;
-          if (my >= 0 && my < horizonRow) {
-            const char = dy === headlandH - 1 ? 'n' : '█';
-            fb.setCell(x, my, char, headlandColor, 9000, undefined, false);
+      // Distant headland on the coast (Parallax 0.022)
+      const headlandScreenX = Math.round((width * 0.5) + (1100 - this.state.camera.x) * 0.022);
+      for (let dx = -20; dx <= 20; dx++) {
+        const sx = headlandScreenX + dx;
+        if (sx >= 0 && sx < width) {
+          const t = 1.0 - Math.abs(dx) / 20;
+          const h = Math.max(0, Math.floor(t * 3));
+          for (let dy = 0; dy < h; dy++) {
+            const sy = horizonRow - 1 - dy;
+            if (sy >= 0 && sy < horizonRow) {
+              fb.setCell(sx, sy, '█', headlandColor, 9000, undefined, false);
+            }
           }
         }
       }
     } else {
       // Generic Biome Horizon Fallback
       const mountainColor = islandColor;
+      const camXOffset = (this.state.camera.x * 0.012) % width;
       for (let x = 0; x < width; x++) {
-        const worldCol = (x + farOffset + width * 10) % width;
+        const worldCol = (x + camXOffset + width * 10) % width;
         const p1 = Math.sin(worldCol * 0.06) * 4.5;
         const p2 = Math.sin(worldCol * 0.18) * 2.2;
         const h1 = Math.max(1, Math.floor(p1 + p2 + 5));
@@ -616,150 +642,9 @@ export class WorldEngine {
   }
 
   /**
-   * Procedural Ocean, Beach & Inland Terrain (Eliminates single-character wallpapers).
+   * Continuous Road Rasterizer & World-Space Projected Terrain Bands (Inland, Beach, Shoreline, Ocean).
    */
-  private renderGround(
-    fb: FrameBuffer,
-    width: number,
-    height: number,
-    horizonRow: number,
-    palette: typeof this.state.biomeBlend.blendedPalette,
-    dayNight: typeof this.state.dayNight
-  ): void {
-    const isTropical = this.state.biomeBlend.currentBiome.id === 'TROPICAL';
-    const time = this.state.worldTime;
-    const energy = this.state.musicParams.environmentalGlow;
-
-    // Ocean Water Colors
-    const isNight = dayNight.phase === 'NIGHT';
-    const isDusk = dayNight.phase === 'DUSK';
-    const oceanBg = isNight
-      ? '#051026'
-      : (isDusk ? '#3b0764' : '#0369a1');
-    const oceanRippleColor = isNight
-      ? '#1e3a8a'
-      : (isDusk ? '#fb7185' : '#38bdf8');
-    const surfFoamColor = '#ffffff';
-
-    // Beach Sand Colors
-    const sandBg = isNight
-      ? '#1c1917'
-      : (isDusk ? '#78350f' : '#d97706');
-    const sandDetailColor = '#fde68a';
-
-    // Inland Turf Colors
-    const inlandBg = isNight
-      ? '#022c22'
-      : (isDusk ? '#14532d' : '#064e3b');
-    const inlandGrassColor = '#34d399';
-
-    for (let y = horizonRow; y < height; y++) {
-      const centerX = this.scanlineCenter[y];
-      const halfW = this.scanlineHalfWidth[y];
-      const depth = this.scanlineDepth[y];
-
-      const roadLeft = Math.round(centerX - halfW);
-      const roadRight = Math.round(centerX + halfW);
-
-      const depthFactor = (y - horizonRow) / Math.max(1, height - horizonRow);
-
-      if (isTropical) {
-        // --- 1. LEFT SIDE: INLAND COASTAL BOULEVARD & LUSH TURF ---
-        for (let x = 0; x < roadLeft; x++) {
-          const distFromRoad = roadLeft - x;
-          const isShoulderTransition = distFromRoad <= 3;
-
-          let char = ' ';
-          let color = inlandGrassColor;
-          let bg = inlandBg;
-
-          if (isShoulderTransition) {
-            bg = ColorPalette.scaleBrightness(inlandBg, 1.25);
-            char = '░';
-            color = inlandGrassColor;
-          } else {
-            // Sparse grass tufts and terrain micro-accents
-            const isTuft = ((x * 7 + y * 13 + Math.floor(time * 2)) % 11) === 0;
-            if (isTuft) {
-              char = depthFactor > 0.5 ? '"' : '·';
-              color = inlandGrassColor;
-            }
-          }
-
-          fb.setCell(x, y, char, color, depth + 10, bg, false);
-        }
-
-        // --- 2. RIGHT SIDE: GOLDEN BEACH & ANIMATED OCEAN SWELLS ---
-        const beachWidth = Math.max(3, Math.round(halfW * 0.28));
-        const beachRight = roadRight + beachWidth;
-
-        // A. Golden Sand Beach Band
-        for (let x = roadRight; x <= beachRight && x < width; x++) {
-          const distToWater = beachRight - x;
-          let char = ' ';
-          let color = sandDetailColor;
-          const bg = sandBg;
-
-          if (distToWater === 0) {
-            // White surf foam along shoreline
-            char = '~';
-            color = surfFoamColor;
-          } else if (distToWater === 1) {
-            char = '≈';
-            color = '#bae6fd';
-          } else {
-            // Sand ripples
-            const isSandDot = ((x * 5 + y * 9) % 7) === 0;
-            if (isSandDot) {
-              char = '.';
-            }
-          }
-
-          fb.setCell(x, y, char, color, depth + 8, bg, false);
-        }
-
-        // B. Open Ocean Surface (Rhythmic animated wave crests)
-        for (let x = beachRight + 1; x < width; x++) {
-          const wavePhase = (x * 0.22) - (time * 3.5) + (y * 0.45);
-          const waveVal = Math.sin(wavePhase);
-          const waveSparkle = energy > 0.2 && Math.sin(wavePhase * 2 + time * 6) > 0.7;
-
-          let char = ' ';
-          let color = oceanRippleColor;
-          const bg = oceanBg;
-
-          if (waveVal > 0.75) {
-            // Wave crest swell
-            char = depthFactor > 0.6 ? '_/\\_' : (depthFactor > 0.3 ? '~~' : '~');
-            color = waveSparkle ? '#ffffff' : oceanRippleColor;
-          } else if (waveVal > 0.45) {
-            char = depthFactor > 0.5 ? '·' : ' ';
-          }
-
-          fb.setCell(x, y, char, color, depth + 12, bg, false);
-        }
-      } else {
-        // Generic ground fallback
-        const groundBaseColor = ColorPalette.scaleBrightness(palette.ground, Math.max(0.35, dayNight.ambientLight));
-        const groundDetailColor = ColorPalette.scaleBrightness(palette.groundDetail, Math.max(0.45, dayNight.ambientLight));
-        const rowColor = ColorPalette.lerp(palette.horizon, groundBaseColor, depthFactor);
-
-        for (let x = 0; x < width; x++) {
-          if (x < roadLeft || x > roadRight) {
-            const isDetail = ((x * 5 + y * 11) % 9) === 0;
-            const char = isDetail ? '·' : ' ';
-            const charColor = isDetail ? groundDetailColor : rowColor;
-            fb.setCell(x, y, char, charColor, depth + 10, undefined, false);
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Continuous Pseudo-3D Road Scanline Rasterizer (Clean asphalt surface & gold markings).
-   */
-  private renderRoad(
+  private renderRoadAndTerrain(
     fb: FrameBuffer,
     width: number,
     height: number,
@@ -770,13 +655,25 @@ export class WorldEngine {
     if (this.scanlineCenter.length < height) {
       this.scanlineCenter = new Float32Array(height);
       this.scanlineHalfWidth = new Float32Array(height);
+      this.scanlineShoreline = new Float32Array(height);
       this.scanlineDepth = new Float32Array(height);
     }
 
-    const halfRoadWidth = this.road.defaultRoadWidth * 0.5;
+    const halfRoadWidth = this.road.defaultRoadWidth * 0.5; // 400
     const isNight = dayNight.phase === 'NIGHT';
+    const isDusk = dayNight.phase === 'DUSK';
     const playerZ = this.state.player.z;
     const beatPulse = this.state.musicParams.fovPulse > 0.1;
+    const time = this.state.worldTime;
+    const energy = this.state.musicParams.environmentalGlow;
+
+    // Palette tokens for World-Space Terrain
+    const oceanBg = isNight ? '#051026' : (isDusk ? '#3b0764' : '#0369a1');
+    const oceanRippleColor = isNight ? '#1e3a8a' : (isDusk ? '#fb7185' : '#38bdf8');
+    const sandBg = isNight ? '#1c1917' : (isDusk ? '#78350f' : '#d97706');
+    const sandDetailColor = '#fde68a';
+    const inlandBg = isNight ? '#022c22' : (isDusk ? '#14532d' : '#064e3b');
+    const inlandGrassColor = '#34d399';
 
     const drawDistance = 1050;
     const stepZ = this.road.segmentLength;
@@ -787,6 +684,7 @@ export class WorldEngine {
       screenX: number;
       screenY: number;
       halfWidth: number;
+      shorelineScreenX: number;
       depth: number;
       worldZ: number;
     }
@@ -796,7 +694,9 @@ export class WorldEngine {
     for (let z = startZ; z <= endZ; z += stepZ) {
       const curveX = this.road.getCurveAt(z);
       const elevY = this.road.getElevationAt(z);
-      const proj = Perspective.projectRoadSlice(
+
+      // Project Road Slice
+      const roadProj = Perspective.projectRoadSlice(
         curveX,
         elevY,
         z,
@@ -807,12 +707,25 @@ export class WorldEngine {
         0.40
       );
 
-      if (proj.visible) {
+      // Project World-Space Shoreline Point
+      const shorelineWorldOffset = this.director.getShorelineOffsetAtZ(z, halfRoadWidth);
+      const shorelineProj = Perspective.project(
+        curveX + shorelineWorldOffset,
+        elevY,
+        z,
+        this.state.camera,
+        width,
+        height,
+        0.40
+      );
+
+      if (roadProj.visible) {
         slices.push({
-          screenX: proj.screenX,
-          screenY: proj.screenY,
-          halfWidth: proj.halfWidth,
-          depth: proj.depth,
+          screenX: roadProj.screenX,
+          screenY: roadProj.screenY,
+          halfWidth: roadProj.halfWidth,
+          shorelineScreenX: shorelineProj.visible ? shorelineProj.screenX : roadProj.screenX + roadProj.halfWidth * 2.2,
+          depth: roadProj.depth,
           worldZ: z,
         });
       }
@@ -823,9 +736,11 @@ export class WorldEngine {
     for (let y = 0; y < height; y++) {
       this.scanlineCenter[y] = width * 0.5;
       this.scanlineHalfWidth[y] = 0;
+      this.scanlineShoreline[y] = width * 0.75;
       this.scanlineDepth[y] = Infinity;
     }
 
+    // Rasterize Trapezoidal Bands between consecutive slices
     for (let i = 1; i < slices.length; i++) {
       const pFar = slices[i];
       const pNear = slices[i - 1];
@@ -841,11 +756,13 @@ export class WorldEngine {
         const t = (y - yTop) / dy;
         const centerX = pFar.screenX + (pNear.screenX - pFar.screenX) * t;
         const halfW = pFar.halfWidth + (pNear.halfWidth - pFar.halfWidth) * t;
+        const shorelineX = pFar.shorelineScreenX + (pNear.shorelineScreenX - pFar.shorelineScreenX) * t;
         const depth = pFar.depth + (pNear.depth - pFar.depth) * t;
         const sliceZ = pFar.worldZ + (pNear.worldZ - pFar.worldZ) * t;
 
         this.scanlineCenter[y] = centerX;
         this.scanlineHalfWidth[y] = halfW;
+        this.scanlineShoreline[y] = shorelineX;
         this.scanlineDepth[y] = depth;
 
         const xL = Math.round(centerX - halfW);
@@ -853,6 +770,33 @@ export class WorldEngine {
         const roadSpan = xR - xL;
         if (roadSpan <= 0) continue;
 
+        const depthFactor = (y - horizonRow) / Math.max(1, height - horizonRow);
+
+        // ==========================================
+        // 1. LEFT INLAND PROJECTED TERRAIN BAND
+        // ==========================================
+        for (let x = 0; x < xL; x++) {
+          const distFromRoad = xL - x;
+          const isShoulder = distFromRoad <= 3;
+          let char = ' ';
+          const color = inlandGrassColor;
+          let bg = inlandBg;
+
+          if (isShoulder) {
+            bg = ColorPalette.scaleBrightness(inlandBg, 1.25);
+            char = '░';
+          } else {
+            const isTuft = ((x * 7 + y * 13 + Math.floor(time * 2)) % 11) === 0;
+            if (isTuft) {
+              char = depthFactor > 0.5 ? '"' : '·';
+            }
+          }
+          fb.setCell(x, y, char, color, depth + 15, bg, false);
+        }
+
+        // ==========================================
+        // 2. ROAD SURFACE & CONTINUOUS CURBS
+        // ==========================================
         const isAltTarmac = Math.floor(sliceZ / 35) % 2 === 0;
         let baseRoadColor = isAltTarmac
           ? palette.road
@@ -868,14 +812,13 @@ export class WorldEngine {
           }
         }
 
-        const depthFactor = Math.min(1.0, depth / 950);
-        const roadColor = ColorPalette.applyFog(baseRoadColor, palette.fog, depthFactor * 0.45);
-        const shoulderColor = ColorPalette.applyFog(palette.roadShoulder, palette.fog, depthFactor * 0.45);
+        const roadFog = ColorPalette.applyFog(baseRoadColor, palette.fog, Math.min(1.0, depth / 950) * 0.45);
+        const shoulderColor = ColorPalette.applyFog(palette.roadShoulder, palette.fog, Math.min(1.0, depth / 950) * 0.45);
         const markingColor = beatPulse
           ? '#ffffff'
-          : ColorPalette.applyFog(palette.roadMarking, palette.fog, depthFactor * 0.4);
+          : ColorPalette.applyFog(palette.roadMarking, palette.fog, Math.min(1.0, depth / 950) * 0.4);
 
-        // 1. Two-Stage Rumble Curbs
+        // A. Continuous Rumble Curbs
         const curbWidth = Math.max(2, Math.round(roadSpan * 0.055));
         const rumblePattern = Math.floor(sliceZ / 25) % 2 === 0;
         const curbChar = rumblePattern ? '█' : '▒';
@@ -888,20 +831,73 @@ export class WorldEngine {
           fb.setCell(x, y, curbChar, curbColor, depth, undefined, false);
         }
 
-        // 2. Clean Asphalt Road Surface with Cell Background
-        const asphaltBg = ColorPalette.scaleBrightness(roadColor, 0.65);
+        // B. Clean Asphalt Surface with Cell Background
+        const asphaltBg = ColorPalette.scaleBrightness(roadFog, 0.65);
         const tarmacChar = depth > 700 ? '·' : (depth > 400 ? '.' : ' ');
         for (let x = xL + 1; x < xR; x++) {
-          fb.setCell(x, y, tarmacChar, roadColor, depth, asphaltBg, false);
+          fb.setCell(x, y, tarmacChar, roadFog, depth, asphaltBg, false);
         }
 
-        // 3. Dashed Gold Lane Dividers (positioned at 1/3 and 2/3 road span)
+        // C. Dashed Gold Lane Dividers
         const isDashed = Math.floor(sliceZ / 25) % 2 === 0;
         if (isDashed) {
           const lane1X = Math.round(xL + roadSpan * 0.333);
           const lane2X = Math.round(xL + roadSpan * 0.667);
           fb.setCell(lane1X, y, '║', markingColor, depth - 0.5, asphaltBg, false);
           fb.setCell(lane2X, y, '║', markingColor, depth - 0.5, asphaltBg, false);
+        }
+
+        // ==========================================
+        // 3. PROJECTED GOLDEN BEACH & SHORELINE
+        // ==========================================
+        const shoreScreenX = Math.max(xR + 3, Math.round(shorelineX));
+
+        // A. Sand Beach Band
+        for (let x = xR + curbWidth + 1; x < shoreScreenX && x < width; x++) {
+          const distToShore = shoreScreenX - x;
+          let char = ' ';
+          let color = sandDetailColor;
+          const bg = sandBg;
+
+          if (distToShore <= 2) {
+            // Wet Sand near surf
+            char = '░';
+            color = ColorPalette.scaleBrightness(sandBg, 1.35);
+          } else {
+            const isSandDot = ((x * 5 + y * 9) % 7) === 0;
+            if (isSandDot) char = '.';
+          }
+          fb.setCell(x, y, char, color, depth + 8, bg, false);
+        }
+
+        // B. Dynamic Surf Foam on Projected Shoreline
+        const foamLeft = Math.max(0, shoreScreenX - 1);
+        const foamRight = Math.min(width - 1, shoreScreenX + 2);
+        for (let x = foamLeft; x <= foamRight; x++) {
+          const isFoam = ((x + Math.floor(time * 4)) % 2) === 0;
+          const foamChar = isFoam ? '≈' : '~';
+          fb.setCell(x, y, foamChar, '#ffffff', depth + 6, '#0284c7', false);
+        }
+
+        // ==========================================
+        // 4. PROJECTED OCEAN SURFACE (Animated Waves)
+        // ==========================================
+        for (let x = foamRight + 1; x < width; x++) {
+          const wavePhase = (x * 0.22) - (time * 3.5) + (y * 0.45);
+          const waveVal = Math.sin(wavePhase);
+          const waveSparkle = energy > 0.2 && Math.sin(wavePhase * 2 + time * 6) > 0.7;
+
+          let char = ' ';
+          let color = oceanRippleColor;
+
+          if (waveVal > 0.75) {
+            char = depthFactor > 0.6 ? '_/\\_' : (depthFactor > 0.3 ? '~~' : '~');
+            color = waveSparkle ? '#ffffff' : oceanRippleColor;
+          } else if (waveVal > 0.45) {
+            char = depthFactor > 0.5 ? '·' : ' ';
+          }
+
+          fb.setCell(x, y, char, color, depth + 12, oceanBg, false);
         }
       }
     }

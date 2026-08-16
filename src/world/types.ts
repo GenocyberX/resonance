@@ -10,6 +10,37 @@ export type BiomeId =
 
 export type DayPhase = 'DAWN' | 'DAY' | 'DUSK' | 'NIGHT';
 
+export type TerrainSurfaceType =
+  | 'INLAND'
+  | 'ROADSIDE'
+  | 'BEACH'
+  | 'SHORELINE'
+  | 'WATER'
+  | 'LANDMARK';
+
+export interface SceneRegion {
+  type: string;
+  startZ: number;
+  length: number;
+  density: number;
+  landmark?: string;
+  variationSeed: number;
+}
+
+export interface ProjectedTerrainSlice {
+  worldZ: number;
+  screenY: number;
+  depth: number;
+  curveX: number;
+  elevY: number;
+  roadLeftScreen: number;
+  roadRightScreen: number;
+  beachRightScreen: number;
+  shorelineScreen: number;
+  oceanFarScreen: number;
+  inlandFarScreen: number;
+}
+
 export interface BiomePalette {
   skyTop: string;
   skyBottom: string;

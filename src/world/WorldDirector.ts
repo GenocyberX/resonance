@@ -2,6 +2,7 @@ import { SceneryObject } from '../entities/SceneryObject';
 import { SeededRandom } from '../procedural/SeededRandom';
 import { BiomeTransitionSystem } from './transitions/BiomeTransitionSystem';
 import { RoadGenerator } from '../road/RoadGenerator';
+import { SceneRegion, TerrainSurfaceType } from './types';
 import { PalmTreeSprite } from '../sprites/scenery/PalmTreeSprite';
 import { ShortPalmSprite } from '../sprites/scenery/ShortPalmSprite';
 import { TropicalBushSprite } from '../sprites/scenery/TropicalBushSprite';
@@ -18,25 +19,71 @@ import { BillboardSprite } from '../sprites/scenery/BillboardSprite';
 import { DirectionSignSprite } from '../sprites/scenery/DirectionSignSprite';
 import { StreetLampSprite } from '../sprites/scenery/StreetLampSprite';
 
-export type SceneVignette =
-  | 'PALM_BOULEVARD'
-  | 'OPEN_BEACH_VISTA'
-  | 'BEACH_TOWN'
-  | 'TROPICAL_COVE'
-  | 'LIGHTHOUSE_POINT'
-  | 'COASTAL_RESORT';
-
 export class WorldDirector {
   private scenery: SceneryObject[] = [];
   private rng: SeededRandom;
   private biomeSystem: BiomeTransitionSystem;
   private lastGeneratedChunk: number = 0;
-  public readonly chunkSize: number = 190; // Distance per scenery chunk
+  public readonly chunkSize: number = 200; // Distance per scenery chunk
   private nextId: number = 1;
+
+  // Cached SceneRegions along the longitudinal trajectory
+  private regions: SceneRegion[] = [];
+  private lastRegionEndZ: number = 0;
 
   constructor(seed: number, biomeSystem: BiomeTransitionSystem) {
     this.rng = new SeededRandom(seed);
     this.biomeSystem = biomeSystem;
+    this.initRegions();
+  }
+
+  private initRegions(): void {
+    this.regions = [];
+    this.lastRegionEndZ = 0;
+    this.ensureRegionsAhead(2500);
+  }
+
+  /**
+   * Deterministically generates macro SceneRegions (600–1800m length each).
+   */
+  public ensureRegionsAhead(maxZ: number): void {
+    const regionTypes: string[] = [
+      'PALM_BOULEVARD',
+      'OPEN_BEACH_VISTA',
+      'BEACH_TOWN',
+      'TROPICAL_COVE',
+      'OPEN_BEACH_VISTA',
+      'LIGHTHOUSE_POINT',
+      'PALM_BOULEVARD',
+      'COASTAL_RESORT',
+    ];
+
+    while (this.lastRegionEndZ < maxZ + 2000) {
+      const regionIndex = this.regions.length;
+      const type = regionTypes[regionIndex % regionTypes.length];
+      const length = Math.round(this.rng.range(700, 1600) / 100) * 100;
+      const density = type === 'OPEN_BEACH_VISTA' ? 0.75 : (type === 'BEACH_TOWN' || type === 'COASTAL_RESORT' ? 1.25 : 1.0);
+
+      this.regions.push({
+        type,
+        startZ: this.lastRegionEndZ,
+        length,
+        density,
+        variationSeed: this.rng.rangeInt(1, 999999),
+      });
+
+      this.lastRegionEndZ += length;
+    }
+  }
+
+  public getRegionAtZ(z: number): SceneRegion {
+    this.ensureRegionsAhead(z + 500);
+    for (const region of this.regions) {
+      if (z >= region.startZ && z < region.startZ + region.length) {
+        return region;
+      }
+    }
+    return this.regions[0];
   }
 
   public getScenery(): SceneryObject[] {
@@ -58,7 +105,7 @@ export class WorldDirector {
     }
 
     // Recycle scenery far behind the camera
-    const recycleThreshold = cameraZ - 180;
+    const recycleThreshold = cameraZ - 200;
     this.scenery = this.scenery.filter(obj => obj.z > recycleThreshold);
 
     // Update positions along road curvature
@@ -68,7 +115,16 @@ export class WorldDirector {
   }
 
   /**
-   * Generates a coherent scenic composition using systematic placement zones and scene grammar.
+   * Evaluates world-space shoreline offset at longitudinal distance Z.
+   */
+  public getShorelineOffsetAtZ(z: number, roadHalfWidth: number = 400): number {
+    const baseShoreline = roadHalfWidth + 450;
+    const coastalWiggle = Math.sin(z * 0.003) * 60;
+    return baseShoreline + coastalWiggle;
+  }
+
+  /**
+   * Generates a coherent scenic composition using surface-aware placement and SceneRegions.
    */
   private generateChunk(chunkZ: number, road: RoadGenerator): void {
     const blendState = this.biomeSystem.evaluate(chunkZ);
@@ -77,23 +133,18 @@ export class WorldDirector {
     // Canonical road dimensions
     const roadHalfWidth = road.defaultRoadWidth * 0.5; // 400
     const safetyMargin = 40;
-
-    // Scenery Placement Zones (world units from road center)
-    const nearMin = roadHalfWidth + safetyMargin; // 440
-    const nearMax = roadHalfWidth * 1.75;         // 700
-    const midMin = nearMax;                       // 700
-    const midMax = roadHalfWidth * 2.8;           // 1120
-    const farMin = midMax;                        // 1120
-    const farMax = roadHalfWidth * 4.5;           // 1800
+    const minSafeOffset = roadHalfWidth + safetyMargin; // 440
+    const shorelineOffset = this.getShorelineOffsetAtZ(chunkZ, roadHalfWidth);
 
     if (isTropical) {
-      this.generateTropicalVignette(chunkZ, road, nearMin, nearMax, midMin, midMax, farMin, farMax);
+      const region = this.getRegionAtZ(chunkZ);
+      this.generateTropicalRegionChunk(chunkZ, road, region, minSafeOffset, shorelineOffset);
     } else {
-      this.generateGenericChunk(chunkZ, road, blendState, nearMin, midMax);
+      this.generateGenericChunk(chunkZ, road, blendState, minSafeOffset, roadHalfWidth * 2.8);
     }
 
     // Rare road obstacles placed using CANONICAL lane center geometry
-    if (this.rng.boolean(0.06)) {
+    if (this.rng.boolean(0.05)) {
       const obstacleSprite = this.biomeSystem.sampleObstacleSprite(blendState, this.rng);
       if (obstacleSprite) {
         const lane = this.rng.choice([-1, 0, 1]);
@@ -105,113 +156,120 @@ export class WorldDirector {
   }
 
   /**
-   * Tropical Coastline Designed Scene Vignettes (Rhythmic Scene Grammar).
+   * Generates tropical scenery according to the current active SceneRegion.
    */
-  private generateTropicalVignette(
+  private generateTropicalRegionChunk(
     chunkZ: number,
     _road: RoadGenerator,
-    nearMin: number,
-    nearMax: number,
-    midMin: number,
-    midMax: number,
-    farMin: number,
-    farMax: number
+    region: SceneRegion,
+    minSafeOffset: number,
+    shorelineOffset: number
   ): void {
-    const chunkIndex = Math.floor(chunkZ / this.chunkSize);
-    const vignettes: SceneVignette[] = [
-      'PALM_BOULEVARD',
-      'OPEN_BEACH_VISTA',
-      'BEACH_TOWN',
-      'TROPICAL_COVE',
-      'LIGHTHOUSE_POINT',
-      'COASTAL_RESORT',
-    ];
+    const jitterZ = this.rng.range(-20, 20);
 
-    const vignette = vignettes[Math.abs(chunkIndex) % vignettes.length];
-    const jitterZ = this.rng.range(-25, 25);
-
-    switch (vignette) {
+    switch (region.type) {
       case 'PALM_BOULEVARD': {
-        // Left side: tall palm + street lamp
-        const leftPalmOffset = -this.rng.range(nearMin, nearMax);
-        this.scenery.push(new SceneryObject(`palm_l_${this.nextId++}`, PalmTreeSprite, chunkZ + jitterZ, leftPalmOffset, false));
-        this.scenery.push(new SceneryObject(`lamp_l_${this.nextId++}`, StreetLampSprite, chunkZ + jitterZ + 60, -nearMin - 15, false));
+        // Left Inland Boulevard: tall palm + street lamp
+        const leftPalmX = -this.rng.range(minSafeOffset + 20, minSafeOffset + 240);
+        this.addScenery(PalmTreeSprite, chunkZ + jitterZ, leftPalmX, 'ROADSIDE');
+        this.addScenery(StreetLampSprite, chunkZ + jitterZ + 70, -minSafeOffset - 15, 'ROADSIDE');
 
-        // Right side (Ocean promenade): palm + coastal grass
-        const rightPalmOffset = this.rng.range(nearMin, nearMax);
-        this.scenery.push(new SceneryObject(`palm_r_${this.nextId++}`, PalmTreeSprite, chunkZ + jitterZ + 30, rightPalmOffset, false));
-        this.scenery.push(new SceneryObject(`grass_r_${this.nextId++}`, CoastalGrassSprite, chunkZ + jitterZ + 15, nearMin + 25, false));
+        // Right Beach Promenade: tall palm + coastal grass
+        const rightPalmX = this.rng.range(minSafeOffset + 30, minSafeOffset + 220);
+        this.addScenery(PalmTreeSprite, chunkZ + jitterZ + 35, rightPalmX, 'BEACH');
+        this.addScenery(CoastalGrassSprite, chunkZ + jitterZ + 15, minSafeOffset + 20, 'BEACH');
         break;
       }
 
       case 'OPEN_BEACH_VISTA': {
-        // Left side: highway direction sign + short palm
-        this.scenery.push(new SceneryObject(`sign_${this.nextId++}`, DirectionSignSprite, chunkZ + jitterZ, -nearMin - 20, false));
-        this.scenery.push(new SceneryObject(`spalm_${this.nextId++}`, ShortPalmSprite, chunkZ + jitterZ + 40, -this.rng.range(nearMin, midMin), false));
-
-        // Right side (Open Ocean): pier / lifeguard hut + distant sailboat
-        if (this.rng.boolean(0.6)) {
-          this.scenery.push(new SceneryObject(`hut_${this.nextId++}`, LifeguardHutSprite, chunkZ + jitterZ, this.rng.range(nearMin + 40, midMin), false));
+        // Left: Highway direction sign or short palm
+        if (this.rng.boolean(0.4)) {
+          this.addScenery(DirectionSignSprite, chunkZ + jitterZ, -minSafeOffset - 25, 'ROADSIDE');
         } else {
-          this.scenery.push(new SceneryObject(`pier_${this.nextId++}`, PierSprite, chunkZ + jitterZ, this.rng.range(midMin, midMax), false));
+          this.addScenery(ShortPalmSprite, chunkZ + jitterZ, -this.rng.range(minSafeOffset + 30, minSafeOffset + 250), 'INLAND');
         }
-        // Distant sailboat on the ocean horizon
-        const boatOffset = this.rng.range(farMin, farMax);
-        this.scenery.push(new SceneryObject(`boat_${this.nextId++}`, SailboatSprite, chunkZ + jitterZ + 20, boatOffset, false));
+
+        // Right (Beach & Ocean): Lifeguard hut or pier on the shoreline + Sailboat in the water
+        if (this.rng.boolean(0.55)) {
+          this.addScenery(LifeguardHutSprite, chunkZ + jitterZ, this.rng.range(minSafeOffset + 60, shorelineOffset - 40), 'BEACH');
+        } else {
+          this.addScenery(PierSprite, chunkZ + jitterZ, shorelineOffset, 'SHORELINE');
+        }
+
+        // Distant Sailboat or Skiff strictly on WATER
+        const waterX = this.rng.range(shorelineOffset + 180, shorelineOffset + 950);
+        this.addScenery(SailboatSprite, chunkZ + jitterZ + 30, waterX, 'WATER');
         break;
       }
 
       case 'BEACH_TOWN': {
-        // Left side (Town): Coastal Diner Cafe or Billboard + Street Lamp + Bush
+        // Left Inland Town: Coastal Diner Cafe or Hotel + Street Lamp + Bush
         if (this.rng.boolean(0.6)) {
-          this.scenery.push(new SceneryObject(`cafe_${this.nextId++}`, RoadsideCafeSprite, chunkZ + jitterZ, -this.rng.range(midMin, midMax), false));
+          const cafeX = -this.rng.range(minSafeOffset + 180, minSafeOffset + 480);
+          this.addScenery(RoadsideCafeSprite, chunkZ + jitterZ, cafeX, 'INLAND');
         } else {
-          this.scenery.push(new SceneryObject(`billboard_${this.nextId++}`, BillboardSprite, chunkZ + jitterZ, -this.rng.range(nearMin + 30, midMin), false));
+          const billboardX = -this.rng.range(minSafeOffset + 80, minSafeOffset + 320);
+          this.addScenery(BillboardSprite, chunkZ + jitterZ, billboardX, 'INLAND');
         }
-        this.scenery.push(new SceneryObject(`lamp_${this.nextId++}`, StreetLampSprite, chunkZ + jitterZ - 30, -nearMin - 15, false));
-        this.scenery.push(new SceneryObject(`bush_${this.nextId++}`, TropicalBushSprite, chunkZ + jitterZ + 35, -nearMin - 40, false));
+        this.addScenery(StreetLampSprite, chunkZ + jitterZ - 30, -minSafeOffset - 15, 'ROADSIDE');
+        this.addScenery(TropicalBushSprite, chunkZ + jitterZ + 40, -minSafeOffset - 35, 'ROADSIDE');
 
-        // Right side (Beach): Short Palm + Coastal grass
-        this.scenery.push(new SceneryObject(`spalm_r_${this.nextId++}`, ShortPalmSprite, chunkZ + jitterZ, this.rng.range(nearMin, nearMax), false));
-        this.scenery.push(new SceneryObject(`grass_r_${this.nextId++}`, CoastalGrassSprite, chunkZ + jitterZ + 20, nearMin + 20, false));
+        // Right Beach: Short Palm + Coastal dune grass
+        this.addScenery(ShortPalmSprite, chunkZ + jitterZ, this.rng.range(minSafeOffset + 20, minSafeOffset + 200), 'BEACH');
+        this.addScenery(CoastalGrassSprite, chunkZ + jitterZ + 20, minSafeOffset + 15, 'BEACH');
         break;
       }
 
       case 'TROPICAL_COVE': {
-        // Deterministic Palm Cluster on left: main palm + small palm + bush
-        const clusterX = -this.rng.range(nearMin + 40, midMin);
-        this.scenery.push(new SceneryObject(`palm_${this.nextId++}`, PalmTreeSprite, chunkZ + jitterZ, clusterX, false));
-        this.scenery.push(new SceneryObject(`spalm_${this.nextId++}`, ShortPalmSprite, chunkZ + jitterZ + 25, clusterX - 80, false));
-        this.scenery.push(new SceneryObject(`bush_${this.nextId++}`, TropicalBushSprite, chunkZ + jitterZ + 15, clusterX + 60, false));
+        // Left: Deterministic Palm Cluster (Tall palm + short palm + tropical bush)
+        const clusterX = -this.rng.range(minSafeOffset + 80, minSafeOffset + 350);
+        this.addScenery(PalmTreeSprite, chunkZ + jitterZ, clusterX, 'INLAND');
+        this.addScenery(ShortPalmSprite, chunkZ + jitterZ + 30, clusterX - 90, 'INLAND');
+        this.addScenery(TropicalBushSprite, chunkZ + jitterZ + 15, clusterX + 70, 'INLAND');
 
-        // Right side (Beach shack / tiki bar)
-        this.scenery.push(new SceneryObject(`shack_${this.nextId++}`, BeachShackSprite, chunkZ + jitterZ, this.rng.range(nearMin + 50, midMin), false));
-        this.scenery.push(new SceneryObject(`palm_r_${this.nextId++}`, PalmTreeSprite, chunkZ + jitterZ + 45, this.rng.range(midMin, midMax), false));
+        // Right: Tiki Beach Shack on the beach + Coastal palm
+        const shackX = this.rng.range(minSafeOffset + 70, shorelineOffset - 60);
+        this.addScenery(BeachShackSprite, chunkZ + jitterZ, shackX, 'BEACH');
+        this.addScenery(PalmTreeSprite, chunkZ + jitterZ + 45, this.rng.range(minSafeOffset + 220, shorelineOffset - 30), 'BEACH');
         break;
       }
 
       case 'LIGHTHOUSE_POINT': {
-        // Left side: tall palm + street lamp
-        this.scenery.push(new SceneryObject(`palm_l_${this.nextId++}`, PalmTreeSprite, chunkZ + jitterZ, -this.rng.range(nearMin, nearMax), false));
+        // Left: Palm Tree + Street Lamp
+        this.addScenery(PalmTreeSprite, chunkZ + jitterZ, -this.rng.range(minSafeOffset + 40, minSafeOffset + 250), 'INLAND');
 
-        // Right side: Coastal Lighthouse Landmark on ocean edge + small skiff boat
-        this.scenery.push(new SceneryObject(`lighthouse_${this.nextId++}`, LighthouseSprite, chunkZ + jitterZ, this.rng.range(midMin + 60, midMax), false));
-        this.scenery.push(new SceneryObject(`skiff_${this.nextId++}`, SmallBoatSprite, chunkZ + jitterZ + 50, this.rng.range(farMin, farMax), false));
-        this.scenery.push(new SceneryObject(`grass_${this.nextId++}`, CoastalGrassSprite, chunkZ + jitterZ - 20, nearMin + 30, false));
+        // Right (Coastal Edge): Coastal Lighthouse Landmark + Skiff in the sea
+        const lighthouseX = this.rng.range(shorelineOffset + 40, shorelineOffset + 220);
+        this.addScenery(LighthouseSprite, chunkZ + jitterZ, lighthouseX, 'LANDMARK');
+
+        const boatX = this.rng.range(shorelineOffset + 280, shorelineOffset + 850);
+        this.addScenery(SmallBoatSprite, chunkZ + jitterZ + 50, boatX, 'WATER');
+        this.addScenery(CoastalGrassSprite, chunkZ + jitterZ - 20, minSafeOffset + 25, 'BEACH');
         break;
       }
 
       case 'COASTAL_RESORT': {
-        // Left side: Grand Art Deco Coastal Hotel + Billboard + Palm promenade
-        this.scenery.push(new SceneryObject(`hotel_${this.nextId++}`, CoastalHotelSprite, chunkZ + jitterZ, -this.rng.range(midMin, midMax), false));
-        this.scenery.push(new SceneryObject(`palm_l_${this.nextId++}`, PalmTreeSprite, chunkZ + jitterZ + 60, -nearMin - 30, false));
+        // Left: Grand Art Deco Coastal Hotel + Palm promenade
+        const hotelX = -this.rng.range(minSafeOffset + 200, minSafeOffset + 500);
+        this.addScenery(CoastalHotelSprite, chunkZ + jitterZ, hotelX, 'INLAND');
+        this.addScenery(PalmTreeSprite, chunkZ + jitterZ + 60, -minSafeOffset - 30, 'ROADSIDE');
 
-        // Right side: Tiki Shack + Palm + Lifeguard Hut
-        this.scenery.push(new SceneryObject(`shack_${this.nextId++}`, BeachShackSprite, chunkZ + jitterZ, this.rng.range(nearMin + 60, midMin), false));
-        this.scenery.push(new SceneryObject(`hut_${this.nextId++}`, LifeguardHutSprite, chunkZ + jitterZ + 50, this.rng.range(midMin, midMax), false));
+        // Right: Tiki Shack + Lifeguard Hut on the beach
+        const shackX = this.rng.range(minSafeOffset + 60, shorelineOffset - 80);
+        this.addScenery(BeachShackSprite, chunkZ + jitterZ, shackX, 'BEACH');
+        this.addScenery(LifeguardHutSprite, chunkZ + jitterZ + 55, this.rng.range(minSafeOffset + 180, shorelineOffset - 40), 'BEACH');
         break;
       }
     }
+  }
+
+  private addScenery(
+    sprite: typeof PalmTreeSprite,
+    z: number,
+    lateralOffset: number,
+    _surfaceType: TerrainSurfaceType
+  ): void {
+    this.scenery.push(new SceneryObject(`scenery_${this.nextId++}`, sprite, z, lateralOffset, false));
   }
 
   private generateGenericChunk(
@@ -249,5 +307,6 @@ export class WorldDirector {
     this.rng.reseed(seed);
     this.scenery = [];
     this.lastGeneratedChunk = 0;
+    this.initRegions();
   }
 }

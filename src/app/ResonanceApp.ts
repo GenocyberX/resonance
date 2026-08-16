@@ -63,9 +63,10 @@ export class ResonanceApp {
     if (typeof window === 'undefined') return;
 
     const params = new URLSearchParams(window.location.search);
-    const hasVisualTest = params.has('visualTest') || params.has('scene') || params.has('time');
+    const hasVisualTest = params.has('visualTest') || params.has('scene') || params.has('time') || params.has('golden');
 
     if (hasVisualTest) {
+      const isGolden = params.get('golden') === 'tropical';
       const sceneParam = (params.get('scene') || 'straight').toLowerCase();
       const timeParam = (params.get('time') || 'day').toLowerCase() as VisualTestTime;
       let scenario: RoadTestMode = 'FLAT_STRAIGHT';
@@ -80,8 +81,13 @@ export class ResonanceApp {
         scenario = 'S_CURVE';
       }
 
-      this.worldEngine.setVisualTestMode(true, scenario, ['day', 'sunset', 'night', 'dawn'].includes(timeParam) ? timeParam : 'day');
-      console.info(`[Resonance] Visual Test Mode active. Scenario: ${scenario}, Time: ${timeParam}`);
+      this.worldEngine.setVisualTestMode(
+        true,
+        scenario,
+        ['day', 'sunset', 'night', 'dawn'].includes(timeParam) ? timeParam : 'day',
+        isGolden
+      );
+      console.info(`[Resonance] Visual Test Mode active. Scenario: ${scenario}, Time: ${timeParam}, Golden: ${isGolden}`);
     }
   }
 

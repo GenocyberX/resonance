@@ -2,13 +2,13 @@ import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
 const cafeColors = {
-  N: '#f43f5e', // Neon sign pink/red
+  N: '#f43f5e', // Neon roof peak
   A: '#fb7185', // Awning coral stripe
   W: '#f8fafc', // Awning white stripe
   B: '#0f766e', // Teal building body
   G: '#38bdf8', // Glowing cyan glass windows
-  D: '#042f2e', // Foundation / door
-  Y: '#fbbf24', // Yellow light
+  D: '#042f2e', // Foundation / entrance
+  Y: '#fbbf24', // Warm light interior
   '*': '#0f766e',
 };
 
@@ -19,76 +19,78 @@ export const RoadsideCafeSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-            .---[ COASTAL DINER ]---.
-           /                         \\
-         .-----------------------------.
-        /\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\
-        |  .--------.   [OPEN]   .--------.  |
-        |  | ###### |   .----.   | ###### |  |
-        |  | ###### |   | || |   | ###### |  |
-        |__|________|___|____|___|________|__|
+                 .-------.
+               ./  * * *  \\.
+             .-------------.
+            /               \\
+         .---------------------.
+        /\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\
+        |  .------.   .------.  |
+        |  | #### |   | #### |  |
+        |  | #### | | | #### |  |
+        |__|______|_|_|______|__|
       `,
       cafeColors,
       `
-            NNNN NNNNNNN NNNNNNN NNNN
-           B                         B
-         BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-        AWAWAWAWAWAWAWAWAWAWAWAWAWAWAWAW
-        B  GGGGGGGGGG   YYYYYY   GGGGGGGGGG  B
-        B  G GGGGGG G   DDDDDD   G GGGGGG G  B
-        B  G GGGGGG G   D DD D   G GGGGGG G  B
-        BBBDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDBBB
+                 NNNNNNNNN
+               NN  Y Y Y  NN
+             BBBBBBBBBBBBBBB
+            B               B
+         BBBBBBBBBBBBBBBBBBBBBBB
+        AWAWAWAWAWAWAWAWAWAWAWAW
+        B  GGGGGG   D GGGGGG  B
+        B  G GGG G  D G GGG G B
+        B  G GGG G  D G GGG G B
+        BBBDDDDDDDDDDDDDDDDDDDBB
       `
     ),
     near: Sprite.createColoredVariant(
       `
-          .-[ DINER ]-.
-        .---------------.
-       /\\/\\/\\/\\/\\/\\/\\/\\/\\
-       | .----.   .----. |
-       | |####| | |####| |
-       |_|____|_|_|____|_|
+               .---.
+             .-------.
+           .-----------.
+          /\\/\\/\\/\\/\\/\\/\\
+          | .---. .---. |
+          | |###| |###| |
+          |_|___|_|___|_|
       `,
       cafeColors,
       `
-          NN NNNNN NN
-        BBBBBBBBBBBBBBBBB
-       AWAWAWAWAWAWAWAWAW
-       B GGGGGG   GGGGGG B
-       B G GGGG D G GGGG B
-       BBDDDDDDDBDDDDDDDBB
+               NNNNN
+             BBBBBBBBB
+           BBBBBBBBBBBBB
+          AWAWAWAWAWAWAW
+          B GGGGG GGGGG B
+          B G GGG G GGG B
+          BBDDDDDBDDBDDBB
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-         .[DINER].
-        .---------.
-       /\\/\\/\\/\\/\\/\\
-       | [##]  [##] |
-       |____________|
+             .-----.
+            /\\/\\/\\/\\
+            | [###] |
+            |_______|
       `,
       cafeColors,
       `
-         NNNNNNNNN
-        BBBBBBBBBBB
-       AWAWAWAWAWAW
-       B GGGG  GGGG B
-       BBBBBBBBBBBBBB
+             BBBBBBB
+            AWAWAWAW
+            B GGGGG B
+            BBBBBBBBB
       `
     ),
     far: Sprite.createColoredVariant(
       `
-        .[===].
-        /=====\\
-        |[][] |
-        |_____|
+            /=====\\
+            |[][] |
+            |_____|
       `,
       cafeColors,
       `
-        NNNNNNN
-        AAAAAAA
-        BGGGG B
-        BBBBBBB
+            AAAAAAA
+            BGGGG B
+            BBBBBBB
       `
     ),
   }
