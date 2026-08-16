@@ -20,9 +20,11 @@ export const BillboardSprite: SpriteDefinition = Sprite.define(
        |  (o)  PACIFIC COAST HIGHWAY  (o) |
        |       * SUN * SURF * SOUND       |
        '=================================='
-           ||                        ||
-           ||                        ||
-           ||                        ||
+           ||                        ||    
+           ||                        ||    
+           ||                        ||    
+           ||                        ||    
+          _||_                      _||_   
       `,
       billboardColors,
       `
@@ -30,9 +32,11 @@ export const BillboardSprite: SpriteDefinition = Sprite.define(
        F  SSS  TTTTTTTTTTTTTTTTTTTTT  SSS F
        F       S SSS S SSSS S SSSSS       F
        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-           PP                        PP
-           PP                        PP
-           PP                        PP
+           PP                        PP    
+           PP                        PP    
+           PP                        PP    
+           PP                        PP    
+          PPPP                      PPPP   
       `
     ),
     near: Sprite.createColoredVariant(
@@ -40,16 +44,20 @@ export const BillboardSprite: SpriteDefinition = Sprite.define(
        .==========================.
        |  PACIFIC COAST  * SUN *  |
        '=========================='
-           ||                ||
-           ||                ||
+           ||                ||    
+           ||                ||    
+           ||                ||    
+          _||_              _||_   
       `,
       billboardColors,
       `
        FFFFFFFFFFFFFFFFFFFFFFFFFFFF
        F  TTTTTTTTTTTTT  S SSS S  F
        FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-           PP                PP
-           PP                PP
+           PP                PP    
+           PP                PP    
+           PP                PP    
+          PPPP              PPPP   
       `
     ),
     medium: Sprite.createColoredVariant(
@@ -57,14 +65,16 @@ export const BillboardSprite: SpriteDefinition = Sprite.define(
        .=================.
        |  PACIFIC COAST  |
        '================='
-           ||       ||
+           ||       ||    
+           ||       ||    
       `,
       billboardColors,
       `
        FFFFFFFFFFFFFFFFFFF
        F  TTTTTTTTTTTTT  F
        FFFFFFFFFFFFFFFFFFF
-           PP       PP
+           PP       PP    
+           PP       PP    
       `
     ),
     far: Sprite.createColoredVariant(
@@ -72,15 +82,21 @@ export const BillboardSprite: SpriteDefinition = Sprite.define(
        .=========.
        | [COAST] |
        '========='
-           ||
+           ||     
       `,
       billboardColors,
       `
        FFFFFFFFFFF
        F TTTTTTT F
        FFFFFFFFFFF
-           PP
+           PP     
       `
     ),
+  },
+  {
+    category: 'ROADSIDE',
+    worldWidth: 200,
+    worldHeight: 160,
+    visualScale: 1.0,
   }
 );

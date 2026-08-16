@@ -1,113 +1,141 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const palmColors = {
-  L: '#6ee7b7', // Light green highlights
-  G: '#10b981', // Mid green foliage
-  D: '#047857', // Dark shadow foliage
-  T: '#b45309', // Warm trunk bark
-  S: '#78350f', // Dark trunk shadow
-  '*': '#10b981',
-};
+const EG = '#10b981'; // Emerald Green
+const LG = '#86efac'; // Light Lime Green
+const DG = '#047857'; // Deep Forest Green
+const AT = '#b45309'; // Amber Trunk
+const DT = '#78350f'; // Dark Bark
 
-export const PalmTreeSprite: SpriteDefinition = Sprite.define(
-  'scenery_palm_tree',
-  'Tropical Palm Tree',
-  '#10b981',
-  {
-    close: Sprite.createColoredVariant(
-      `
-             .---.
-        .--/       \\--.
-     .-/   /   |   \\   \\-.
-   _/ /   /    |    \\   \\ \\_
-  /  /   /     |     \\   \\  \\
- /__/   /      |      \\   \\__\\
-       /____.-----.____\\
-             ( @ )
-              ) (
-             /   \\
-            (  #  )
-             \\   /
-              ) (
-             ( # )
-             /   \\
-      `,
-      palmColors,
-      `
-             LLLLL
-        GGGD       DGGG
-     LLD   G   G   G   DLL.
-   GG D   G    D    G   D GG
-  G  D   G     D     G   D  G
- DDDD   G      D      G   DDDD
-       DDDDDLLLLLDDDDD
-             T T T
-              S S
-             T   T
-            S  T  S
-             T   T
-              S S
-             T S T
-             T   T
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-         .--.
-      .-/ |  \\-.
-    _/ /  |   \\ \\_
-   /  /   |    \\  \\
-  /__/    |     \\__\\
-       .--'--.
-        ( @ )
-         ) (
-        ( # )
-        /   \\
-      `,
-      palmColors,
-      `
-         LLLL
-      GGD G  DGG
-    GG D  D   D GG
-   G  D   D    D  G
-  DDDD    D     DDDD
-       TTTTTTT
-        T T T
-         S S
-        T S T
-        T   T
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-        _\\|/_
-       (_/|\\_)
-         |||
-         |||
-         |||
-      `,
-      palmColors,
-      `
-        GGGGG
-       DDDDDDD
-         TTT
-         STS
-         TTT
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-        \\|/
-         |
-         |
-      `,
-      palmColors,
-      `
-        GGG
-         T
-         T
-      `
-    ),
-  }
-);
+export const PalmTreeSprite: SpriteDefinition = {
+  id: 'palm_tree',
+  name: 'Palm Tree',
+  category: 'VEGETATION_LARGE',
+  defaultColor: '#10b981',
+  worldWidth: 180,
+  worldHeight: 230,
+  visualScale: 1.05,
+  variants: {
+    close: {
+      width: 26,
+      height: 18,
+      anchorX: 13,
+      anchorY: 17,
+      lines: [
+        "      .---.     .---.     ",
+        "    ./  _  \\._./  _  \\.   ",
+        "  ./  /   \\     /   \\  \\. ",
+        " /_.-'     \\_._/     '-._\\",
+        "  '--.._  /     \\  _..--' ",
+        "        '(       )'       ",
+        "          \\     /         ",
+        "           )   (          ",
+        "          (  _  )         ",
+        "           )(_)(          ",
+        "          (     )         ",
+        "           )   (          ",
+        "          (  _  )         ",
+        "           )(_)(          ",
+        "          (     )         ",
+        "         (   _   )        ",
+        "        (___________)     ",
+        "       /=============//   ",
+      ],
+      colors: [
+        [LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG],
+        [LG, LG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, LG, LG, LG, LG],
+        [LG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, LG, LG, LG],
+        [EG, EG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, EG, EG],
+        [DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG],
+        ['', '', '', '', '', '', '', '', AT, AT, AT, AT, AT, AT, AT, AT, AT, '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', AT, AT, AT, AT, AT, AT, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', '', AT, AT, AT, AT, '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', AT, AT, DT, AT, AT, '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', '', AT, DT, AT, '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', AT, AT, AT, AT, AT, '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', '', AT, AT, AT, AT, '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', AT, AT, DT, AT, AT, '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', '', AT, DT, AT, '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', AT, AT, AT, AT, AT, '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', AT, AT, AT, DT, AT, AT, AT, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', DT, DT, DT, DT, DT, DT, DT, DT, DT, DT, DT, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', DT, DT, DT, DT, DT, DT, DT, DT, DT, DT, DT, DT, DT, '', '', '', '', '', '', ''],
+      ],
+    },
+    near: {
+      width: 17,
+      height: 12,
+      anchorX: 8,
+      anchorY: 11,
+      lines: [
+        "    .---. .---.  ",
+        "  ./ _   V   _ \\.",
+        " /_.' \\_  _/ '._\\",
+        "       )( )(     ",
+        "        ) (      ",
+        "       (   )     ",
+        "        ) (      ",
+        "       (   )     ",
+        "        ) (      ",
+        "       (   )     ",
+        "      (_____)    ",
+        "     /=======//  ",
+      ],
+      colors: [
+        [LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG],
+        [LG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, LG, LG],
+        [EG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, EG],
+        ['', '', '', '', '', '', AT, AT, AT, AT, AT, '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', AT, AT, AT, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', AT, AT, AT, AT, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', AT, AT, AT, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', AT, AT, AT, AT, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', AT, AT, AT, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', AT, AT, AT, AT, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', DT, DT, DT, DT, DT, DT, DT, '', '', '', '', ''],
+        ['', '', '', '', DT, DT, DT, DT, DT, DT, DT, DT, DT, '', '', '', ''],
+      ],
+    },
+    medium: {
+      width: 11,
+      height: 7,
+      anchorX: 5,
+      anchorY: 6,
+      lines: [
+        "  .--V--.  ",
+        " /_  |  _\\ ",
+        "   \\ | /   ",
+        "    |||    ",
+        "    |||    ",
+        "    |||    ",
+        "   /___\\   ",
+      ],
+      colors: [
+        [LG, LG, LG, LG, LG, LG, LG, LG, LG, LG, LG],
+        [EG, EG, EG, EG, EG, EG, EG, EG, EG, EG, EG],
+        [DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG],
+        ['', '', '', '', AT, AT, AT, '', '', '', ''],
+        ['', '', '', '', AT, AT, AT, '', '', '', ''],
+        ['', '', '', '', AT, AT, AT, '', '', '', ''],
+        ['', '', '', DT, DT, DT, DT, DT, '', '', ''],
+      ],
+    },
+    far: {
+      width: 5,
+      height: 4,
+      anchorX: 2,
+      anchorY: 3,
+      lines: [
+        " \\|/ ",
+        "--*--",
+        "  |  ",
+        " /_\\ ",
+      ],
+      colors: [
+        [LG, EG, LG, EG, LG],
+        [DG, DG, EG, DG, DG],
+        ['', '', AT, '', ''],
+        ['', DT, DT, DT, ''],
+      ],
+    },
+  },
+};

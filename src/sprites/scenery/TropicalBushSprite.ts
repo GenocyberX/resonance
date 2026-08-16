@@ -16,44 +16,48 @@ export const TropicalBushSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-          .-----.
-       .-'  *    '-.
-     .'   *    *    '.
-    /   *    *    *   \\
-   |___________________|
+          .-----.          
+       .-'  *    '-.       
+     .'   *    *    '.     
+    /   *    *    *   \\    
+   |___________________|   
+  /=====================\\  
       `,
       bushColors,
       `
-          LLLLL
-       LLD  F   DLL
-     DD   F    F    DD
-    G   F    F    F   G
-   DDDDDDDDDDDDDDDDDDDDD
+          LLLLL            
+       LLD  F   DLL        
+     DD   F    F    DD     
+    G   F    F    F   G    
+   DDDDDDDDDDDDDDDDDDDDD   
+  DDDDDDDDDDDDDDDDDDDDDDD  
       `
     ),
     near: Sprite.createColoredVariant(
       `
-        .---.
-      .'  *  '.
-     /  *   *  \\
-    |___________|
+        .---.      
+      .'  *  '.    
+     /  *   *  \\   
+    |___________|  
+   /=============\\ 
       `,
       bushColors,
       `
-        LLLL
-      LL  F  LL
-     G  F   F  G
-    DDDDDDDDDDDDD
+        LLLL       
+      LL  F  LL    
+     G  F   F  G   
+    DDDDDDDDDDDDD  
+   DDDDDDDDDDDDDDD 
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-       (***)
+       (***) 
       (_____)
       `,
       bushColors,
       `
-       LFLFG
+       LFLFG 
       DDDDDDD
       `
     ),
@@ -66,5 +70,11 @@ export const TropicalBushSprite: SpriteDefinition = Sprite.define(
        GGG
       `
     ),
+  },
+  {
+    category: 'VEGETATION_SMALL',
+    worldWidth: 90,
+    worldHeight: 70,
+    visualScale: 1.0,
   }
 );

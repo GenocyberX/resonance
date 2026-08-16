@@ -16,45 +16,49 @@ export const SmallBoatSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-            .----.
-           / [#]  \\
-         .============.
+            .----.      
+           / [#]  \\     
+         .============. 
         ~\\____________/~
-         ~~~~~~~~~~~~~~
+         ~~~~~~~~~~~~~~ 
+         ~  ~  ~  ~  ~  
       `,
       boatColors,
       `
-            WWWW
-           C CCCC C
-         HHHHHHHHHHHHHH
+            WWWW        
+           C CCCC C     
+         HHHHHHHHHHHHHH 
         RHHHHHHHHHHHHHHR
-         RRRRRRRRRRRRRR
+         RRRRRRRRRRRRRR 
+         R  R  R  R  R  
       `
     ),
     near: Sprite.createColoredVariant(
       `
-           .---.
-         .=======.
-        ~\\_______/~
+           .---.     
+         .=======.   
+        ~\\_______/~  
+         ~~~~~~~~~   
       `,
       boatColors,
       `
-           WWWW
-         HHHHHHHHH
-        RHHHHHHHHHR
+           WWWW      
+         HHHHHHHHH   
+        RHHHHHHHHHR  
+         RRRRRRRRR   
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-          /===\\
-         \\_____/
-         ~~~~~~~
+          /===\\  
+         \\_____/ 
+         ~~~~~~~ 
       `,
       boatColors,
       `
-          WWWW
-         HHHHHHH
-         RRRRRRR
+          WWWW   
+         HHHHHHH 
+         RRRRRRR 
       `
     ),
     far: Sprite.createColoredVariant(
@@ -68,5 +72,11 @@ export const SmallBoatSprite: SpriteDefinition = Sprite.define(
          RRRRR
       `
     ),
+  },
+  {
+    category: 'WATERCRAFT',
+    worldWidth: 120,
+    worldHeight: 80,
+    visualScale: 1.0,
   }
 );

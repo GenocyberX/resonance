@@ -1,128 +1,162 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const lighthouseColors = {
-  Y: '#fef08a', // Beacon light glow
-  L: '#fbbf24', // Lantern glass
-  D: '#0f172a', // Dark dome / gallery
-  R: '#ef4444', // Red stripe band
-  W: '#f8fafc', // White stripe band
-  B: '#334155', // Stone foundation
-  '*': '#ef4444',
-};
+const GL = '#fde047'; // Golden Beacon Glow
+const BL = '#38bdf8'; // Lantern Glass
+const RD = '#ef4444'; // Red Tower Stripes
+const WT = '#f8fafc'; // White Granite Tower
+const DK = '#1e293b'; // Balcony Railing / Roof
+const RK = '#475569'; // Base Rock Platform
 
-export const LighthouseSprite: SpriteDefinition = Sprite.define(
-  'scenery_lighthouse',
-  'Coastal Lighthouse Landmark',
-  '#ef4444',
-  {
-    close: Sprite.createColoredVariant(
-      `
-            .---.
-           / (o) \\
-          '======='
-         <=========>
-           /     \\
-          /  [#]  \\
-         |=========|
-         |         |
-         |  [###]  |
-         |=========|
-         /         \\
-        /   [###]   \\
-       |=============|
-       |  .-------.  |
-       |  |  [#]  |  |
-       |__|_______|__|
-      `,
-      lighthouseColors,
-      `
-            DDDDD
-           L YYY L
-          DDDDDDDDD
-         YYYYYYYYYYY
-           R     R
-          R  WWW  R
-         WWWWWWWWWWW
-         W         W
-         W  RRR    W
-         RRRRRRRRRRR
-         R         R
-        R   WWW     R
-       WWWWWWWWWWWWWWW
-       B  BBBBBBBBB  B
-       B  B  WWW  B  B
-       BBBBBBBBBBBBBBB
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-           .---.
-          /(o)o)\\
-         <=======>
-          /     \\
-         |=======|
-         |  [#]  |
-         |=======|
-         /       \\
-        |=========|
-        |  |===|  |
-        |__|___|__|
-      `,
-      lighthouseColors,
-      `
-           DDDDD
-          LYYYYYL
-         YYYYYYYYY
-          R     R
-         WWWWWWWWW
-         W  RRR  W
-         RRRRRRRRR
-         R       R
-        WWWWWWWWWWW
-        B  BBBBBB B
-        BBBBBBBBBBB
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-          .(o).
-         <=====>
-          /   \\
-         |=====|
-         | [#] |
-         |=====|
-         | [d] |
-         |_____|
-      `,
-      lighthouseColors,
-      `
-          DYYYD
-         YYYYYYY
-          R   R
-         WWWWWWW
-         W RRR W
-         RRRRRRR
-         B WWW B
-         BBBBBBB
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-          (o)
-          / \\
-         |===|
-         |===|
-         |___|
-      `,
-      lighthouseColors,
-      `
-          YYY
-          R R
-         WWWWW
-         RRRRR
-         BBBBB
-      `
-    ),
-  }
-);
+export const LighthouseSprite: SpriteDefinition = {
+  id: 'lighthouse',
+  name: 'Coastal Lighthouse',
+  category: 'LANDMARK',
+  defaultColor: '#ef4444',
+  worldWidth: 160,
+  worldHeight: 420,
+  visualScale: 1.1,
+  variants: {
+    close: {
+      width: 19,
+      height: 22,
+      anchorX: 9,
+      anchorY: 21,
+      lines: [
+        "        /\\         ",
+        "       /  \\        ",
+        "      /____\\       ",
+        "      |*GL*|       ",
+        "     [======]      ",
+        "      |    |       ",
+        "      | RD |       ",
+        "      |====|       ",
+        "     /      \\      ",
+        "    /   WT   \\     ",
+        "    |========|     ",
+        "    |   RD   |     ",
+        "    |========|     ",
+        "   /    WT    \\    ",
+        "  /   [====]   \\   ",
+        "  |     RD     |   ",
+        "  |============|   ",
+        " /      WT      \\  ",
+        "/      (==)      \\ ",
+        "|________________| ",
+        "  /============\\   ",
+        " /==============\\  ",
+      ],
+      colors: [
+        ['', '', '', '', '', '', '', '', DK, DK, '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', DK, DK, DK, DK, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', DK, DK, DK, DK, DK, DK, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', BL, GL, GL, GL, GL, BL, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', DK, DK, DK, DK, DK, DK, DK, DK, '', '', '', '', '', ''],
+        ['', '', '', '', '', '', RD, RD, RD, RD, RD, RD, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', RD, RD, RD, RD, RD, RD, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', RD, RD, RD, RD, RD, RD, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', WT, WT, WT, WT, WT, WT, WT, WT, '', '', '', '', '', ''],
+        ['', '', '', '', WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, '', '', '', '', ''],
+        ['', '', '', '', WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, '', '', '', '', ''],
+        ['', '', '', '', RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, '', '', '', '', ''],
+        ['', '', '', '', RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, '', '', '', '', ''],
+        ['', '', '', WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, '', '', '', ''],
+        ['', '', WT, WT, WT, DK, DK, DK, DK, DK, DK, WT, WT, WT, WT, WT, '', '', ''],
+        ['', '', RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, '', '', ''],
+        ['', '', RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, RD, '', '', ''],
+        ['', WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, '', ''],
+        [WT, WT, WT, WT, WT, WT, DK, DK, DK, DK, WT, WT, WT, WT, WT, WT, WT, WT, ''],
+        [RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, ''],
+        ['', '', RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, '', '', ''],
+        ['', RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, '', ''],
+      ],
+    },
+    near: {
+      width: 13,
+      height: 15,
+      anchorX: 6,
+      anchorY: 14,
+      lines: [
+        "     /\\      ",
+        "    /  \\     ",
+        "    |*GL*|   ",
+        "   [====]    ",
+        "    |RD|     ",
+        "    |==|     ",
+        "   / WT \\    ",
+        "   |====|    ",
+        "   | RD |    ",
+        "   |====|    ",
+        "  /  WT  \\   ",
+        "  |  RD  |   ",
+        " /   WT   \\  ",
+        "|__________| ",
+        "/==========\\ ",
+      ],
+      colors: [
+        ['', '', '', '', '', DK, DK, '', '', '', '', '', ''],
+        ['', '', '', '', DK, DK, DK, DK, '', '', '', '', ''],
+        ['', '', '', '', BL, GL, GL, BL, '', '', '', '', ''],
+        ['', '', '', DK, DK, DK, DK, DK, DK, '', '', '', ''],
+        ['', '', '', '', RD, RD, RD, RD, '', '', '', '', ''],
+        ['', '', '', '', RD, RD, RD, RD, '', '', '', '', ''],
+        ['', '', '', WT, WT, WT, WT, WT, WT, '', '', '', ''],
+        ['', '', '', WT, WT, WT, WT, WT, WT, '', '', '', ''],
+        ['', '', '', RD, RD, RD, RD, RD, RD, '', '', '', ''],
+        ['', '', '', RD, RD, RD, RD, RD, RD, '', '', '', ''],
+        ['', '', WT, WT, WT, WT, WT, WT, WT, WT, '', '', ''],
+        ['', '', RD, RD, RD, RD, RD, RD, RD, RD, '', '', ''],
+        ['', WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, '', ''],
+        [RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, ''],
+        [RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, RK, ''],
+      ],
+    },
+    medium: {
+      width: 9,
+      height: 9,
+      anchorX: 4,
+      anchorY: 8,
+      lines: [
+        "   /\\    ",
+        "  |*GL*| ",
+        "  [====] ",
+        "   |RD|  ",
+        "  / WT \\ ",
+        "  | RD | ",
+        " /  WT  \\",
+        "|_______|",
+        "/=======\\",
+      ],
+      colors: [
+        ['', '', '', DK, DK, '', '', '', ''],
+        ['', '', BL, GL, GL, BL, '', '', ''],
+        ['', '', DK, DK, DK, DK, DK, DK, ''],
+        ['', '', '', RD, RD, RD, '', '', ''],
+        ['', '', WT, WT, WT, WT, WT, '', ''],
+        ['', '', RD, RD, RD, RD, RD, '', ''],
+        ['', WT, WT, WT, WT, WT, WT, WT, ''],
+        [RK, RK, RK, RK, RK, RK, RK, RK, RK],
+        [RK, RK, RK, RK, RK, RK, RK, RK, RK],
+      ],
+    },
+    far: {
+      width: 5,
+      height: 5,
+      anchorX: 2,
+      anchorY: 4,
+      lines: [
+        "  ^  ",
+        " |*| ",
+        " |R| ",
+        " |W| ",
+        "|___|",
+      ],
+      colors: [
+        ['', '', DK, '', ''],
+        ['', BL, GL, BL, ''],
+        ['', RD, RD, RD, ''],
+        ['', WT, WT, WT, ''],
+        [RK, RK, RK, RK, RK],
+      ],
+    },
+  },
+};

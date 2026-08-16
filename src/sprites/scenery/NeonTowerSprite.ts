@@ -50,5 +50,11 @@ export const NeonTowerSprite: SpriteDefinition = Sprite.define(
        |::|
       `
     ),
+  },
+  {
+    category: 'LANDMARK',
+    worldWidth: 200,
+    worldHeight: 350,
+    visualScale: 1.0,
   }
 );

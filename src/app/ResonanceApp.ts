@@ -75,6 +75,13 @@ export class ResonanceApp {
     if (typeof window === 'undefined') return;
 
     const params = new URLSearchParams(window.location.search);
+    const hasGallery = params.has('gallery') || params.get('sprites') === '1' || params.get('gallery') === 'sprites';
+    if (hasGallery) {
+      this.worldEngine.setGalleryMode(true);
+      console.info('[Resonance] Sprite Gallery & LOD Inspection Mode active.');
+      return;
+    }
+
     const hasVisualTest = params.has('visualTest') || params.has('scene') || params.has('time') || params.has('golden') || params.has('stability');
 
     if (hasVisualTest) {
@@ -118,23 +125,51 @@ export class ResonanceApp {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
       switch (e.key) {
+        case 'g':
+        case 'G':
+          if (this.worldEngine.getGalleryMode()) {
+            this.worldEngine.nextGallerySprite();
+          } else {
+            this.worldEngine.setGalleryMode(true);
+            console.info('[Resonance] Entered Sprite Gallery Mode');
+          }
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          if (this.worldEngine.getGalleryMode()) {
+            this.worldEngine.nextGallerySprite();
+          }
+          break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          if (this.worldEngine.getGalleryMode()) {
+            this.worldEngine.prevGallerySprite();
+          }
+          break;
         case '1':
+          this.worldEngine.setGalleryMode(false);
           this.worldEngine.setVisualTestMode(true, 'FLAT_STRAIGHT');
           console.info('[Resonance Test] Scenario: FLAT_STRAIGHT');
           break;
         case '2':
+          this.worldEngine.setGalleryMode(false);
           this.worldEngine.setVisualTestMode(true, 'FLAT_CURVE_LEFT');
           console.info('[Resonance Test] Scenario: FLAT_CURVE_LEFT');
           break;
         case '3':
+          this.worldEngine.setGalleryMode(false);
           this.worldEngine.setVisualTestMode(true, 'FLAT_CURVE_RIGHT');
           console.info('[Resonance Test] Scenario: FLAT_CURVE_RIGHT');
           break;
         case '4':
+          this.worldEngine.setGalleryMode(false);
           this.worldEngine.setVisualTestMode(true, 'HILL');
           console.info('[Resonance Test] Scenario: HILL');
           break;
         case '5':
+          this.worldEngine.setGalleryMode(false);
           this.worldEngine.setVisualTestMode(true, 'S_CURVE');
           console.info('[Resonance Test] Scenario: S_CURVE');
           break;
@@ -146,6 +181,7 @@ export class ResonanceApp {
           break;
         case '0':
         case 'Escape':
+          this.worldEngine.setGalleryMode(false);
           this.worldEngine.setVisualTestMode(false);
           console.info('[Resonance] Returned to Normal Procedural Mode');
           break;

@@ -1,92 +1,138 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const treeColors = {
-  L: '#86efac', // Sunlit leaf highlight
-  G: '#16a34a', // Lush green canopy
-  D: '#14532d', // Deep canopy shadow
-  T: '#713f12', // Wood trunk
-  '*': '#16a34a',
-};
+const LG = '#86efac'; // Light Lime Canopy
+const MG = '#16a34a'; // Mid Foliage Green
+const DG = '#14532d'; // Dark Canopy Shadow
+const TR = '#78350f'; // Wood Trunk Bark
 
-export const DeciduousTreeSprite: SpriteDefinition = Sprite.define(
-  'scenery_deciduous_tree',
-  'Lush Deciduous Tree',
-  '#16a34a',
-  {
-    close: Sprite.createColoredVariant(
-      `
-              .--------.
-           .-'  *  * *  '-.
-         .'  * *   *  * *  '.
-        /  *  *  *  *  *  *  \\
-       |  * *  *   *  *  * *  |
-       | *   *   *   *   *  * |
-        \\  *  *  *  *  *  *  /
-         '.________________.'
-                |    |
-                |____|
-      `,
-      treeColors,
-      `
-              LLLLLLLL
-           LLG  L  L G  GGD
-         LL  G G   G  G G  GDD
-        LL G  G  G  D  D  D  DDD
-       LL  G G  G   D  D  D D  DDD
-       GG D   D   D   D   D  D DDD
-        GG D  D  D  D  D  D  DDD
-         DDDDDDDDDDDDDDDDDD
-                TTTT
-                TTTT
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-            .------.
-          .-' *  *  '-.
-         / *  *  *  *  \\
-        | *  *  *  *  * |
-         \\____________/
-              |  |
-      `,
-      treeColors,
-      `
-            LLLLLL
-          LLG L  G  GGD
-         LL G  D  D  DDD
-        GG D  D  D  D DDD
-         DDDDDDDDDDDD
-              TTTT
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-           .----.
-          / *  * \\
-         |________|
-            ||
-      `,
-      treeColors,
-      `
-           LLLL
-          LL G GDD
-         DDDDDDDD
-            TT
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-           (@@)
-           (@@)
-            ||
-      `,
-      treeColors,
-      `
-           GG
-           DD
-           TT
-      `
-    ),
-  }
-);
+export const DeciduousTreeSprite: SpriteDefinition = {
+  id: 'deciduous_tree',
+  name: 'Lush Oak Tree',
+  category: 'VEGETATION_LARGE',
+  defaultColor: '#16a34a',
+  worldWidth: 170,
+  worldHeight: 200,
+  visualScale: 1.0,
+  variants: {
+    close: {
+      width: 21,
+      height: 17,
+      anchorX: 10,
+      anchorY: 16,
+      lines: [
+        "      _..---.._      ",
+        "   .-'  .   .  '-.   ",
+        "  / .  . . .   .  \\  ",
+        " |   .   ..   .    | ",
+        " | .   .    .   .  | ",
+        "  \\ .   .   .     /  ",
+        "   '--._______.--'   ",
+        "       /  ||  \\      ",
+        "      /   ||   \\     ",
+        "          ||         ",
+        "          ||         ",
+        "          ||         ",
+        "          ||         ",
+        "          ||         ",
+        "        __||__       ",
+        "       /======\\      ",
+        "      /========\\     ",
+      ],
+      colors: [
+        ['', '', '', '', '', '', LG, LG, LG, LG, LG, LG, LG, LG, LG, '', '', '', '', '', ''],
+        ['', '', '', LG, LG, LG, LG, MG, MG, MG, LG, LG, LG, LG, LG, LG, LG, '', '', '', ''],
+        ['', '', LG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, LG, '', '', ''],
+        ['', LG, MG, MG, MG, DG, DG, DG, MG, MG, MG, DG, DG, DG, MG, MG, MG, MG, LG, '', ''],
+        ['', LG, MG, MG, DG, DG, DG, DG, DG, MG, DG, DG, DG, DG, DG, MG, MG, MG, LG, '', ''],
+        ['', '', LG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, LG, '', '', ''],
+        ['', '', '', LG, LG, DG, DG, DG, DG, DG, DG, DG, DG, DG, LG, LG, '', '', '', '', ''],
+        ['', '', '', '', '', '', TR, TR, TR, TR, TR, TR, TR, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', TR, TR, TR, TR, TR, TR, TR, TR, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', TR, TR, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', TR, TR, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', TR, TR, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', TR, TR, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', TR, TR, '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', TR, TR, TR, TR, TR, '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', TR, TR, TR, TR, TR, TR, TR, TR, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', TR, TR, TR, TR, TR, TR, TR, TR, TR, TR, '', '', '', '', '', ''],
+      ],
+    },
+    near: {
+      width: 15,
+      height: 12,
+      anchorX: 7,
+      anchorY: 11,
+      lines: [
+        "    .-----.    ",
+        "  .-' . . '-.  ",
+        " / . . . . . \\ ",
+        "| . . . . . . |",
+        " \\ . . . . . / ",
+        "  '--.____.-'  ",
+        "     / || \\    ",
+        "       ||      ",
+        "       ||      ",
+        "       ||      ",
+        "     __||__    ",
+        "    /======\\   ",
+      ],
+      colors: [
+        ['', '', '', '', LG, LG, LG, LG, LG, LG, LG, '', '', '', ''],
+        ['', '', LG, LG, MG, MG, MG, MG, MG, MG, MG, LG, LG, '', ''],
+        ['', LG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, LG, ''],
+        [LG, MG, MG, DG, DG, DG, DG, DG, DG, DG, DG, MG, MG, MG, LG],
+        ['', LG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, LG, ''],
+        ['', '', LG, LG, DG, DG, DG, DG, DG, DG, DG, LG, LG, '', ''],
+        ['', '', '', '', '', TR, TR, TR, TR, TR, '', '', '', '', ''],
+        ['', '', '', '', '', '', '', TR, TR, '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', TR, TR, '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', TR, TR, '', '', '', '', '', ''],
+        ['', '', '', '', '', TR, TR, TR, TR, TR, '', '', '', '', ''],
+        ['', '', '', '', TR, TR, TR, TR, TR, TR, TR, '', '', '', ''],
+      ],
+    },
+    medium: {
+      width: 9,
+      height: 7,
+      anchorX: 4,
+      anchorY: 6,
+      lines: [
+        "  .---.  ",
+        " / . . \\ ",
+        "| . . . |",
+        " \\____/  ",
+        "   |||   ",
+        "   |||   ",
+        "  _|||_  ",
+      ],
+      colors: [
+        ['', '', LG, LG, LG, LG, LG, '', ''],
+        ['', LG, MG, MG, MG, MG, MG, LG, ''],
+        [LG, MG, DG, DG, DG, DG, DG, MG, LG],
+        ['', LG, DG, DG, DG, DG, DG, LG, ''],
+        ['', '', '', TR, TR, TR, '', '', ''],
+        ['', '', '', TR, TR, TR, '', '', ''],
+        ['', '', TR, TR, TR, TR, TR, '', ''],
+      ],
+    },
+    far: {
+      width: 5,
+      height: 4,
+      anchorX: 2,
+      anchorY: 3,
+      lines: [
+        " .-. ",
+        "( . )",
+        " '-' ",
+        "  |  ",
+      ],
+      colors: [
+        ['', LG, LG, LG, ''],
+        [LG, MG, MG, MG, LG],
+        ['', DG, DG, DG, ''],
+        ['', '', TR, '', ''],
+      ],
+    },
+  },
+};

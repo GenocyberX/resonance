@@ -15,75 +15,89 @@ export const StreetLampSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-            .---.
-           / (o) \\
-          '---.---'
-              |
-              |
-              |
-              |
-              |
-              |
+            .---.    
+           / (o) \\   
+          '---.---'  
+              |      
+              |      
+              |      
+              |      
+              |      
+              |      
+              |      
+             _|_     
       `,
       lampColors,
       `
-            GGGGG
-           G YYY G
-          GGGGGGGGG
-              P
-              P
-              P
-              P
-              P
-              P
+            GGGGG    
+           G YYY G   
+          GGGGGGGGG  
+              P      
+              P      
+              P      
+              P      
+              P      
+              P      
+              P      
+             PPP     
       `
     ),
     near: Sprite.createColoredVariant(
       `
-           .---.
-          '-(o)-'
-             |
-             |
-             |
-             |
+           .---.  
+          '-(o)-' 
+             |    
+             |    
+             |    
+             |    
+             |    
+            _|_   
       `,
       lampColors,
       `
-           GGGGG
-          GGYYYGG
-             P
-             P
-             P
-             P
+           GGGGG  
+          GGYYYGG 
+             P    
+             P    
+             P    
+             P    
+             P    
+            PPP   
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-          .(o).
-            |
-            |
-            |
+          .(o). 
+            |   
+            |   
+            |   
       `,
       lampColors,
       `
-          GYYYG
-            P
-            P
-            P
+          GYYYG 
+            P   
+            P   
+            P   
       `
     ),
     far: Sprite.createColoredVariant(
       `
           (o)
-           |
-           |
+           | 
+           | 
       `,
       lampColors,
       `
           YYY
-           P
-           P
+           P 
+           P 
       `
     ),
+  },
+  {
+    category: 'ROADSIDE',
+    worldWidth: 90,
+    worldHeight: 170,
+    visualScale: 1.0,
   }
 );

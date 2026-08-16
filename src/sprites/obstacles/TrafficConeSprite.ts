@@ -36,5 +36,11 @@ export const TrafficConeSprite: SpriteDefinition = Sprite.define(
         ||
       `
     ),
+  },
+  {
+    category: 'OBSTACLE',
+    worldWidth: 40,
+    worldHeight: 45,
+    visualScale: 1.0,
   }
 );

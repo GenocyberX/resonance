@@ -17,39 +17,41 @@ export const PierSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-              (o)
-               |
-         .=====|===========================.
-        /|  |  |  |  |  |  |  |  |  |  |  |\\
+              (o)                            
+               |                             
+         .=====|===========================. 
+        /|  |  |  |  |  |  |  |  |  |  |  |\\ 
        /_|__|__|__|__|__|__|__|__|__|__|__|\\_
-         |     |     |     |     |     |
-       ~~|~~~~~|~~~~~|~~~~~|~~~~~|~~~~~|~~~~
+         |     |     |     |     |     |     
+       ~~|~~~~~|~~~~~|~~~~~|~~~~~|~~~~~|~~~~ 
+       ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
       `,
       pierColors,
       `
-              LLL
-               M
-         TTTTTTMTTTTTTTTTTTTTTTTTTTTTTTTTTT
-        TT  T  M  T  T  T  T  T  T  T  T  TT
+              LLL                            
+               M                             
+         TTTTTTMTTTTTTTTTTTTTTTTTTTTTTTTTTT  
+        TT  T  M  T  T  T  T  T  T  T  T  TT 
        TTTTTTTTMTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-         P     P     P     P     P     P
-       WWPWWWWWPWWWWWPWWWWWPWWWWWPWWWWWPWWWW
+         P     P     P     P     P     P     
+       WWPWWWWWPWWWWWPWWWWWPWWWWWPWWWWWPWWWW 
+       W W W W W W W W W W W W W W W W W W W 
       `
     ),
     near: Sprite.createColoredVariant(
       `
-             (o)
-        .=====|================.
+             (o)                 
+        .=====|================. 
        /_|__|__|__|__|__|__|__|\\_
-         |   |   |   |   |   |
+         |   |   |   |   |   |   
        ~~|~~~|~~~|~~~|~~~|~~~|~~~
       `,
       pierColors,
       `
-             LLL
-        TTTTTTMTTTTTTTTTTTTTTTTT
+             LLL                 
+        TTTTTTMTTTTTTTTTTTTTTTTT 
        TTTTTTTTMTTTTTTTTTTTTTTTTT
-         P   P   P   P   P   P
+         P   P   P   P   P   P   
        WWPWWWPWWWPWWWPWWWPWWWPWWW
       `
     ),
@@ -77,5 +79,11 @@ export const PierSprite: SpriteDefinition = Sprite.define(
         WPWWPWWPWWPW
       `
     ),
+  },
+  {
+    category: 'LANDMARK',
+    worldWidth: 260,
+    worldHeight: 120,
+    visualScale: 1.0,
   }
 );

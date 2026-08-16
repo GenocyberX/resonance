@@ -16,67 +16,77 @@ export const ShortPalmSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-         _  \\ | /  _
-       _(_)-.---.-(_)_
-     _(_) /   |   \\ (_)
+         _  \\ | /  _    
+       _(_)-.---.-(_)_  
+     _(_) /   |   \\ (_) 
     /  / /    |    \\ \\  \\
    /__/ /     |     \\ \\__\\
-         '--.===.--'
-            / | \\
-            | | |
+         '--.===.--'    
+            / | \\       
+            | | |       
+           _| | |_      
       `,
       shortPalmColors,
       `
-         L  L G L  L
-       GGGG LLLLL GGGG
-     DDDD G   G   G DDD
+         L  L G L  L    
+       GGGG LLLLL GGGG  
+     DDDD G   G   G DDD 
     D  D G    D    G D  D
    DDDD G     D     G DDDD
-         TTTTTTTTTTT
-            T T T
-            T T T
+         TTTTTTTTTTT    
+            T T T       
+            T T T       
+           TTTTTTT      
       `
     ),
     near: Sprite.createColoredVariant(
       `
-       \\ \\ | / /
-      -(_)-+-(_)-
+       \\ \\ | / /  
+      -(_)-+-(_)- 
      /  /  |  \\  \\
-       '-.===.-'
-          | |
+       '-.===.-'  
+          | |     
+         _| |_    
       `,
       shortPalmColors,
       `
-       L L G L L
-      GGGGGDGGGGG
+       L L G L L  
+      GGGGGDGGGGG 
      D  D  D  D  D
-       TTTTTTTTT
-          T T
+       TTTTTTTTT  
+          T T     
+         TTTTT    
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-       \\|/ \\|/
+       \\|/ \\|/ 
       --(_+_)--
-         | |
+         | |   
       `,
       shortPalmColors,
       `
-       LLL GGG
+       LLL GGG 
       DDDDDDDDD
-         TTT
+         TTT   
       `
     ),
     far: Sprite.createColoredVariant(
       `
        \\|/
-        |
+        | 
       `,
       shortPalmColors,
       `
        GGG
-        T
+        T 
       `
     ),
+  },
+  {
+    category: 'VEGETATION_SMALL',
+    worldWidth: 120,
+    worldHeight: 110,
+    visualScale: 1.0,
   }
 );

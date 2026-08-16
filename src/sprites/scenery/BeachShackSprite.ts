@@ -17,61 +17,77 @@ export const BeachShackSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-              .--------------.
-          .--/   /\\  /\\  /\\   \\--.
-        ./______/__\\/__\\/__\\______\\.
-         |   (o)              (o)   |
-         |    |====[======]====|    |
-         |====|                |====|
-         |  | |   |        |   | |  |
-         |  | |   |        |   | |  |
+              .--------------.             
+          .--/   /\\  /\\  /\\   \\--.         
+        ./______/__\\/__\\/__\\______\\.       
+       /============================\\      
+      /______________________________\\     
+         |   (o)              (o)   |      
+         |    |====[======]====|    |      
+         |====|                |====|      
+         |  | |   |        |   | |  |      
+         |  | |   |        |   | |  |      
+         |  | |   |        |   | |  |      
+         |__|_|___|________|___|_|__|      
+        /============================\\     
       `,
       shackColors,
       `
-              WWWWWWWWWWWWWW
-          RRRR   WW  WW  WW   RRRR
-        RRRRRRRRRRRRRRRRRRRRRRRRRRRR
-         T   YYY              YYY   T
-         T    TCCCCCCCCCCCCCCCT     T
-         TTTTTT                TTTTTT
-         T  T T   T        T   T T  T
-         T  T T   T        T   T T  T
+              WWWWWWWWWWWWWW               
+          RRRR   WW  WW  WW   RRRR         
+        RRRRRRRRRRRRRRRRRRRRRRRRRRRR       
+       WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW      
+      RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR     
+         T   YYY              YYY   T      
+         T    TCCCCCCCCCCCCCCCT     T      
+         TTTTTT                TTTTTT      
+         T  T T   T        T   T T  T      
+         T  T T   T        T   T T  T      
+         T  T T   T        T   T T  T      
+         TTTTTTTTTTTTTTTTTTTTTTTTTTTT      
+        TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT     
       `
     ),
     near: Sprite.createColoredVariant(
       `
-            .------------.
-          ./  /\\  /\\  /\\  \\.
-         ./________________\\.
-          | (o)        (o) |
-          |===[========]===|
-          | |            | |
+            .------------.    
+          ./  /\\  /\\  /\\  \\.  
+         ./________________\\. 
+        /====================\\
+         | (o)        (o) |   
+         |===[========]===|   
+         | |            | |   
+         |_|____________|_|   
       `,
       shackColors,
       `
-            WWWWWWWWWWWW
-          RR  WW  WW  WW  RR
-         RRRRRRRRRRRRRRRRRRRR
-          T YYY        YYY T
-          TTTCCCCCCCCCCCCCTTT
-          T T            T T
+            WWWWWWWWWWWW      
+          RR  WW  WW  WW  RR  
+         RRRRRRRRRRRRRRRRRRRR 
+        WWWWWWWWWWWWWWWWWWWWWW
+         T YYY        YYY T   
+         TTTCCCCCCCCCCCCCTTT  
+         T T            T T   
+         TTTTTTTTTTTTTTTTTT   
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-           .----------.
-          /____________\\
-          | (o)    (o) |
-          |============|
-          |            |
+           .----------.  
+          /____________\\ 
+          | (o)    (o) | 
+          |============| 
+          |            | 
+          |____________| 
       `,
       shackColors,
       `
-           WWWWWWWWWW
-          RRRRRRRRRRRRRR
-          T YYY    YYY T
+           WWWWWWWWWW    
+          RRRRRRRRRRRRRR 
+          T YYY    YYY T 
           TTTCCCCCCCCCTTT
-          T            T
+          T            T 
+          TTTTTTTTTTTTTT 
       `
     ),
     far: Sprite.createColoredVariant(
@@ -82,10 +98,16 @@ export const BeachShackSprite: SpriteDefinition = Sprite.define(
       `,
       shackColors,
       `
-          RRRRRR
-          TTTTTT
-          TTTTTT
+          RRRRRR  
+          TTTTTT  
+          TTTTTT  
       `
     ),
+  },
+  {
+    category: 'BUILDING',
+    worldWidth: 200,
+    worldHeight: 220,
+    visualScale: 1.0,
   }
 );

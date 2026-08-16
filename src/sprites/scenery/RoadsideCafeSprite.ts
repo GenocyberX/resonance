@@ -19,65 +19,79 @@ export const RoadsideCafeSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-                 .-------.
-               ./  * * *  \\.
-             .-------------.
-            /               \\
-         .---------------------.
-        /\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\
-        |  .------.   .------.  |
-        |  | #### |   | #### |  |
-        |  | #### | | | #### |  |
-        |__|______|_|_|______|__|
+                 .-------.                 
+               ./  * * *  \\.               
+             .-------------.               
+            /               \\              
+         .---------------------.           
+        /\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\           
+        |  .------.   .------.  |          
+        |  | #### |   | #### |  |          
+        |  | #### | | | #### |  |          
+        |  | #### | | | #### |  |          
+        |  '------' | '------'  |          
+        |           |           |          
+        |___________|___________|          
+       /=========================\\         
       `,
       cafeColors,
       `
-                 NNNNNNNNN
-               NN  Y Y Y  NN
-             BBBBBBBBBBBBBBB
-            B               B
-         BBBBBBBBBBBBBBBBBBBBBBB
-        AWAWAWAWAWAWAWAWAWAWAWAW
-        B  GGGGGG   D GGGGGG  B
-        B  G GGG G  D G GGG G B
-        B  G GGG G  D G GGG G B
-        BBBDDDDDDDDDDDDDDDDDDDBB
+                 NNNNNNNNN                 
+               NN  Y Y Y  NN               
+             BBBBBBBBBBBBBBB               
+            B               B              
+         BBBBBBBBBBBBBBBBBBBBBBB           
+        AWAWAWAWAWAWAWAWAWAWAWAW           
+        B  GGGGGG   D GGGGGG  B          
+        B  G GGG G  D G GGG G B          
+        B  G GGG G  D G GGG G B          
+        B  G GGG G  D G GGG G B          
+        B  GGGGGG   D GGGGGG  B          
+        B  DDDDDD   D DDDDDD  B          
+        BBBDDDDDDDDDDDDDDDDDDDBB          
+       DDDDDDDDDDDDDDDDDDDDDDDDD          
       `
     ),
     near: Sprite.createColoredVariant(
       `
-               .---.
-             .-------.
-           .-----------.
-          /\\/\\/\\/\\/\\/\\/\\
-          | .---. .---. |
-          | |###| |###| |
-          |_|___|_|___|_|
+               .---.       
+             .-------.     
+           .-----------.   
+          /\\/\\/\\/\\/\\/\\/\\   
+          | .---. .---. |  
+          | |###| |###| |  
+          | |###| |###| |  
+          |_|___|_|___|_|  
+         /===============\\ 
       `,
       cafeColors,
       `
-               NNNNN
-             BBBBBBBBB
-           BBBBBBBBBBBBB
-          AWAWAWAWAWAWAW
-          B GGGGG GGGGG B
-          B G GGG G GGG B
-          BBDDDDDBDDBDDBB
+               NNNNN       
+             BBBBBBBBB     
+           BBBBBBBBBBBBB   
+          AWAWAWAWAWAWAW   
+          B GGGGG GGGGG B  
+          B G GGG G GGG B  
+          B GGGGG GGGGG B  
+          BBDDDDDBDDBDDBB  
+         DDDDDDDDDDDDDDDDD 
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-             .-----.
-            /\\/\\/\\/\\
-            | [###] |
-            |_______|
+             .-----.   
+            /\\/\\/\\/\\   
+            | [###] |  
+            | [###] |  
+            |_______|  
       `,
       cafeColors,
       `
-             BBBBBBB
-            AWAWAWAW
-            B GGGGG B
-            BBBBBBBBB
+             BBBBBBB   
+            AWAWAWAW   
+            B GGGGG B  
+            B GGGGG B  
+            BBBBBBBBB  
       `
     ),
     far: Sprite.createColoredVariant(
@@ -93,5 +107,11 @@ export const RoadsideCafeSprite: SpriteDefinition = Sprite.define(
             BBBBBBB
       `
     ),
+  },
+  {
+    category: 'BUILDING',
+    worldWidth: 220,
+    worldHeight: 250,
+    visualScale: 1.0,
   }
 );

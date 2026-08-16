@@ -16,59 +16,61 @@ export const LifeguardHutSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-            .---/\\---.
-          ./__________\\.
-          |  [#] (O) [#]  |
-          |_______________|
-           /|   |   |   |\\
-          / |   |   |   | \\
-         /  |   |===|   |  \\
+            .---/\\---.       
+          ./__________\\.     
+          |  [#] (O) [#]  |  
+          |_______________|  
+           /|   |   |   |\\   
+          / |   |   |   | \\  
+         /  |   |===|   |  \\ 
         '==================='
       `,
       hutColors,
       `
-            RRRRRRRRRR
-          RRRRRRRRRRRRRR
-          W  GGG RRR GGG  W
-          WWWWWWWWWWWWWWWWW
-           TT   T   T   TT
-          T T   T   T   T T
-         T  T   T T T   T  T
+            RRRRRRRRRR       
+          RRRRRRRRRRRRRR     
+          W  GGG RRR GGG  W  
+          WWWWWWWWWWWWWWWWW  
+           TT   T   T   TT   
+          T T   T   T   T T  
+         T  T   T T T   T  T 
         TTTTTTTTTTTTTTTTTTTTT
       `
     ),
     near: Sprite.createColoredVariant(
       `
-          .-/\\-.
-        ./______\\.
-        | [#](O) |
-        |________|
-         /|  | |\\
-        / |==| | \\
+          .-/\\-.    
+        ./______\\.  
+        | [#](O) |  
+        |________|  
+         /|  | |\\   
+        / |==| | \\  
+       '==========' 
       `,
       hutColors,
       `
-          RRRRRR
-        RRRRRRRRRR
-        W GGGWWR W
-        WWWWWWWWWW
-         TT  T TT
-        T TTTT T T
+          RRRRRR    
+        RRRRRRRRRR  
+        W GGGWWR W  
+        WWWWWWWWWW  
+         TT  T TT   
+        T TTTT T T  
+       TTTTTTTTTTTT 
       `
     ),
     medium: Sprite.createColoredVariant(
       `
-         ./\\/\\.
+         ./\\/\\. 
         | [##] |
         |______|
-         /|  |\\
+         /|  |\\ 
       `,
       hutColors,
       `
-         RRRRRR
+         RRRRRR 
         W GGGG W
         WWWWWWWW
-         TT  TT
+         TT  TT 
       `
     ),
     far: Sprite.createColoredVariant(
@@ -82,5 +84,11 @@ export const LifeguardHutSprite: SpriteDefinition = Sprite.define(
         TT
       `
     ),
+  },
+  {
+    category: 'BUILDING',
+    worldWidth: 150,
+    worldHeight: 180,
+    visualScale: 1.0,
   }
 );

@@ -30,5 +30,11 @@ export const MountainSprite: SpriteDefinition = Sprite.define(
           /__\\
       `
     ),
+  },
+  {
+    category: 'LANDMARK',
+    worldWidth: 400,
+    worldHeight: 500,
+    visualScale: 1.0,
   }
 );

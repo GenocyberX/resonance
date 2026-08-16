@@ -1,91 +1,141 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const pineColors = {
-  G: '#10b981', // Sunlit Pine Needle Green
-  D: '#047857', // Deep Evergreen Shadow
-  T: '#78350f', // Pine Bark Trunk
-  '*': '#10b981',
-};
+const HL = '#6ee7b7'; // Highlight Spruce Green
+const MG = '#10b981'; // Mid Emerald Pine
+const DG = '#047857'; // Deep Forest Shadow
+const TR = '#78350f'; // Wood Trunk Bark
+const GN = '#064e3b'; // Base Needles
 
-export const PineTreeSprite: SpriteDefinition = Sprite.define(
-  'scenery_pine_tree',
-  'Misty Pine Tree',
-  '#10b981',
-  {
-    close: Sprite.createColoredVariant(
-      `
-               /\\
-              /  \\
-             / /\\ \\
-            / /__\\ \\
-           /   /\\   \\
-          /   /__\\   \\
-         /     /\\     \\
-        /_____/__\\_____\\
-              |  |
-              |__|
-      `,
-      pineColors,
-      `
-               GG
-              GGGG
-             GGDDEG
-            GDDDDDDEG
-           GGDGDDDEGGG
-          GDDDDDDDDDDEG
-         GGDDGDDDDDEGGEG
-        GDDDDDDDDDDDDDDG
-              TTTT
-              TTTT
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-             /\\
-            /  \\
-           / /\\ \\
-          / /__\\ \\
-         /________\\
-            |  |
-      `,
-      pineColors,
-      `
-             GG
-            GGGG
-           GGDDEG
-          GDDDDDDEG
-         GDDDDDDDDG
-            TTTT
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-            /\\
-           /  \\
-          /____\\
-            ||
-      `,
-      pineColors,
-      `
-            GG
-           GGDG
-          GDDDDG
-            TT
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-            /\\
-           /__\\
-            ||
-      `,
-      pineColors,
-      `
-            GG
-           GGGG
-            TT
-      `
-    ),
-  }
-);
+export const PineTreeSprite: SpriteDefinition = {
+  id: 'pine_tree',
+  name: 'Misty Pine Tree',
+  category: 'VEGETATION_LARGE',
+  defaultColor: '#10b981',
+  worldWidth: 150,
+  worldHeight: 210,
+  visualScale: 1.05,
+  variants: {
+    close: {
+      width: 19,
+      height: 18,
+      anchorX: 9,
+      anchorY: 17,
+      lines: [
+        "        /\\         ",
+        "       /  \\        ",
+        "      / /\\ \\       ",
+        "     / /__\\ \\      ",
+        "    /   /\\   \\     ",
+        "   /   /__\\   \\    ",
+        "  /     /\\     \\   ",
+        " /     /__\\     \\  ",
+        "  /    /\\    \\     ",
+        " /    /__\\    \\    ",
+        "/      /\\      \\   ",
+        "\\     /__\\     /   ",
+        " \\___  /\\  ___/    ",
+        "    /_/__\\_\\       ",
+        "      |  |         ",
+        "      |  |         ",
+        "     _|__|__       ",
+        "    /=======//     ",
+      ],
+      colors: [
+        ['', '', '', '', '', '', '', '', HL, HL, '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', HL, MG, MG, HL, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', HL, MG, MG, MG, MG, HL, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', HL, MG, DG, DG, DG, DG, MG, HL, '', '', '', '', '', ''],
+        ['', '', '', '', HL, MG, MG, MG, MG, MG, MG, MG, MG, HL, '', '', '', '', ''],
+        ['', '', '', HL, MG, DG, DG, DG, DG, DG, DG, DG, DG, MG, HL, '', '', '', ''],
+        ['', '', HL, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, HL, '', '', ''],
+        ['', HL, MG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, MG, HL, '', ''],
+        ['', '', HL, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, HL, '', '', '', ''],
+        ['', HL, MG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, MG, HL, '', '', ''],
+        [HL, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, MG, HL, ''],
+        [DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, ''],
+        ['', DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, '', '', ''],
+        ['', '', '', DG, DG, DG, DG, DG, DG, DG, DG, DG, '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', TR, TR, TR, TR, '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', TR, TR, TR, TR, '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', GN, GN, TR, TR, GN, GN, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', GN, GN, GN, GN, GN, GN, GN, GN, GN, '', '', '', '', '', ''],
+      ],
+    },
+    near: {
+      width: 14,
+      height: 12,
+      anchorX: 7,
+      anchorY: 11,
+      lines: [
+        "      /\\      ",
+        "     /  \\     ",
+        "    / /\\ \\    ",
+        "   / /__\\ \\   ",
+        "  /   /\\   \\  ",
+        " /   /__\\   \\ ",
+        "/____/  \\____\\",
+        "    / /\\ \\    ",
+        "   /_/__\\_\\   ",
+        "     |  |     ",
+        "    _|__|__   ",
+        "   /=======// ",
+      ],
+      colors: [
+        ['', '', '', '', '', '', HL, HL, '', '', '', '', '', ''],
+        ['', '', '', '', '', HL, MG, MG, HL, '', '', '', '', ''],
+        ['', '', '', '', HL, MG, MG, MG, MG, HL, '', '', '', ''],
+        ['', '', '', HL, MG, DG, DG, DG, DG, MG, HL, '', '', ''],
+        ['', '', HL, MG, MG, MG, MG, MG, MG, MG, MG, HL, '', ''],
+        ['', HL, MG, DG, DG, DG, DG, DG, DG, DG, DG, MG, HL, ''],
+        [HL, MG, DG, DG, DG, DG, DG, DG, DG, DG, DG, DG, MG, HL],
+        ['', '', '', '', HL, MG, MG, MG, MG, HL, '', '', '', ''],
+        ['', '', '', DG, DG, DG, DG, DG, DG, DG, '', '', '', ''],
+        ['', '', '', '', '', TR, TR, TR, TR, '', '', '', '', ''],
+        ['', '', '', '', GN, GN, TR, TR, GN, GN, '', '', '', ''],
+        ['', '', '', GN, GN, GN, GN, GN, GN, GN, GN, '', '', ''],
+      ],
+    },
+    medium: {
+      width: 10,
+      height: 7,
+      anchorX: 5,
+      anchorY: 6,
+      lines: [
+        "    /\\    ",
+        "   /  \\   ",
+        "  / /\\ \\  ",
+        " / /__\\ \\ ",
+        "/________\\",
+        "   |  |   ",
+        "  _|__|__ ",
+      ],
+      colors: [
+        ['', '', '', '', HL, HL, '', '', '', ''],
+        ['', '', '', HL, MG, MG, HL, '', '', ''],
+        ['', '', HL, MG, MG, MG, MG, HL, '', ''],
+        ['', HL, MG, DG, DG, DG, DG, MG, HL, ''],
+        [DG, DG, DG, DG, DG, DG, DG, DG, DG, DG],
+        ['', '', '', TR, TR, TR, TR, '', '', ''],
+        ['', '', GN, GN, TR, TR, GN, GN, '', ''],
+      ],
+    },
+    far: {
+      width: 6,
+      height: 4,
+      anchorX: 3,
+      anchorY: 3,
+      lines: [
+        "  /\\  ",
+        " /__\\ ",
+        "/____\\",
+        "  ||  ",
+      ],
+      colors: [
+        ['', '', HL, HL, '', ''],
+        ['', HL, MG, MG, HL, ''],
+        [DG, DG, DG, DG, DG, DG],
+        ['', '', TR, TR, '', ''],
+      ],
+    },
+  },
+};

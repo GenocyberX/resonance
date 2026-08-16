@@ -1,4 +1,4 @@
-import { SpriteDefinition, SpriteVariant } from './types';
+import { SpriteCategory, SpriteDefinition, SpriteVariant } from './types';
 
 export class Sprite {
   /**
@@ -82,12 +82,22 @@ export class Sprite {
     id: string,
     name: string,
     defaultColor: string,
-    variants: SpriteDefinition['variants']
+    variants: SpriteDefinition['variants'],
+    metadata?: {
+      category?: SpriteCategory;
+      worldWidth?: number;
+      worldHeight?: number;
+      visualScale?: number;
+    }
   ): SpriteDefinition {
     return {
       id,
       name,
       defaultColor,
+      category: metadata?.category || 'VEGETATION_LARGE',
+      worldWidth: metadata?.worldWidth || 160,
+      worldHeight: metadata?.worldHeight || 180,
+      visualScale: metadata?.visualScale || 1.0,
       variants,
     };
   }

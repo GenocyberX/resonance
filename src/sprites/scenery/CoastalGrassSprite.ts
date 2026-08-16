@@ -15,30 +15,30 @@ export const CoastalGrassSprite: SpriteDefinition = Sprite.define(
   {
     close: Sprite.createColoredVariant(
       `
-       |  / | \\  |
-      /| /  |  \\ |\\
+       |  / | \\  |  
+      /| /  |  \\ |\\ 
      //|/   |   \\|\\\\
      '==============='
       `,
       grassColors,
       `
-       L  L G L  L
-      GG G  G  G GG
+       L  L G L  L  
+      GG G  G  G GG 
      GGG    G    GGG
      SSSSSSSSSSSSSSSSS
       `
     ),
     near: Sprite.createColoredVariant(
       `
-       /|\\ /|\\
-      //|\\\\//|\\\\
+       /|\\ /|\\   
+      //|\\\\//|\\\\ 
       '========='
       `,
       grassColors,
       `
-       LGL LGL
-      GGGGGGGGGG
-      SSSSSSSSSS
+       LGL LGL   
+      GGGGGGGGGG 
+      SSSSSSSSSS 
       `
     ),
     medium: Sprite.createColoredVariant(
@@ -49,7 +49,7 @@ export const CoastalGrassSprite: SpriteDefinition = Sprite.define(
       grassColors,
       `
        LGL LGL
-       SSSSS
+       SSSSS  
       `
     ),
     far: Sprite.createColoredVariant(
@@ -61,5 +61,11 @@ export const CoastalGrassSprite: SpriteDefinition = Sprite.define(
        GGG
       `
     ),
+  },
+  {
+    category: 'VEGETATION_SMALL',
+    worldWidth: 80,
+    worldHeight: 50,
+    visualScale: 1.0,
   }
 );

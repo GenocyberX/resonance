@@ -20,9 +20,11 @@ export const DirectionSignSprite: SpriteDefinition = Sprite.define(
         | [EXIT 1]  COAST BEACH ->|
         |           OCEAN DRIVE   |
         '========================='
-                    ||
-                    ||
-                    ||
+                    ||             
+                    ||             
+                    ||             
+                    ||             
+                   _||_            
       `,
       signColors,
       `
@@ -30,9 +32,11 @@ export const DirectionSignSprite: SpriteDefinition = Sprite.define(
         W YYYYYYYY  WWWWWWWWWWW WWW
         W           WWWWWWWWWWW   W
         WWWWWWWWWWWWWWWWWWWWWWWWWWW
-                    PP
-                    PP
-                    PP
+                    PP             
+                    PP             
+                    PP             
+                    PP             
+                   PPPP            
       `
     ),
     near: Sprite.createColoredVariant(
@@ -40,16 +44,20 @@ export const DirectionSignSprite: SpriteDefinition = Sprite.define(
         .===================.
         | [EX]  COASTWAY -> |
         '==================='
-                 ||
-                 ||
+                 ||          
+                 ||          
+                 ||          
+                _||_         
       `,
       signColors,
       `
         WWWWWWWWWWWWWWWWWWWWW
         W YYYY  WWWWWWWW WW W
         WWWWWWWWWWWWWWWWWWWWW
-                 PP
-                 PP
+                 PP          
+                 PP          
+                 PP          
+                PPPP         
       `
     ),
     medium: Sprite.createColoredVariant(
@@ -57,26 +65,34 @@ export const DirectionSignSprite: SpriteDefinition = Sprite.define(
         .=============.
         | [COAST ->]  |
         '============='
-              ||
+              ||       
+              ||       
       `,
       signColors,
       `
         WWWWWWWWWWWWWWW
         W WWWWWWWWWW  W
         WWWWWWWWWWWWWWW
-              PP
+              PP       
+              PP       
       `
     ),
     far: Sprite.createColoredVariant(
       `
         .[====].
-           ||
+           ||   
       `,
       signColors,
       `
         WWWWWWWW
-           PP
+           PP   
       `
     ),
+  },
+  {
+    category: 'ROADSIDE',
+    worldWidth: 160,
+    worldHeight: 150,
+    visualScale: 1.0,
   }
 );

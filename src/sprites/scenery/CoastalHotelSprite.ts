@@ -1,109 +1,142 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const hotelColors = {
-  P: '#fb7185', // Pastel Coral pink facade
-  N: '#fde047', // Art Deco gold spire / crown
-  G: '#38bdf8', // Cyan window glow
-  T: '#0d9488', // Teal accent trims
-  B: '#881337', // Shadow / framing
-  '*': '#fb7185',
-};
+const FC = '#fb7185'; // Art Deco Coral Pink Facade
+const WN = '#fef08a'; // Warm Golden Lit Windows
+const GL = '#38bdf8'; // Cyan Glass
+const SP = '#f59e0b'; // Amber Gold Spire
+const RF = '#be123c'; // Crimson Trim Roof
+const BS = '#334155'; // Ground Granite Foundation
 
-export const CoastalHotelSprite: SpriteDefinition = Sprite.define(
-  'scenery_coastal_hotel',
-  'Art Deco Coastal Hotel',
-  '#fb7185',
-  {
-    close: Sprite.createColoredVariant(
-      `
-                    .---.
-                 .-'  |  '-.
-               .-------------.
-             .-----------------.
-            /  _______________  \\
-           /  /  [+] [+] [+]  \\  \\
-          |  |   [#] [#] [#]   |  |
-          |==|=================|==|
-          |  |   [#] [#] [#]   |  |
-          |  |   [#] [#] [#]   |  |
-          |==|=====[===]=======|==|
-          |  |     |   |       |  |
-          |__|_____|___|_______|__|
-      `,
-      hotelColors,
-      `
-                    NNNNN
-                 NNN  N  NNN
-               TTTTTTTTTTTTTTT
-             TTTTTTTTTTTTTTTTTTT
-            P  TTTTTTTTTTTTTTT  P
-           P  P  GGG GGG GGG  P  P
-          B  P   GGG GGG GGG   P  B
-          TTTTTTTTTTTTTTTTTTTTTTTTT
-          B  P   GGG GGG GGG   P  B
-          B  P   GGG GGG GGG   P  B
-          TTTTTTTTTNNNNNTTTTTTTTTTT
-          B  P     B   B       P  B
-          BBBPBBBBBBGGGBBBBBBBBPBBB
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-                 .-+-.
-               .-------.
-             .-----------.
-            / [#] [#] [#] \\
-           |==|=========|==|
-           |  | [#] [#] |  |
-           |==|==[===]==|==|
-           |__|__|   |__|__|
-      `,
-      hotelColors,
-      `
-                 NNNNN
-               TTTTTTTTT
-             TTTTTTTTTTTTT
-            P GGG GGG GGG P
-           TTTTTTTTTTTTTTTTT
-           B  P GGG GGG P  B
-           TTTTTTNNNNNTTTTTT
-           BBBPBBBG GBBPBBBB
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-              .-+-.
-             .-----.
-             |[#][#]|
-             |==|==-|
-             |[#][#]|
-             |______|
-      `,
-      hotelColors,
-      `
-              NNNNN
-             TTTTTTT
-             PGGGGGGP
-             TTTTTTTT
-             PGGGGGGP
-             BBBBBBBB
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-             .-+-.
-             |[][]|
-             |[][]|
-             |____|
-      `,
-      hotelColors,
-      `
-             NNNNN
-             PGGG P
-             PGGG P
-             BBBBBB
-      `
-    ),
-  }
-);
+export const CoastalHotelSprite: SpriteDefinition = {
+  id: 'coastal_hotel',
+  name: 'Art Deco Coastal Hotel',
+  category: 'BUILDING',
+  defaultColor: '#fb7185',
+  worldWidth: 240,
+  worldHeight: 320,
+  visualScale: 1.05,
+  variants: {
+    close: {
+      width: 28,
+      height: 18,
+      anchorX: 14,
+      anchorY: 17,
+      lines: [
+        "             ||             ",
+        "           .-||-.           ",
+        "          [======]          ",
+        "       .---======---.       ",
+        "      |  |========|  |      ",
+        "     .|==============|.     ",
+        "    |  | |[]| |[]| |  |     ",
+        "    |==| |[]| |[]| |==|     ",
+        "    |  | |[]| |[]| |  |     ",
+        "   .|==| |[]| |[]| |==|.    ",
+        "  |  | | |[]| |[]| | |  |   ",
+        "  |==| | |[]| |[]| | |==|   ",
+        "  |  | | |[]| |[]| | |  |   ",
+        " .|==| | |[]| |[]| | |==|.  ",
+        " | |  | | |[]| |[]| | |  | |",
+        " | |==| | [======] | |==| | ",
+        " | |  | |  |PORT|  | |  | | ",
+        " |____|_|__(====)__|_|____| ",
+      ],
+      colors: [
+        ['', '', '', '', '', '', '', '', '', '', '', '', '', SP, SP, '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', '', '', SP, SP, SP, SP, SP, '', '', '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '', '', RF, RF, RF, RF, RF, RF, RF, RF, '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', RF, RF, RF, RF, RF, RF, RF, RF, RF, RF, RF, RF, RF, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', FC, FC, FC, RF, RF, RF, RF, RF, RF, RF, RF, FC, FC, FC, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', FC, FC, RF, RF, RF, RF, RF, RF, RF, RF, RF, RF, RF, RF, FC, FC, '', '', '', '', '', '', ''],
+        ['', '', '', '', FC, FC, FC, FC, FC, WN, WN, FC, FC, WN, WN, FC, FC, FC, FC, FC, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', FC, RF, RF, FC, FC, WN, WN, FC, FC, WN, WN, FC, FC, RF, RF, FC, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', FC, FC, FC, FC, FC, WN, WN, FC, FC, WN, WN, FC, FC, FC, FC, FC, '', '', '', '', '', '', '', ''],
+        ['', '', '', FC, FC, RF, RF, FC, FC, WN, WN, FC, FC, WN, WN, FC, FC, RF, RF, FC, FC, '', '', '', '', '', '', ''],
+        ['', '', FC, FC, FC, FC, FC, FC, FC, WN, WN, FC, FC, WN, WN, FC, FC, FC, FC, FC, FC, FC, '', '', '', '', '', ''],
+        ['', '', FC, RF, RF, FC, FC, FC, FC, WN, WN, FC, FC, WN, WN, FC, FC, FC, FC, RF, RF, FC, '', '', '', '', '', ''],
+        ['', '', FC, FC, FC, FC, FC, FC, FC, WN, WN, FC, FC, WN, WN, FC, FC, FC, FC, FC, FC, FC, '', '', '', '', '', ''],
+        ['', FC, FC, RF, RF, FC, FC, FC, FC, WN, WN, FC, FC, WN, WN, FC, FC, FC, FC, RF, RF, FC, FC, '', '', '', '', ''],
+        ['', FC, FC, FC, FC, FC, FC, FC, FC, WN, WN, FC, FC, WN, WN, FC, FC, FC, FC, FC, FC, FC, FC, FC, FC, FC, '', ''],
+        ['', FC, FC, FC, RF, RF, FC, FC, FC, RF, RF, RF, RF, RF, RF, RF, RF, FC, FC, FC, RF, RF, FC, FC, FC, FC, '', ''],
+        ['', FC, FC, FC, FC, FC, FC, FC, FC, FC, GL, GL, GL, GL, GL, GL, FC, FC, FC, FC, FC, FC, FC, FC, FC, FC, '', ''],
+        ['', BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, '', ''],
+      ],
+    },
+    near: {
+      width: 20,
+      height: 12,
+      anchorX: 10,
+      anchorY: 11,
+      lines: [
+        "         ||         ",
+        "       [====]       ",
+        "    .---====---.    ",
+        "   | |========| |   ",
+        "  .|============|.  ",
+        " | | |[]|  |[]| | | ",
+        " |=| |[]|  |[]| |=| ",
+        " | | |[]|  |[]| | | ",
+        " |=| |[]|  |[]| |=| ",
+        " | | |[]|  |[]| | | ",
+        " | |=| [======] |=| ",
+        " |_|_|__(====)__|_| ",
+      ],
+      colors: [
+        ['', '', '', '', '', '', '', '', '', SP, SP, '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', RF, RF, RF, RF, RF, RF, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', RF, RF, RF, RF, RF, RF, RF, RF, RF, RF, '', '', '', '', '', ''],
+        ['', '', '', FC, FC, RF, RF, RF, RF, RF, RF, RF, RF, FC, FC, '', '', '', '', ''],
+        ['', '', FC, FC, RF, RF, RF, RF, RF, RF, RF, RF, RF, RF, FC, FC, '', '', '', ''],
+        ['', FC, FC, FC, FC, WN, WN, FC, FC, FC, WN, WN, FC, FC, FC, FC, '', '', '', ''],
+        ['', FC, RF, FC, FC, WN, WN, FC, FC, FC, WN, WN, FC, FC, RF, FC, '', '', '', ''],
+        ['', FC, FC, FC, FC, WN, WN, FC, FC, FC, WN, WN, FC, FC, FC, FC, '', '', '', ''],
+        ['', FC, RF, FC, FC, WN, WN, FC, FC, FC, WN, WN, FC, FC, RF, FC, '', '', '', ''],
+        ['', FC, FC, FC, FC, WN, WN, FC, FC, FC, WN, WN, FC, FC, FC, FC, '', '', '', ''],
+        ['', FC, RF, FC, RF, RF, RF, RF, RF, RF, RF, RF, FC, RF, FC, FC, '', '', '', ''],
+        ['', BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, '', ''],
+      ],
+    },
+    medium: {
+      width: 12,
+      height: 7,
+      anchorX: 6,
+      anchorY: 6,
+      lines: [
+        "     ||     ",
+        "   [====]   ",
+        " .--====--. ",
+        "| |[]||[]| |",
+        "|=|[]||[]|=|",
+        "| |======| |",
+        "|_|_(==)_|_|",
+      ],
+      colors: [
+        ['', '', '', '', '', SP, SP, '', '', '', '', ''],
+        ['', '', '', RF, RF, RF, RF, RF, RF, '', '', ''],
+        ['', RF, RF, RF, RF, RF, RF, RF, RF, RF, RF, ''],
+        [FC, FC, FC, WN, WN, FC, FC, WN, WN, FC, FC, FC],
+        [FC, RF, FC, WN, WN, FC, FC, WN, WN, FC, RF, FC],
+        [FC, FC, RF, RF, RF, RF, RF, RF, RF, RF, FC, FC],
+        [BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS, BS],
+      ],
+    },
+    far: {
+      width: 6,
+      height: 4,
+      anchorX: 3,
+      anchorY: 3,
+      lines: [
+        "  ||  ",
+        " [==] ",
+        "|[..]|",
+        "|____|",
+      ],
+      colors: [
+        ['', '', SP, SP, '', ''],
+        ['', RF, RF, RF, RF, ''],
+        [FC, FC, WN, WN, FC, FC],
+        [BS, BS, BS, BS, BS, BS],
+      ],
+    },
+  },
+};

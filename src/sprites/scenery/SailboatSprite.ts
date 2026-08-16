@@ -1,86 +1,127 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const boatColors = {
-  S: '#f8fafc', // White sail
-  M: '#38bdf8', // Blue sail accent / mast
-  H: '#f43f5e', // Coral boat hull
-  W: '#0284c7', // Water ripples
-  '*': '#f8fafc',
-};
+const ST = '#38bdf8'; // Cyan Mast Rigging
+const SL = '#f8fafc'; // White Dacron Sails
+const SD = '#cbd5e1'; // Shaded Sail Edge
+const HL = '#f43f5e'; // Coral Racing Hull
+const WT = '#0284c7'; // Sea Wave Waterline
 
-export const SailboatSprite: SpriteDefinition = Sprite.define(
-  'scenery_sailboat',
-  'Ocean Sailboat',
-  '#f8fafc',
-  {
-    close: Sprite.createColoredVariant(
-      `
-              /|
-             / |
-            /  |   /\\
-           /   |  /  \\
-          /____|_/____\\
-         ._____[#]_____.
-        ~\\____________/~
-         ~~~~~~~~~~~~~~~
-      `,
-      boatColors,
-      `
-              SM
-             S M
-            S  M   SS
-           S   M  S  S
-          SSSSSMMSSSSSS
-         HHHHHHHHHHHHHHH
-        WWWWWWWWWWWWWWWW
-         WWWWWWWWWWWWWWW
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-             /|
-            / |  /\\
-           /__|_/__\\
-          .____[#]___.
-         ~\\__________/~
-      `,
-      boatColors,
-      `
-             SM
-            S M  SS
-           SSSSMMSSS
-          HHHHHHHHHHH
-         WWWWWWWWWWWW
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-            /|
-           /_|_/\\
-          .\\____/.
-          ~~~~~~~~
-      `,
-      boatColors,
-      `
-            SM
-           SSMMSS
-          HHHHHHHH
-          WWWWWWWW
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-           /\\
-          \\__/_
-          ~~~~~
-      `,
-      boatColors,
-      `
-           SS
-          HHHHH
-          WWWWW
-      `
-    ),
-  }
-);
+export const SailboatSprite: SpriteDefinition = {
+  id: 'sailboat',
+  name: 'Ocean Sailboat',
+  category: 'WATERCRAFT',
+  defaultColor: '#f8fafc',
+  worldWidth: 160,
+  worldHeight: 180,
+  visualScale: 1.0,
+  variants: {
+    close: {
+      width: 18,
+      height: 14,
+      anchorX: 9,
+      anchorY: 13,
+      lines: [
+        "       |          ",
+        "       |\\         ",
+        "      /| \\        ",
+        "     / |  \\       ",
+        "    /  |   \\      ",
+        "   /   |    \\     ",
+        "  /    |     \\    ",
+        " /     |      \\   ",
+        "/______|_______\\  ",
+        "       |          ",
+        " \\_____________/  ",
+        "  \\___________/   ",
+        "~~~~~~~~~~~~~~~~~~",
+        " ~ ~ ~ ~ ~ ~ ~ ~  ",
+      ],
+      colors: [
+        ['', '', '', '', '', '', '', ST, '', '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ST, SL, '', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', SL, ST, SL, SL, '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', SL, SL, ST, SL, SL, SL, '', '', '', '', '', '', ''],
+        ['', '', '', '', SL, SL, SL, ST, SL, SL, SL, SL, '', '', '', '', '', ''],
+        ['', '', '', SL, SL, SL, SL, ST, SL, SL, SL, SL, SL, '', '', '', '', ''],
+        ['', '', SL, SL, SL, SL, SL, ST, SL, SL, SL, SL, SL, SL, '', '', '', ''],
+        ['', SL, SL, SL, SL, SL, SL, ST, SL, SL, SL, SL, SL, SL, SL, '', '', ''],
+        [SL, SL, SL, SL, SL, SL, SL, ST, SD, SD, SD, SD, SD, SD, SD, SD, '', ''],
+        ['', '', '', '', '', '', '', ST, '', '', '', '', '', '', '', '', '', ''],
+        ['', HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, '', ''],
+        ['', '', HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, '', '', ''],
+        [WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, WT],
+        ['', WT, '', WT, '', WT, '', WT, '', WT, '', WT, '', WT, '', WT, '', ''],
+      ],
+    },
+    near: {
+      width: 13,
+      height: 10,
+      anchorX: 6,
+      anchorY: 9,
+      lines: [
+        "     |       ",
+        "    /|\\      ",
+        "   / | \\     ",
+        "  /  |  \\    ",
+        " /   |   \\   ",
+        "/____|____\\  ",
+        "     |       ",
+        "\\___________/",
+        " ~~~~~~~~~~~ ",
+        "  ~ ~ ~ ~ ~  ",
+      ],
+      colors: [
+        ['', '', '', '', '', ST, '', '', '', '', '', '', ''],
+        ['', '', '', '', SL, ST, SL, '', '', '', '', '', ''],
+        ['', '', '', SL, SL, ST, SL, SL, '', '', '', '', ''],
+        ['', '', SL, SL, SL, ST, SL, SL, SL, '', '', '', ''],
+        ['', SL, SL, SL, SL, ST, SL, SL, SL, SL, '', '', ''],
+        [SL, SL, SL, SL, SL, ST, SD, SD, SD, SD, SD, '', ''],
+        ['', '', '', '', '', ST, '', '', '', '', '', '', ''],
+        [HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL, HL],
+        ['', WT, WT, WT, WT, WT, WT, WT, WT, WT, WT, '', ''],
+        ['', '', WT, '', WT, '', WT, '', WT, '', WT, '', ''],
+      ],
+    },
+    medium: {
+      width: 9,
+      height: 6,
+      anchorX: 4,
+      anchorY: 5,
+      lines: [
+        "   |\\    ",
+        "  /| \\   ",
+        " / |  \\  ",
+        "/__|___\\ ",
+        "\\_______/",
+        " ~~~~~~~ ",
+      ],
+      colors: [
+        ['', '', '', ST, SL, '', '', '', ''],
+        ['', '', SL, ST, SL, SL, '', '', ''],
+        ['', SL, SL, ST, SL, SL, SL, '', ''],
+        [SL, SL, SL, ST, SD, SD, SD, SD, ''],
+        [HL, HL, HL, HL, HL, HL, HL, HL, HL],
+        ['', WT, WT, WT, WT, WT, WT, '', ''],
+      ],
+    },
+    far: {
+      width: 5,
+      height: 4,
+      anchorX: 2,
+      anchorY: 3,
+      lines: [
+        " |\\  ",
+        "/| \\ ",
+        "\\___/",
+        " ~~~ ",
+      ],
+      colors: [
+        ['', ST, SL, '', ''],
+        [SL, ST, SL, SL, ''],
+        [HL, HL, HL, HL, HL],
+        ['', WT, WT, WT, ''],
+      ],
+    },
+  },
+};

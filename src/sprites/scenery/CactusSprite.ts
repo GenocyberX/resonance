@@ -1,95 +1,125 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const cactusColors = {
-  F: '#f43f5e', // Desert blossom pink
-  G: '#a3e635', // Sunlit cactus green
-  D: '#65a30d', // Shaded rib olive
-  '*': '#a3e635',
-};
+const FL = '#f43f5e'; // Blossom Coral Flower
+const LM = '#a3e635'; // Lime Highlight Ribs
+const SG = '#65a30d'; // Sage Green Body
+const DK = '#365314'; // Dark Olive Shadow
+const SA = '#78350f'; // Desert Sand Earth
 
-export const CactusSprite: SpriteDefinition = Sprite.define(
-  'scenery_cactus',
-  'Desert Saguaro Cactus',
-  '#a3e635',
-  {
-    close: Sprite.createColoredVariant(
-      `
-              *
-           _ (o) _
-          | | | | | |
-          | | | | | |
-          | |_| |_| |
-          |  _   _  |
-          | | | | | |
-          |_| | | |_|
-              | |
-              | |
-             /   \\
-      `,
-      cactusColors,
-      `
-              F
-           G FFF G
-          GGDGGGD GGD
-          GGDGGGD GGD
-          GGDDGGDDGGD
-          GDDDDDDDDDD
-          GGDGGGD GGD
-          DDDGGGD DDD
-              GGD
-              GGD
-             DDDDD
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-            *
-         _ (o) _
-        | || || |
-        |_||_||_|
-         |  _  |
-         | | | |
-           | |
-      `,
-      cactusColors,
-      `
-            F
-         G FFF G
-        GGDGGGDGD
-        DDDGGGDGD
-         GDDDDDG
-         GGD GGD
-           GGD
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-         _  *  _
-        | || || |
-        |_||_||_|
-           | |
-      `,
-      cactusColors,
-      `
-         G  F  G
-        GGDFGGDGD
-        DDDDDGGGD
-           GGD
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-         _ | _
-        |_||_|
-          ||
-      `,
-      cactusColors,
-      `
-         G G G
-        GDGGDD
-          GD
-      `
-    ),
-  }
-);
+export const CactusSprite: SpriteDefinition = {
+  id: 'cactus',
+  name: 'Saguaro Cactus',
+  category: 'VEGETATION_LARGE',
+  defaultColor: '#a3e635',
+  worldWidth: 120,
+  worldHeight: 160,
+  visualScale: 1.0,
+  variants: {
+    close: {
+      width: 16,
+      height: 14,
+      anchorX: 8,
+      anchorY: 13,
+      lines: [
+        "      .***.     ",
+        "     ( (o) )    ",
+        "     | | | |    ",
+        "  .-.| | | |.-. ",
+        " | | | | | | | |",
+        " | | | | | | | |",
+        " | | | | | | | |",
+        " | |_| | | |_| |",
+        "  \\____| |____/ ",
+        "     | | | |    ",
+        "     | | | |    ",
+        "     | | | |    ",
+        "    _| | | |_   ",
+        "   /=========// ",
+      ],
+      colors: [
+        ['', '', '', '', '', '', FL, FL, FL, FL, FL, '', '', '', '', ''],
+        ['', '', '', '', '', LM, LM, FL, LM, LM, '', '', '', '', '', ''],
+        ['', '', '', '', '', LM, SG, DK, SG, LM, '', '', '', '', '', ''],
+        ['', '', LM, SG, LM, LM, SG, DK, SG, LM, LM, SG, LM, '', '', ''],
+        ['', LM, SG, SG, LM, LM, SG, DK, SG, LM, LM, SG, SG, LM, '', ''],
+        ['', LM, SG, SG, LM, LM, SG, DK, SG, LM, LM, SG, SG, LM, '', ''],
+        ['', LM, SG, SG, LM, LM, SG, DK, SG, LM, LM, SG, SG, LM, '', ''],
+        ['', LM, SG, DK, DK, LM, SG, DK, SG, LM, DK, DK, SG, LM, '', ''],
+        ['', '', LM, DK, DK, DK, SG, DK, SG, DK, DK, DK, LM, '', '', ''],
+        ['', '', '', '', '', LM, SG, DK, SG, LM, '', '', '', '', '', ''],
+        ['', '', '', '', '', LM, SG, DK, SG, LM, '', '', '', '', '', ''],
+        ['', '', '', '', '', LM, SG, DK, SG, LM, '', '', '', '', '', ''],
+        ['', '', '', '', SA, SA, SG, DK, SG, SA, SA, '', '', '', '', ''],
+        ['', '', '', SA, SA, SA, SA, SA, SA, SA, SA, SA, '', '', '', ''],
+      ],
+    },
+    near: {
+      width: 12,
+      height: 9,
+      anchorX: 6,
+      anchorY: 8,
+      lines: [
+        "    .**.    ",
+        "    | ||    ",
+        " .-.| ||.-. ",
+        "| ||| ||| ||",
+        "| |_| |||_||",
+        " \\___||___/ ",
+        "    | ||    ",
+        "   _| ||_   ",
+        "  /======// ",
+      ],
+      colors: [
+        ['', '', '', '', FL, FL, FL, FL, '', '', '', ''],
+        ['', '', '', '', LM, SG, DK, LM, '', '', '', ''],
+        ['', LM, SG, LM, LM, SG, DK, LM, LM, SG, LM, ''],
+        [LM, SG, DK, LM, LM, SG, DK, LM, LM, SG, DK, LM],
+        [LM, SG, DK, DK, LM, SG, DK, LM, DK, DK, SG, LM],
+        ['', LM, DK, DK, DK, SG, DK, SG, DK, DK, LM, ''],
+        ['', '', '', '', LM, SG, DK, LM, '', '', '', ''],
+        ['', '', '', SA, SA, SG, DK, SA, SA, '', '', ''],
+        ['', '', SA, SA, SA, SA, SA, SA, SA, SA, '', ''],
+      ],
+    },
+    medium: {
+      width: 8,
+      height: 6,
+      anchorX: 4,
+      anchorY: 5,
+      lines: [
+        "  .**   ",
+        ".-| |.-.",
+        "| | || |",
+        "\\_| ||_/",
+        "  | |   ",
+        " _|_|_  ",
+      ],
+      colors: [
+        ['', '', FL, FL, FL, '', '', ''],
+        ['', LM, SG, DK, LM, LM, SG, ''],
+        [LM, SG, SG, DK, SG, SG, SG, LM],
+        [LM, DK, DK, DK, DK, DK, DK, LM],
+        ['', '', LM, SG, DK, LM, '', ''],
+        ['', SA, SA, SA, SA, SA, SA, ''],
+      ],
+    },
+    far: {
+      width: 6,
+      height: 4,
+      anchorX: 3,
+      anchorY: 3,
+      lines: [
+        "  *   ",
+        "-|+|- ",
+        " | |  ",
+        " _|_  ",
+      ],
+      colors: [
+        ['', '', FL, '', '', ''],
+        [LM, SG, SG, SG, LM, ''],
+        ['', LM, SG, LM, '', ''],
+        ['', SA, SA, SA, '', ''],
+      ],
+    },
+  },
+};

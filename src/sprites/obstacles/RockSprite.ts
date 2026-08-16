@@ -36,5 +36,11 @@ export const RockSprite: SpriteDefinition = Sprite.define(
         (_)
       `
     ),
+  },
+  {
+    category: 'OBSTACLE',
+    worldWidth: 60,
+    worldHeight: 50,
+    visualScale: 1.0,
   }
 );

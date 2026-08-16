@@ -1,91 +1,100 @@
-import { Sprite } from '../../ascii/Sprite';
 import { SpriteDefinition } from '../../ascii/types';
 
-const sedanColors = {
-  B: '#f59e0b', // Amber body panels
-  D: '#b45309', // Dark amber shadow
-  W: '#0f172a', // Tinted rear window glass
-  G: '#fef3c7', // Glass highlight
-  R: '#f43f5e', // Ruby taillights
-  E: '#cbd5e1', // Chrome bumper
-  T: '#0f172a', // Tires
-  '*': '#f59e0b',
-};
+const BD = '#94a3b8'; // Slate Silver Body
+const DK = '#475569'; // Dark Slate Body
+const GL = '#0f172a'; // Tinted Glass
+const TL = '#ef4444'; // Red Taillights
+const TR = '#18181b'; // Rubber Tires
+const CH = '#f1f5f9'; // Chrome Bumper Accent
 
-export const TrafficSedanSprite: SpriteDefinition = Sprite.define(
-  'vehicle_traffic_sedan',
-  'Traffic Sedan',
-  '#f59e0b',
-  {
-    close: Sprite.createColoredVariant(
-      `
-            .--------.
-          ./  ______  \\.
-         /===/   __   \\===\\
-        |====[========]====|
-        |[*]|  [SED]  |[*]|
-        |====[========]====|
-         (O)   (==)(==)  (O)
-      `,
-      sedanColors,
-      `
-            BBBBBBBB
-          BB  GGGGGG  BB
-         DDDW   GG   WDDD
-        BBBBBBRRRRRRRRBBBBBB
-        B R B  E EEE  B R B
-        DDDDDDEEEEEEEEDDDDDD
-         TTT   EEEEEE    TTT
-      `
-    ),
-    near: Sprite.createColoredVariant(
-      `
-           .------.
-          /  ____  \\
-         |==[====]==|
-         |[*][SED][*]|
-         |==[====]==|
-          (o) -- (o)
-      `,
-      sedanColors,
-      `
-           BBBBBB
-          B  GGGG  B
-         BBBRRRRRRBBB
-         B R EEEE R B
-         DDDEEEEEEDDD
-          T  EE  T
-      `
-    ),
-    medium: Sprite.createColoredVariant(
-      `
-          .----.
-         |[====]|
-         |[*][*]|
-         |______|
-           -  -
-      `,
-      sedanColors,
-      `
-          BBBB
-         BRRRRB
-         B R  B
-         DDDDDD
-           TT
-      `
-    ),
-    far: Sprite.createColoredVariant(
-      `
-         [==]
-         [**]
-          --
-      `,
-      sedanColors,
-      `
-         BB
-         RR
-         TT
-      `
-    ),
-  }
-);
+export const TrafficSedanSprite: SpriteDefinition = {
+  id: 'traffic_sedan',
+  name: 'Traffic Sedan',
+  category: 'VEHICLE',
+  defaultColor: '#94a3b8',
+  worldWidth: 85,
+  worldHeight: 70,
+  visualScale: 1.0,
+  variants: {
+    close: {
+      width: 24,
+      height: 8,
+      anchorX: 12,
+      anchorY: 7,
+      lines: [
+        "      .------------.    ",
+        "    ./  __________  \\.  ",
+        "   /  / _________ \\  \\  ",
+        "  /==/ /_________\\ \\==\\ ",
+        " |====================| ",
+        " |[*] |__________| [*]| ",
+        " |====================| ",
+        "  (O)              (O)  ",
+      ],
+      colors: [
+        ['', '', '', '', '', '', BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, '', '', '', '', '', ''],
+        ['', '', '', '', BD, BD, GL, GL, GL, GL, GL, GL, GL, GL, GL, GL, BD, BD, '', '', '', '', '', ''],
+        ['', '', '', BD, GL, GL, GL, GL, GL, GL, GL, GL, GL, GL, GL, GL, GL, GL, BD, '', '', '', '', ''],
+        ['', '', BD, DK, DK, GL, GL, GL, GL, GL, GL, GL, GL, GL, GL, GL, DK, DK, BD, '', '', '', '', ''],
+        ['', BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, '', ''],
+        ['', BD, TL, TL, DK, CH, CH, CH, CH, CH, CH, CH, CH, CH, CH, DK, TL, TL, BD, '', '', '', '', ''],
+        ['', BD, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, DK, BD, '', ''],
+        ['', '', TR, TR, '', '', '', '', '', '', '', '', '', '', '', '', '', '', TR, TR, '', '', '', ''],
+      ],
+    },
+    near: {
+      width: 16,
+      height: 6,
+      anchorX: 8,
+      anchorY: 5,
+      lines: [
+        "    .--------.  ",
+        "  ./  ______  \\.",
+        "/==/ ______ \\==\\",
+        "|==============|",
+        "|[*]|______|[*]|",
+        " (O)        (O) ",
+      ],
+      colors: [
+        ['', '', '', '', BD, BD, BD, BD, BD, BD, BD, BD, '', '', '', ''],
+        ['', '', BD, BD, GL, GL, GL, GL, GL, GL, BD, BD, '', '', '', ''],
+        [BD, BD, DK, DK, GL, GL, GL, GL, GL, GL, DK, DK, BD, BD, '', ''],
+        [BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD, BD],
+        [BD, TL, TL, DK, CH, CH, CH, CH, CH, CH, DK, TL, TL, BD, '', ''],
+        ['', TR, TR, '', '', '', '', '', '', '', '', '', TR, TR, '', ''],
+      ],
+    },
+    medium: {
+      width: 10,
+      height: 4,
+      anchorX: 5,
+      anchorY: 3,
+      lines: [
+        "  .----.  ",
+        " /======\\ ",
+        "|[*]==[*]|",
+        " (O)  (O) ",
+      ],
+      colors: [
+        ['', '', BD, BD, BD, BD, BD, BD, '', ''],
+        ['', BD, GL, GL, GL, GL, GL, GL, BD, ''],
+        [BD, TL, TL, DK, DK, DK, DK, TL, TL, BD],
+        ['', TR, TR, '', '', '', '', TR, TR, ''],
+      ],
+    },
+    far: {
+      width: 6,
+      height: 2,
+      anchorX: 3,
+      anchorY: 1,
+      lines: [
+        " .--. ",
+        "|[==]|",
+      ],
+      colors: [
+        ['', BD, BD, BD, BD, ''],
+        [BD, TL, DK, DK, TL, BD],
+      ],
+    },
+  },
+};

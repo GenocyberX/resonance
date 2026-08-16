@@ -6,12 +6,24 @@ import { PalmTreeSprite } from '../sprites/scenery/PalmTreeSprite';
 import { PineTreeSprite } from '../sprites/scenery/PineTreeSprite';
 import { CactusSprite } from '../sprites/scenery/CactusSprite';
 import { DeciduousTreeSprite } from '../sprites/scenery/DeciduousTreeSprite';
+import { LighthouseSprite } from '../sprites/scenery/LighthouseSprite';
+import { CoastalHotelSprite } from '../sprites/scenery/CoastalHotelSprite';
+import { RoadsideCafeSprite } from '../sprites/scenery/RoadsideCafeSprite';
+import { BeachShackSprite } from '../sprites/scenery/BeachShackSprite';
+import { SailboatSprite } from '../sprites/scenery/SailboatSprite';
+import { DirectionSignSprite } from '../sprites/scenery/DirectionSignSprite';
 import { BillboardSprite } from '../sprites/scenery/BillboardSprite';
-import { NeonTowerSprite } from '../sprites/scenery/NeonTowerSprite';
-import { MountainSprite } from '../sprites/scenery/MountainSprite';
 import { StreetLampSprite } from '../sprites/scenery/StreetLampSprite';
+import { ShortPalmSprite } from '../sprites/scenery/ShortPalmSprite';
+import { TropicalBushSprite } from '../sprites/scenery/TropicalBushSprite';
+import { CoastalGrassSprite } from '../sprites/scenery/CoastalGrassSprite';
+import { SmallBoatSprite } from '../sprites/scenery/SmallBoatSprite';
+import { PierSprite } from '../sprites/scenery/PierSprite';
+import { LifeguardHutSprite } from '../sprites/scenery/LifeguardHutSprite';
 import { TrafficConeSprite } from '../sprites/obstacles/TrafficConeSprite';
 import { RockSprite } from '../sprites/obstacles/RockSprite';
+import { MountainSprite } from '../sprites/scenery/MountainSprite';
+import { NeonTowerSprite } from '../sprites/scenery/NeonTowerSprite';
 
 export class SpriteLibrary {
   private static sprites: Map<string, SpriteDefinition> = new Map();
@@ -25,12 +37,24 @@ export class SpriteLibrary {
       PineTreeSprite,
       CactusSprite,
       DeciduousTreeSprite,
+      LighthouseSprite,
+      CoastalHotelSprite,
+      RoadsideCafeSprite,
+      BeachShackSprite,
+      SailboatSprite,
+      DirectionSignSprite,
       BillboardSprite,
-      NeonTowerSprite,
-      MountainSprite,
       StreetLampSprite,
+      ShortPalmSprite,
+      TropicalBushSprite,
+      CoastalGrassSprite,
+      SmallBoatSprite,
+      PierSprite,
+      LifeguardHutSprite,
       TrafficConeSprite,
       RockSprite,
+      MountainSprite,
+      NeonTowerSprite,
     ];
 
     for (const s of list) {

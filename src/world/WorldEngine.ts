@@ -14,6 +14,22 @@ import { WorldState } from './WorldState';
 import { AmbientParticle, WorldMusicParameters } from './types';
 import { SeededRandom } from '../procedural/SeededRandom';
 import { PlayerContainmentTelemetry } from '../ui/types';
+import { PalmTreeSprite } from '../sprites/scenery/PalmTreeSprite';
+import { PineTreeSprite } from '../sprites/scenery/PineTreeSprite';
+import { CactusSprite } from '../sprites/scenery/CactusSprite';
+import { DeciduousTreeSprite } from '../sprites/scenery/DeciduousTreeSprite';
+import { SportsCarSprite } from '../sprites/vehicles/SportsCarSprite';
+import { TrafficSedanSprite } from '../sprites/vehicles/TrafficSedanSprite';
+import { TruckSprite } from '../sprites/vehicles/TruckSprite';
+import { LighthouseSprite } from '../sprites/scenery/LighthouseSprite';
+import { CoastalHotelSprite } from '../sprites/scenery/CoastalHotelSprite';
+import { RoadsideCafeSprite } from '../sprites/scenery/RoadsideCafeSprite';
+import { BeachShackSprite } from '../sprites/scenery/BeachShackSprite';
+import { SailboatSprite } from '../sprites/scenery/SailboatSprite';
+import { DirectionSignSprite } from '../sprites/scenery/DirectionSignSprite';
+import { BillboardSprite } from '../sprites/scenery/BillboardSprite';
+import { StreetLampSprite } from '../sprites/scenery/StreetLampSprite';
+import { LODLevel, SpriteDefinition } from '../ascii/types';
 
 interface Cloud {
   xNorm: number;
@@ -50,6 +66,8 @@ export class WorldEngine {
   // Visual Test Mode state
   private isVisualTest: boolean = false;
   private isGoldenMode: boolean = false;
+  private isGalleryMode: boolean = false;
+  private galleryIndex: number = 0;
   private stabilityMode: 'dynamic' | 'static' | 'none' = 'none';
   private testScenario: RoadTestMode = 'NORMAL';
   private testTimeOfDay: VisualTestTime = 'day';
@@ -136,6 +154,7 @@ export class WorldEngine {
     time: VisualTestTime;
     isGolden: boolean;
     stability: 'dynamic' | 'static' | 'none';
+    isGallery: boolean;
   } {
     return {
       isVisualTest: this.isVisualTest,
@@ -143,7 +162,25 @@ export class WorldEngine {
       time: this.testTimeOfDay,
       isGolden: this.isGoldenMode,
       stability: this.stabilityMode,
+      isGallery: this.isGalleryMode,
     };
+  }
+
+  public setGalleryMode(enabled: boolean, index: number = 0): void {
+    this.isGalleryMode = enabled;
+    this.galleryIndex = Math.max(0, index);
+  }
+
+  public getGalleryMode(): boolean {
+    return this.isGalleryMode;
+  }
+
+  public nextGallerySprite(): void {
+    this.galleryIndex++;
+  }
+
+  public prevGallerySprite(): void {
+    this.galleryIndex = Math.max(0, this.galleryIndex - 1);
   }
 
   public getLastFrameHash(): number {
@@ -388,6 +425,12 @@ export class WorldEngine {
    * Renders the complete procedural ASCII scene into the FrameBuffer.
    */
   public render(frameBuffer: FrameBuffer): void {
+    if (this.isGalleryMode) {
+      this.renderSpriteGallery(frameBuffer, frameBuffer.width, frameBuffer.height);
+      this.lastFrameHash = frameBuffer.getFrameHash();
+      return;
+    }
+
     frameBuffer.clear(' ', '#10141e', '#030712');
 
     const width = frameBuffer.width;
@@ -1169,6 +1212,69 @@ export class WorldEngine {
         playerColor,
         30
       );
+    }
+  }
+
+  /**
+   * Renders the interactive Sprite Gallery & LOD Inspection Screen.
+   */
+  private renderSpriteGallery(fb: FrameBuffer, width: number, height: number): void {
+    fb.clear(' ', '#ffffff', '#090d16');
+
+    const sprites: SpriteDefinition[] = [
+      PalmTreeSprite,
+      PineTreeSprite,
+      CactusSprite,
+      DeciduousTreeSprite,
+      SportsCarSprite,
+      TrafficSedanSprite,
+      TruckSprite,
+      LighthouseSprite,
+      CoastalHotelSprite,
+      RoadsideCafeSprite,
+      BeachShackSprite,
+      SailboatSprite,
+      DirectionSignSprite,
+      BillboardSprite,
+      StreetLampSprite,
+    ];
+
+    const currentSprite = sprites[this.galleryIndex % sprites.length];
+    const headerText = `=== RESONANCE SPRITE GALLERY & LOD INSPECTION [${(this.galleryIndex % sprites.length) + 1}/${sprites.length}] ===`;
+    fb.drawString(Math.floor((width - headerText.length) / 2), 1, headerText, '#38bdf8', 0, '#0f172a');
+
+    const infoText = `${currentSprite.name.toUpperCase()} (ID: ${currentSprite.id}) | Category: ${currentSprite.category || 'SCENERY'} | World: ${currentSprite.worldWidth || '-'}x${currentSprite.worldHeight || '-'} | Scale: ${currentSprite.visualScale || 1.0}`;
+    fb.drawString(Math.max(2, Math.floor((width - infoText.length) / 2)), 3, infoText, '#fde047');
+
+    const helpText = `[PREV: LEFT ARROW / 'A']  •  [NEXT: RIGHT ARROW / 'D' / 'G']  •  [EXIT: ESC / '0']`;
+    fb.drawString(Math.max(2, Math.floor((width - helpText.length) / 2)), height - 2, helpText, '#94a3b8');
+
+    // Display baseline and slots for FAR, MEDIUM, NEAR, CLOSE
+    const lods: LODLevel[] = ['far', 'medium', 'near', 'close'];
+    const colStep = Math.floor(width / 4);
+    const baselineY = height - 5;
+
+    // Draw horizontal ground baseline
+    fb.drawHLine(4, width - 5, baselineY, '─', '#334155', 0);
+
+    for (let i = 0; i < lods.length; i++) {
+      const lod = lods[i];
+      const variant = currentSprite.variants[lod];
+      const slotCenterX = Math.floor(colStep * i + colStep / 2);
+
+      const label = `[ ${lod.toUpperCase()} ]`;
+      fb.drawString(slotCenterX - Math.floor(label.length / 2), 5, label, '#38bdf8');
+
+      if (variant) {
+        const dimLabel = `${variant.width}x${variant.height}`;
+        fb.drawString(slotCenterX - Math.floor(dimLabel.length / 2), 7, dimLabel, '#64748b');
+
+        // Draw sprite anchored at baseline
+        fb.drawSprite(slotCenterX, baselineY, variant, currentSprite.defaultColor, 0);
+      } else {
+        const noneLabel = '(none)';
+        fb.drawString(slotCenterX - Math.floor(noneLabel.length / 2), Math.floor(baselineY / 2), noneLabel, '#ef4444');
+      }
     }
   }
 }
