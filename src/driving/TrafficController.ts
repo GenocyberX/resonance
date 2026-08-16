@@ -7,7 +7,7 @@ export class TrafficController {
   private trafficVehicles: TrafficVehicle[] = [];
   private rng: SeededRandom;
   private nextId: number = 1;
-  public maxTrafficCount: number = 5;
+  public maxTrafficCount: number = 4;
 
   constructor(rng: SeededRandom) {
     this.rng = rng.fork(991);
@@ -36,11 +36,11 @@ export class TrafficController {
 
     // 3. Spawn new vehicles ahead if under capacity
     if (this.trafficVehicles.length < this.maxTrafficCount && this.rng.boolean(0.04)) {
-      this.spawnVehicle(player.z);
+      this.spawnVehicle(player.z, road);
     }
   }
 
-  private spawnVehicle(playerZ: number): void {
+  private spawnVehicle(playerZ: number, road: RoadGenerator): void {
     const lanes = [-1, 0, 1];
     const lane = this.rng.choice(lanes);
     const type: TrafficType = this.rng.boolean(0.35) ? 'truck' : 'sedan';
@@ -50,7 +50,8 @@ export class TrafficController {
     const isOverlapping = this.trafficVehicles.some(v => Math.abs(v.z - spawnZ) < 200 && v.lane === lane);
     if (!isOverlapping) {
       const id = `traffic_${this.nextId++}`;
-      const vehicle = new TrafficVehicle(id, type, spawnZ, lane);
+      const laneOffset = road.getLaneCenterOffset(lane);
+      const vehicle = new TrafficVehicle(id, type, spawnZ, lane, laneOffset);
       this.trafficVehicles.push(vehicle);
     }
   }

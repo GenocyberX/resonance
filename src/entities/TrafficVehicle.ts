@@ -8,18 +8,18 @@ export type TrafficType = 'sedan' | 'truck';
 export class TrafficVehicle extends Vehicle {
   public vehicleType: TrafficType;
 
-  constructor(id: string, type: TrafficType, startZ: number, lane: number) {
+  constructor(id: string, type: TrafficType, startZ: number, lane: number, laneOffset: number = 0) {
     const sprite: SpriteDefinition = type === 'truck' ? TruckSprite : TrafficSedanSprite;
     const boundingBox = type === 'truck'
-      ? { width: 260, length: 240, height: 120 }
-      : { width: 200, length: 140, height: 75 };
+      ? { width: 220, length: 240, height: 120 }
+      : { width: 190, length: 140, height: 75 };
 
     super(id, sprite, boundingBox);
     this.vehicleType = type;
     this.z = startZ;
     this.lane = lane;
-    this.setLane(lane);
-    this.lateralOffset = this.targetLateralOffset;
+    this.setLane(lane, laneOffset);
+    this.lateralOffset = laneOffset;
 
     // Ambient traffic speeds
     this.speed = type === 'truck' ? 75 : 95;

@@ -13,7 +13,7 @@ export class AutonomousDriver {
   }
 
   /**
-   * Scans ahead of the vehicle to build situational awareness.
+   * Scans ahead of the vehicle to build situational awareness using canonical lane geometry.
    */
   public perceive(
     player: PlayerVehicle,
@@ -34,13 +34,8 @@ export class AutonomousDriver {
 
       // Only check entities ahead within perception distance (up to 700 units)
       if (distZ > 10 && distZ < 700) {
-        // Determine which lane this entity occupies
-        let entLane = 0;
-        if (ent.x < road.getCurveAt(ent.z) - 250) {
-          entLane = -1;
-        } else if (ent.x > road.getCurveAt(ent.z) + 250) {
-          entLane = 1;
-        }
+        // Determine canonical lane this entity occupies
+        const entLane = road.getLaneForWorldX(ent.x, ent.z);
 
         if (lanes[entLane] && distZ < lanes[entLane].closestDistance) {
           lanes[entLane].closestDistance = distZ;
@@ -67,17 +62,20 @@ export class AutonomousDriver {
   }
 
   /**
-   * Decides driving action based on perception.
+   * Decides driving action based on perception and road state.
    */
   public decide(
     perception: RoadPerception,
     player: PlayerVehicle,
+    road: RoadGenerator,
     baseCruisingSpeed: number
   ): DriverDecision {
     if (player.collisionCooldown > 0) {
+      // During RECOVER: guide smoothly to nearest safe canonical lane
+      const safeLane = road.getNearestLane(player.lateralOffset);
       return {
-        targetLane: player.lane,
-        targetSpeed: Math.max(70, baseCruisingSpeed * 0.5),
+        targetLane: safeLane,
+        targetSpeed: Math.max(70, baseCruisingSpeed * 0.6),
         state: 'RECOVER',
       };
     }
@@ -87,10 +85,8 @@ export class AutonomousDriver {
 
     // Check overtake need
     if (isVehicleAheadClose && this.overtakeCooldown <= 0) {
-      // Find candidate lanes to switch to
       const candidateLanes: number[] = [];
       if (player.lane === 0) {
-        // From center, can switch to left (-1) or right (+1)
         if (perception.lanes[-1].closestDistance > 350) candidateLanes.push(-1);
         if (perception.lanes[1].closestDistance > 350) candidateLanes.push(1);
       } else if (player.lane === -1) {
@@ -100,7 +96,6 @@ export class AutonomousDriver {
       }
 
       if (candidateLanes.length > 0) {
-        // Choose best lane
         const bestLane = candidateLanes.reduce((prev, curr) =>
           perception.lanes[curr].closestDistance > perception.lanes[prev].closestDistance ? curr : prev
         );
@@ -111,7 +106,6 @@ export class AutonomousDriver {
           state: 'OVERTAKE',
         };
       } else if (currentLaneInfo.closestDistance < 160) {
-        // No overtake lane available -> must brake
         return {
           targetLane: player.lane,
           targetSpeed: Math.max(50, baseCruisingSpeed * 0.55),
@@ -129,7 +123,7 @@ export class AutonomousDriver {
       };
     }
 
-    // Default cruise: gently bias back towards center lane if clear
+    // Default cruise: bias back towards center lane if clear
     let targetLane = player.lane;
     if (player.lane !== this.preferredLane && this.overtakeCooldown <= 0 && perception.lanes[this.preferredLane].closestDistance > 450) {
       targetLane = this.preferredLane;
@@ -158,10 +152,12 @@ export class AutonomousDriver {
 
     const effectiveBaseSpeed = this.baseSpeed + musicSpeedBonus;
     const perception = this.perceive(player, traffic, road);
-    const decision = this.decide(perception, player, effectiveBaseSpeed);
+    const decision = this.decide(perception, player, road, effectiveBaseSpeed);
 
     player.driverState = decision.state;
     player.targetSpeed = decision.targetSpeed;
-    player.setLane(decision.targetLane);
+
+    const targetOffset = road.getLaneCenterOffset(decision.targetLane);
+    player.setLane(decision.targetLane, targetOffset);
   }
 }

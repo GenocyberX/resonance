@@ -22,16 +22,22 @@ export class PlayerVehicle extends Vehicle {
     this.brakingForce = 160;
   }
 
-  public update(dt: number, roadCenterCurve: number): void {
-    // Steer laterally towards target lane offset
+  public update(dt: number, roadCenterCurve: number, maxDriveableOffset: number = 270): void {
+    // 1. Physical clamp on target offset
+    this.targetLateralOffset = Math.max(-maxDriveableOffset, Math.min(maxDriveableOffset, this.targetLateralOffset));
+
+    // 2. Steer laterally towards target lane offset
     const lateralDiff = this.targetLateralOffset - this.lateralOffset;
-    const steerSpeed = this.driverState === 'RECOVER' ? 8.0 : 4.5;
+    const steerSpeed = this.driverState === 'RECOVER' ? 6.0 : 4.5;
     this.lateralOffset += lateralDiff * Math.min(1.0, dt * steerSpeed);
 
-    // Global X = Road curve center + Vehicle lateral offset
+    // 3. Physical clamp on actual lateral offset
+    this.lateralOffset = Math.max(-maxDriveableOffset, Math.min(maxDriveableOffset, this.lateralOffset));
+
+    // 4. Global X = Road curve center + Vehicle lateral offset
     this.x = roadCenterCurve + this.lateralOffset;
 
-    // Longitudinal speed adjustment
+    // 5. Longitudinal speed adjustment
     if (this.collisionCooldown > 0) {
       this.collisionCooldown = Math.max(0, this.collisionCooldown - dt);
     }
@@ -42,14 +48,14 @@ export class PlayerVehicle extends Vehicle {
       this.speed = Math.max(this.targetSpeed, this.speed - this.brakingForce * dt);
     }
 
-    // Move forward along the road
+    // 6. Move forward along the road
     this.z += this.speed * dt;
   }
 
   public onCollisionImpact(): void {
     this.collisionCount++;
-    this.collisionCooldown = 1.2;
-    this.speed = Math.max(40, this.speed * 0.45);
+    this.collisionCooldown = 1.0;
+    this.speed = Math.max(50, this.speed * 0.55);
     this.driverState = 'RECOVER';
   }
 }

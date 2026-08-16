@@ -34,6 +34,64 @@ export class RoadGenerator {
     this.tensionMultiplier = 1.0 + tension * 1.5;
   }
 
+  // --- CANONICAL LANE & ROAD GEOMETRY (Single Source of Truth) ---
+
+  /**
+   * Width of a single lane in world units (derived mathematically from road width and lane count).
+   */
+  public getLaneWidth(): number {
+    return this.defaultRoadWidth / this.lanes;
+  }
+
+  /**
+   * Lateral center offset for a lane index (-1 = Left, 0 = Center, +1 = Right).
+   */
+  public getLaneCenterOffset(lane: number): number {
+    // For 3 lanes: lane -1 -> -266.67, lane 0 -> 0, lane 1 -> +266.67
+    return lane * this.getLaneWidth();
+  }
+
+  /**
+   * Maximum safe lateral offset for a vehicle before its outer edge touches the shoulder curb.
+   */
+  public getDriveableHalfWidth(vehicleWidth: number = 220, safetyMargin: number = 20): number {
+    const roadHalfWidth = this.defaultRoadWidth * 0.5;
+    return Math.max(50, roadHalfWidth - (vehicleWidth * 0.5) - safetyMargin);
+  }
+
+  /**
+   * Clamps a lateral offset strictly within the driveable road boundaries.
+   */
+  public clampLateralOffset(offset: number, vehicleWidth: number = 220, safetyMargin: number = 20): number {
+    const maxOffset = this.getDriveableHalfWidth(vehicleWidth, safetyMargin);
+    return Math.max(-maxOffset, Math.min(maxOffset, offset));
+  }
+
+  /**
+   * Classifies which lane (-1, 0, or 1) a world coordinate (worldX, z) occupies.
+   */
+  public getLaneForWorldX(worldX: number, z: number): number {
+    const curve = this.getCurveAt(z);
+    const offset = worldX - curve;
+    const halfLane = this.getLaneWidth() * 0.5;
+
+    if (offset < -halfLane) return -1;
+    if (offset > halfLane) return 1;
+    return 0;
+  }
+
+  /**
+   * Finds the nearest valid lane index for any arbitrary lateral offset.
+   */
+  public getNearestLane(lateralOffset: number): number {
+    const laneWidth = this.getLaneWidth();
+    const halfLane = laneWidth * 0.5;
+
+    if (lateralOffset < -halfLane) return -1;
+    if (lateralOffset > halfLane) return 1;
+    return 0;
+  }
+
   /**
    * Evaluates road center lateral curve offset at longitudinal distance z.
    */
@@ -73,7 +131,6 @@ export class RoadGenerator {
         return Math.sin(z * 0.004) * 120;
       case 'NORMAL':
       default: {
-        // Controlled elevation variations to prevent road from being thrown out of view
         const hill1 = this.noise.noise1D((z + 5000) * 0.0004) * 160;
         const hill2 = Math.cos(z * 0.0002) * 80;
         return hill1 + hill2;

@@ -22,6 +22,11 @@ interface Cloud {
   speed: number;
 }
 
+// Chase Camera & Lateral Presentation Constants
+export const PLAYER_CAMERA_LATERAL_FOLLOW = 0.85;
+export const PLAYER_SCREEN_LATERAL_RESIDUAL = 0.15;
+export const CAMERA_SMOOTH_SPEED = 7.0;
+
 export class WorldEngine {
   private state: WorldState;
   private road: RoadGenerator;
@@ -43,7 +48,7 @@ export class WorldEngine {
   private isVisualTest: boolean = false;
   private testScenario: RoadTestMode = 'NORMAL';
 
-  // Cached scanline geometry for player anchoring and continuity verification
+  // Cached scanline geometry for player anchoring, debug telemetry and continuity verification
   private scanlineCenter: Float32Array = new Float32Array(100);
   private scanlineHalfWidth: Float32Array = new Float32Array(100);
   private scanlineDepth: Float32Array = new Float32Array(100);
@@ -82,12 +87,21 @@ export class WorldEngine {
       this.traffic.maxTrafficCount = 2;
     } else {
       this.road.setTestMode('NORMAL');
-      this.traffic.maxTrafficCount = 5;
+      this.traffic.maxTrafficCount = 4;
     }
   }
 
   public getVisualTestMode(): { isVisualTest: boolean; scenario: RoadTestMode } {
     return { isVisualTest: this.isVisualTest, scenario: this.testScenario };
+  }
+
+  public getScanlineDataAt(y: number): { center: number; halfWidth: number; depth: number } {
+    const iy = Math.max(0, Math.min(this.scanlineCenter.length - 1, Math.round(y)));
+    return {
+      center: this.scanlineCenter[iy],
+      halfWidth: this.scanlineHalfWidth[iy],
+      depth: this.scanlineDepth[iy],
+    };
   }
 
   private initStars(): void {
@@ -165,7 +179,6 @@ export class WorldEngine {
     this.state.worldTime += dt;
 
     if (this.isVisualTest) {
-      // In Visual Test Mode: completely deterministic and quiet
       this.state.musicParams = {
         targetSpeedBonus: 0,
         cameraBounce: 0,
@@ -177,14 +190,14 @@ export class WorldEngine {
       this.state.dayNight.phase = 'DAY';
       this.state.dayNight.ambientLight = 1.0;
       this.state.dayNight.sunElevation = 0.8;
-      this.state.biomeBlend = this.biomeSystem.evaluate(0); // Fixed Tropical / starting biome
+      this.state.biomeBlend = this.biomeSystem.evaluate(0);
     } else {
       this.state.musicParams = musicParams;
       this.state.dayNight = this.dayNightCycle.update(dt);
       this.state.biomeBlend = this.biomeSystem.evaluate(this.state.player.z);
     }
 
-    // Weather update (responsive to real-time viewport dimensions)
+    // Weather update
     if (!this.isVisualTest) {
       this.weatherEngine.updateBiomeWeather(this.state.biomeBlend.currentBiome.id, this.state.musicParams.tension);
       this.state.weather = this.weatherEngine.update(dt, viewportWidth, viewportHeight);
@@ -193,29 +206,35 @@ export class WorldEngine {
       this.state.weather = { type: 'CLEAR', intensity: 0, particles: [] };
     }
 
-    // Autonomous driving
+    // 1. Autonomous driving decision using canonical geometry
     const allEntities = [...this.traffic.getVehicles(), ...this.director.getScenery()];
     this.driver.update(dt, this.state.player, allEntities, this.road, this.state.musicParams.targetSpeedBonus);
 
-    // Update player vehicle position along road
+    // 2. Update player vehicle position with physical road clamping
+    const maxDriveableOffset = this.road.getDriveableHalfWidth(this.state.player.boundingBox.width, 20);
     const playerRoadCurve = this.road.getCurveAt(this.state.player.z);
-    this.state.player.update(dt, playerRoadCurve);
+    this.state.player.update(dt, playerRoadCurve, maxDriveableOffset);
     this.state.distance = this.state.player.z;
 
-    // Collision detection & physical contact lifecycle
-    const collisionEvents = this.collisions.checkCollisions(this.state.player, allEntities);
+    // 3. Collision detection & physical contact lifecycle with boundary preservation
+    const collisionEvents = this.collisions.checkCollisions(this.state.player, allEntities, maxDriveableOffset);
     for (const evt of collisionEvents) {
       this.state.cameraShake = Math.max(this.state.cameraShake, evt.cameraShakeAmount);
     }
+    // Ensure player is safely clamped
+    this.state.player.lateralOffset = this.road.clampLateralOffset(this.state.player.lateralOffset, this.state.player.boundingBox.width, 20);
+    this.state.player.x = playerRoadCurve + this.state.player.lateralOffset;
 
-    // Update camera follow model
+    // 4. Smooth Chase Camera Follow Model
     const camZ = this.state.player.z - 130;
-    const camX = this.road.getCurveAt(camZ) + this.state.player.lateralOffset * 0.45;
+    const roadCurveAtCamZ = this.road.getCurveAt(camZ);
+    const targetCamX = roadCurveAtCamZ + this.state.player.lateralOffset * PLAYER_CAMERA_LATERAL_FOLLOW;
     const camElevation = this.road.getElevationAt(camZ);
     const shakeOffset = this.isVisualTest ? 0 : (this.rng.next() - 0.5) * this.state.cameraShake * 18;
 
+    // Smooth exponential interpolation for camera lateral movement
+    this.state.camera.x += (targetCamX - this.state.camera.x) * Math.min(1.0, dt * CAMERA_SMOOTH_SPEED);
     this.state.camera.z = camZ;
-    this.state.camera.x = camX;
     this.state.camera.y = 280 + camElevation + this.state.musicParams.cameraBounce + shakeOffset;
     this.state.camera.distanceToPlane = 0.44;
     this.state.camera.fovPulse = this.isVisualTest ? 0 : this.state.musicParams.fovPulse;
@@ -225,16 +244,16 @@ export class WorldEngine {
       this.state.cameraShake = Math.max(0, this.state.cameraShake - dt * 2.5);
     }
 
-    // Update traffic and scenery
+    // 5. Update traffic and scenery
     this.traffic.update(dt, this.state.player, this.road);
     this.director.update(this.state.camera.z, this.road, 1200);
 
-    // Update clouds drift
+    // 6. Update clouds drift
     for (const cloud of this.clouds) {
       cloud.xNorm = (cloud.xNorm + cloud.speed * dt) % 1.0;
     }
 
-    // Update ambient roadside particles
+    // 7. Update ambient particles
     if (!this.isVisualTest) {
       this.updateAmbientParticles(dt, this.state.musicParams);
     }
@@ -285,7 +304,7 @@ export class WorldEngine {
     const dayNight = this.state.dayNight;
     const glow = this.state.musicParams.environmentalGlow;
 
-    // 1. SKY RENDERING (Gradients, Clouds, Stars, Sun/Moon)
+    // 1. SKY RENDERING
     this.renderSky(frameBuffer, width, horizonRow, palette, dayNight, glow);
 
     // 2. PARALLAX HORIZON & MOUNTAIN SILHOUETTES
@@ -545,7 +564,6 @@ export class WorldEngine {
 
   /**
    * Continuous Pseudo-3D Road Scanline Rasterizer.
-   * Traverses consecutive projected cross-sections and fills 100% of rows from horizon to screen bottom.
    */
   private renderRoad(
     fb: FrameBuffer,
@@ -566,7 +584,6 @@ export class WorldEngine {
     const playerZ = this.state.player.z;
     const beatPulse = this.state.musicParams.fovPulse > 0.1;
 
-    // 1. Sample and project road cross-sections along the visible frustum
     const drawDistance = 1050;
     const stepZ = this.road.segmentLength;
     const startZ = Math.floor((this.state.camera.z + 10) / stepZ) * stepZ;
@@ -609,14 +626,12 @@ export class WorldEngine {
 
     if (slices.length < 2) return;
 
-    // Initialize scanlines to default
     for (let y = 0; y < height; y++) {
       this.scanlineCenter[y] = width * 0.5;
       this.scanlineHalfWidth[y] = 0;
       this.scanlineDepth[y] = Infinity;
     }
 
-    // 2. Interpolate scanlines continuously between adjacent projected cross-sections
     for (let i = 1; i < slices.length; i++) {
       const pFar = slices[i];
       const pNear = slices[i - 1];
@@ -644,13 +659,11 @@ export class WorldEngine {
         const roadSpan = xR - xL;
         if (roadSpan <= 0) continue;
 
-        // Visual road colors & lighting
         const isAltTarmac = Math.floor(sliceZ / 35) % 2 === 0;
         let baseRoadColor = isAltTarmac
           ? palette.road
           : ColorPalette.scaleBrightness(palette.road, 1.22);
 
-        // Headlight beam illumination on asphalt at night
         if (isNight) {
           const distFromPlayer = sliceZ - playerZ;
           if (distFromPlayer > 0 && distFromPlayer < 350) {
@@ -668,7 +681,7 @@ export class WorldEngine {
           ? '#ffffff'
           : ColorPalette.applyFog(palette.roadMarking, palette.fog, depthFactor * 0.4);
 
-        // 1. Two-Stage Rumble Curbs (█▓▒░)
+        // 1. Two-Stage Rumble Curbs
         const curbWidth = Math.max(2, Math.round(roadSpan * 0.055));
         const rumblePattern = Math.floor(sliceZ / 25) % 2 === 0;
         const curbChar = rumblePattern ? '█' : '▒';
@@ -681,17 +694,17 @@ export class WorldEngine {
           fb.setCell(x, y, curbChar, curbColor, depth, undefined, false);
         }
 
-        // 2. Asphalt Road Surface (Clean with subtle depth stippling)
-        const tarmacChar = depth > 700 ? '·' : (depth > 400 ? '.' : (isAltTarmac ? ' ' : ' '));
+        // 2. Asphalt Road Surface
+        const tarmacChar = depth > 700 ? '·' : (depth > 400 ? '.' : ' ');
         for (let x = xL + 1; x < xR; x++) {
           fb.setCell(x, y, tarmacChar, roadColor, depth, undefined, false);
         }
 
-        // 3. Dashed Lane Dividers
+        // 3. Dashed Lane Dividers (positioned at 1/3 and 2/3 road span)
         const isDashed = Math.floor(sliceZ / 25) % 2 === 0;
         if (isDashed) {
-          const lane1X = Math.round(xL + roadSpan * 0.33);
-          const lane2X = Math.round(xL + roadSpan * 0.66);
+          const lane1X = Math.round(xL + roadSpan * 0.333);
+          const lane2X = Math.round(xL + roadSpan * 0.667);
           fb.setCell(lane1X, y, '║', markingColor, depth - 0.5, undefined, false);
           fb.setCell(lane2X, y, '║', markingColor, depth - 0.5, undefined, false);
         }
@@ -700,7 +713,7 @@ export class WorldEngine {
   }
 
   /**
-   * Renders Protagonist Sports Car as an anchored arcade element firmly on the road.
+   * Renders Protagonist Sports Car with chase camera residual framing and strict road containment.
    */
   private renderPlayerVehicle(
     fb: FrameBuffer,
@@ -716,9 +729,25 @@ export class WorldEngine {
     const roadCenterX = this.scanlineCenter[playerScreenY];
     const halfW = this.scanlineHalfWidth[playerScreenY];
 
-    // Lateral position: maps lateral offset (-1 to +1 lane) to road width at that row
+    // Normalized lateral position in road space: [-1.0, 1.0]
     const normalizedLateral = player.lateralOffset / (this.road.defaultRoadWidth * 0.5);
-    const playerScreenX = roadCenterX + normalizedLateral * halfW * 0.85;
+
+    // Screen residual: since chase camera already follows 85% of lateral movement,
+    // the sprite only exhibits a comfortable 15% residual displacement on screen
+    const screenResidual = normalizedLateral * halfW * PLAYER_SCREEN_LATERAL_RESIDUAL;
+    const calculatedX = roadCenterX + screenResidual;
+
+    // Select Close/Near LOD variant based on resolution
+    const variant = (height >= 35 ? player.sprite.variants.close : player.sprite.variants.near) ||
+                    player.sprite.variants.medium ||
+                    player.sprite.variants.far;
+
+    // Strict containment clamp: keep the full sprite body safely on the road tarmac
+    const spriteHalfW = (variant ? variant.width : 28) * 0.5;
+    const curbMargin = 2;
+    const minCarCenter = (roadCenterX - halfW) + spriteHalfW + curbMargin;
+    const maxCarCenter = (roadCenterX + halfW) - spriteHalfW - curbMargin;
+    const playerScreenX = Math.max(minCarCenter, Math.min(maxCarCenter, calculatedX));
 
     const isRecovering = player.collisionCooldown > 0;
     const isBraking = player.driverState === 'BRAKING';
@@ -733,16 +762,11 @@ export class WorldEngine {
     // Shadow underneath player car
     const shadowY = playerScreenY + 1;
     if (shadowY < height) {
-      const shadowSpan = 14;
+      const shadowSpan = 13;
       for (let sx = Math.round(playerScreenX - shadowSpan); sx <= Math.round(playerScreenX + shadowSpan); sx++) {
         fb.setCell(sx, shadowY, '▄', '#05060a', 25, undefined, false);
       }
     }
-
-    // Select Close/Near LOD variant based on resolution
-    const variant = (height >= 35 ? player.sprite.variants.close : player.sprite.variants.near) ||
-                    player.sprite.variants.medium ||
-                    player.sprite.variants.far;
 
     if (variant) {
       // Draw protagonist car on top of the road surface (depth = 30)

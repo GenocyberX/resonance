@@ -21,10 +21,13 @@ export class CollisionSystem {
 
   /**
    * Checks collisions between player vehicle and all active collidable entities.
-   * Implements a robust contact lifecycle (ENTER, STAY, EXIT) so that continuous
-   * overlap counts as exactly one collision impact, while maintaining physical separation.
+   * Implements a robust contact lifecycle (ENTER, STAY, EXIT) and controlled lateral separation.
    */
-  public checkCollisions(player: PlayerVehicle, entities: Entity[]): CollisionEvent[] {
+  public checkCollisions(
+    player: PlayerVehicle,
+    entities: Entity[],
+    maxDriveableOffset: number = 270
+  ): CollisionEvent[] {
     const events: CollisionEvent[] = [];
     const currentFrameOverlaps: Set<string> = new Set();
 
@@ -59,11 +62,14 @@ export class CollisionSystem {
             });
           }
 
-          // Both ENTER & STAY: Push apart laterally to resolve overlap and prevent ghosting
+          // Both ENTER & STAY: Push apart laterally with physical bounding limit
           const pushDirection = player.x >= ent.x ? 1 : -1;
           const overlap = minXDistance - dx;
-          const pushAmount = overlap + (isInitialContact ? 25 : 10);
+          const pushAmount = Math.min(35, overlap + (isInitialContact ? 15 : 6));
+
           player.lateralOffset += pushDirection * pushAmount;
+          // Clamp immediately so push cannot fling the player outside driveable bounds
+          player.lateralOffset = Math.max(-maxDriveableOffset, Math.min(maxDriveableOffset, player.lateralOffset));
           player.x += pushDirection * pushAmount;
         }
       }
