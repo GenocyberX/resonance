@@ -8,7 +8,8 @@ import { TrafficController } from '../driving/TrafficController';
 import { CollisionSystem } from '../driving/CollisionSystem';
 import { BiomeTransitionSystem } from './transitions/BiomeTransitionSystem';
 import { DayNightCycle } from './transitions/DayNightCycle';
-import { WeatherEngine } from './weather/WeatherEngine';
+import { SkyDirector } from './sky/SkyDirector';
+import { DayPhase, SpecialSkyEvent, WeatherType } from './sky/SkyTypes';
 import { WorldDirector } from './WorldDirector';
 import { WorldState } from './WorldState';
 import { AmbientParticle, WorldMusicParameters } from './types';
@@ -17,15 +18,20 @@ import { PlayerContainmentTelemetry } from '../ui/types';
 import { LODLevel, SpriteDefinition } from '../ascii/types';
 import { SpriteLibrary } from '../ascii/SpriteLibrary';
 
-interface Cloud {
-  xNorm: number;
-  yNorm: number;
-  width: number;
-  shape: string[];
-  speed: number;
-}
-
-export type VisualTestTime = 'day' | 'sunset' | 'night' | 'dawn';
+export type VisualTestTime =
+  | 'day'
+  | 'sunset'
+  | 'night'
+  | 'dawn'
+  | 'sunrise'
+  | 'morning'
+  | 'midday'
+  | 'afternoon'
+  | 'golden_hour'
+  | 'golden'
+  | 'dusk'
+  | 'deep_night'
+  | 'pre_dawn';
 
 // Chase Camera & Lateral Presentation Constants
 export const PLAYER_CAMERA_LATERAL_FOLLOW = 0.85;
@@ -40,14 +46,12 @@ export class WorldEngine {
   private collisions: CollisionSystem;
   private biomeSystem: BiomeTransitionSystem;
   private dayNightCycle: DayNightCycle;
-  private weatherEngine: WeatherEngine;
+  private skyDirector: SkyDirector;
   private director: WorldDirector;
   private depthSorter: DepthSorter;
   private rng: SeededRandom;
 
   private ambientParticles: AmbientParticle[] = [];
-  private stars: { xNorm: number; yNorm: number; char: string; brightness: number; twinkleSpeed: number }[] = [];
-  private clouds: Cloud[] = [];
 
   // Visual Test Mode & Resonance Art Lab state
   private isVisualTest: boolean = false;
@@ -87,7 +91,7 @@ export class WorldEngine {
     this.collisions = new CollisionSystem();
     this.biomeSystem = new BiomeTransitionSystem();
     this.dayNightCycle = new DayNightCycle();
-    this.weatherEngine = new WeatherEngine(this.rng);
+    this.skyDirector = new SkyDirector(seed);
     this.director = new WorldDirector(seed, this.biomeSystem);
     this.depthSorter = new DepthSorter();
 
@@ -95,9 +99,8 @@ export class WorldEngine {
     this.state.camera.distanceToPlane = 0.44;
     this.state.dayNight = this.dayNightCycle.update(0);
     this.state.biomeBlend = this.biomeSystem.evaluate(0);
-
-    this.initStars();
-    this.initClouds();
+    this.state.sky = this.skyDirector.update(0, this.state.biomeBlend.currentBiome.id, this.state.musicParams, 120, 40);
+    this.state.weather = this.skyDirector.getWeatherManager().toWeatherState();
   }
 
   public setVisualTestMode(
@@ -105,7 +108,9 @@ export class WorldEngine {
     scenario: RoadTestMode = 'FLAT_STRAIGHT',
     time: VisualTestTime = 'day',
     golden: boolean = false,
-    stability: 'dynamic' | 'static' | 'none' = 'none'
+    stability: 'dynamic' | 'static' | 'none' = 'none',
+    weather?: WeatherType,
+    event: SpecialSkyEvent = 'NONE'
   ): void {
     this.isVisualTest = enabled;
     this.isGoldenMode = golden;
@@ -116,7 +121,7 @@ export class WorldEngine {
 
     if (enabled) {
       this.state.cameraShake = 0;
-      this.setVisualTestTime(time);
+      this.setVisualTestTime(time, weather, event);
       this.traffic.maxTrafficCount = (golden || stability !== 'none') ? 1 : 2;
       if (golden || stability !== 'none') {
         this.director.reset(2026);
@@ -124,18 +129,34 @@ export class WorldEngine {
     } else {
       this.road.setTestMode('NORMAL');
       this.traffic.maxTrafficCount = 4;
+      this.skyDirector.setVisualTestOverride(false);
     }
   }
 
-  public setVisualTestTime(time: VisualTestTime): void {
+  public setVisualTestTime(time: VisualTestTime, weather?: WeatherType, event: SpecialSkyEvent = 'NONE'): void {
     this.testTimeOfDay = time;
-    let normTime = 0.35; // DAY
-    if (time === 'sunset') normTime = 0.60;
-    if (time === 'night') normTime = 0.85;
-    if (time === 'dawn') normTime = 0.10;
+    const timeLower = (time || 'day').toLowerCase();
+    let normTime = 0.50;
+    let phase: DayPhase = 'MIDDAY';
+
+    if (timeLower.includes('deep_night')) { normTime = 0.04; phase = 'DEEP_NIGHT'; }
+    else if (timeLower.includes('pre_dawn')) { normTime = 0.11; phase = 'PRE_DAWN'; }
+    else if (timeLower.includes('dawn')) { normTime = 0.18; phase = 'DAWN'; }
+    else if (timeLower.includes('sunrise')) { normTime = 0.26; phase = 'SUNRISE'; }
+    else if (timeLower.includes('morning')) { normTime = 0.36; phase = 'MORNING'; }
+    else if (timeLower.includes('midday') || timeLower === 'day') { normTime = 0.50; phase = 'MIDDAY'; }
+    else if (timeLower.includes('afternoon')) { normTime = 0.63; phase = 'AFTERNOON'; }
+    else if (timeLower.includes('golden') || timeLower === 'golden_hour') { normTime = 0.72; phase = 'GOLDEN_HOUR'; }
+    else if (timeLower.includes('sunset')) { normTime = 0.80; phase = 'SUNSET'; }
+    else if (timeLower.includes('dusk')) { normTime = 0.88; phase = 'DUSK'; }
+    else if (timeLower.includes('night')) { normTime = 0.96; phase = 'NIGHT'; }
 
     this.dayNightCycle.setNormalizedTime(normTime);
     this.state.dayNight = this.dayNightCycle.calculateState(normTime);
+
+    this.skyDirector.setVisualTestOverride(true, phase, weather || null, event);
+    this.state.sky = this.skyDirector.update(0, this.state.biomeBlend.currentBiome.id, this.state.musicParams, 120, 40);
+    this.state.weather = this.skyDirector.getWeatherManager().toWeatherState();
   }
 
   public getVisualTestMode(): {
@@ -237,56 +258,8 @@ export class WorldEngine {
     };
   }
 
-  private initStars(): void {
-    this.stars = [];
-    const starChars = ['*', '+', '.', '°', '·', '✦', '✧'];
-    for (let i = 0; i < 95; i++) {
-      this.stars.push({
-        xNorm: this.rng.next(),
-        yNorm: this.rng.range(0.01, 0.38),
-        char: this.rng.choice(starChars),
-        brightness: this.rng.range(0.5, 1.0),
-        twinkleSpeed: this.rng.range(2.0, 6.0),
-      });
-    }
-  }
-
-  private initClouds(): void {
-    this.clouds = [
-      {
-        xNorm: 0.12,
-        yNorm: 0.06,
-        width: 24,
-        speed: 0.003,
-        shape: [
-          '     .-------.    ',
-          '  .-(         )-. ',
-          ' (_______________)',
-        ],
-      },
-      {
-        xNorm: 0.58,
-        yNorm: 0.14,
-        width: 32,
-        speed: 0.005,
-        shape: [
-          '       .--------.       ',
-          '   .--(          )---.  ',
-          '  (___________________) ',
-        ],
-      },
-      {
-        xNorm: 0.85,
-        yNorm: 0.04,
-        width: 20,
-        speed: 0.002,
-        shape: [
-          '   .----.   ',
-          ' .-(      )-.',
-          '(____________)',
-        ],
-      },
-    ];
+  public getSkyDirector(): SkyDirector {
+    return this.skyDirector;
   }
 
   public getState(): WorldState {
@@ -353,14 +326,16 @@ export class WorldEngine {
       this.state.biomeBlend = this.biomeSystem.evaluate(this.state.player.z);
     }
 
-    // Weather update
-    if (!this.isVisualTest) {
-      this.weatherEngine.updateBiomeWeather(this.state.biomeBlend.currentBiome.id, this.state.musicParams.tension);
-      this.state.weather = this.weatherEngine.update(dt, viewportWidth, viewportHeight);
-      this.road.setTension(this.state.musicParams.tension);
-    } else {
-      this.state.weather = { type: 'CLEAR', intensity: 0, particles: [] };
-    }
+    // Sky & Weather update via authoritative SkyDirector
+    this.state.sky = this.skyDirector.update(
+      dt,
+      this.state.biomeBlend.currentBiome.id,
+      this.state.musicParams,
+      viewportWidth,
+      viewportHeight
+    );
+    this.state.weather = this.skyDirector.getWeatherManager().toWeatherState();
+    this.road.setTension(this.state.musicParams.tension);
 
     // 1. Autonomous driving decision using canonical geometry
     const allEntities = [...this.traffic.getVehicles(), ...this.director.getScenery()];
@@ -416,12 +391,7 @@ export class WorldEngine {
     this.traffic.update(dt, this.state.player, this.road);
     this.director.update(this.state.camera.z, this.road, 1200);
 
-    // 7. Update clouds drift
-    for (const cloud of this.clouds) {
-      cloud.xNorm = (cloud.xNorm + cloud.speed * dt) % 1.0;
-    }
-
-    // 8. Update ambient particles
+    // 7. Update ambient particles
     if (!this.isVisualTest) {
       this.updateAmbientParticles(dt, this.state.musicParams);
     }
@@ -476,10 +446,9 @@ export class WorldEngine {
 
     const palette = this.state.biomeBlend.blendedPalette;
     const dayNight = this.state.dayNight;
-    const glow = this.state.musicParams.environmentalGlow;
 
-    // 1. SKY RENDERING
-    this.renderSky(frameBuffer, width, horizonRow, palette, dayNight, glow);
+    // 1. SKY & CELESTIAL RENDERING (Multi-Band Gradient, Aurora, Stars, Sun/Moon, Clouds, Lightning, Fog, Weather)
+    this.skyDirector.render(frameBuffer, width, horizonRow, height, this.state.sky);
 
     // 2. WORLD-SPACE PARALLAX HORIZON SILHOUETTES
     this.renderHorizonSilhouettes(frameBuffer, width, horizonRow, palette, dayNight);
@@ -546,126 +515,8 @@ export class WorldEngine {
       }
     }
 
-    // 7. WEATHER PARTICLES
-    for (const p of this.state.weather.particles) {
-      frameBuffer.setCell(p.x, p.y, p.char, p.color, 5, undefined, true);
-    }
-
-    // 8. FRAME HASH (for deterministic stability validation)
+    // 7. FRAME HASH (for deterministic stability validation)
     this.lastFrameHash = frameBuffer.getFrameHash();
-  }
-
-  /**
-   * Sky Rendering with multi-band background gradients and drifting clouds.
-   */
-  private renderSky(
-    fb: FrameBuffer,
-    width: number,
-    horizonRow: number,
-    palette: typeof this.state.biomeBlend.blendedPalette,
-    dayNight: typeof this.state.dayNight,
-    glow: number
-  ): void {
-    const skyTop = ColorPalette.scaleBrightness(
-      ColorPalette.lerp(palette.skyTop, dayNight.blendedSkyTop, 0.7),
-      0.85 + glow * 0.25
-    );
-    const skyBottom = ColorPalette.scaleBrightness(
-      ColorPalette.lerp(palette.skyBottom, dayNight.blendedSkyBottom, 0.65),
-      0.85 + glow * 0.25
-    );
-
-    // Background color gradient across the upper sky
-    for (let y = 0; y < horizonRow; y++) {
-      const t = y / Math.max(1, horizonRow);
-      const rowColor = ColorPalette.lerp(skyTop, skyBottom, t);
-      const rowBg = ColorPalette.scaleBrightness(rowColor, 0.35);
-      const skyChar = t > 0.85 ? '░' : ' ';
-      for (let x = 0; x < width; x++) {
-        fb.setCell(x, y, skyChar, rowColor, 10000, rowBg, false);
-      }
-    }
-
-    // Stars during Night and Twilight
-    if (dayNight.starIntensity > 0.05) {
-      const time = this.state.worldTime;
-      for (const star of this.stars) {
-        const starX = Math.floor(star.xNorm * width);
-        const starY = Math.floor(star.yNorm * horizonRow);
-        const twinkle = 0.6 + Math.sin(time * star.twinkleSpeed) * 0.4;
-        const brightness = star.brightness * dayNight.starIntensity * twinkle;
-        if (brightness > 0.18) {
-          const starColor = ColorPalette.scaleBrightness('#ffffff', brightness);
-          fb.setCell(starX, starY, star.char, starColor, 9990, undefined, true);
-        }
-      }
-    }
-
-    // Drifting Procedural Clouds with multi-color volume
-    if (dayNight.phase !== 'NIGHT') {
-      const cloudColor = dayNight.phase === 'DUSK'
-        ? '#f472b6'
-        : (dayNight.phase === 'DAWN' ? '#fde047' : '#f0f9ff');
-      const cloudShadow = dayNight.phase === 'DUSK' ? '#be185d' : '#93c5fd';
-
-      for (const cloud of this.clouds) {
-        const startX = Math.floor(cloud.xNorm * width);
-        const startY = Math.floor(cloud.yNorm * horizonRow);
-
-        for (let r = 0; r < cloud.shape.length; r++) {
-          const line = cloud.shape[r];
-          const cy = startY + r;
-          if (cy >= horizonRow) continue;
-
-          const rowTint = r === cloud.shape.length - 1 ? cloudShadow : cloudColor;
-
-          for (let c = 0; c < line.length; c++) {
-            const ch = line[c];
-            if (ch !== ' ') {
-              const cx = (startX + c) % width;
-              fb.setCell(cx, cy, ch, rowTint, 9970, undefined, true);
-            }
-          }
-        }
-      }
-    }
-
-    // Sun / Moon Celestial Body
-    const celestialY = Math.floor(horizonRow * (1.0 - dayNight.sunElevation * 0.72));
-    const celestialX = Math.floor(width * 0.5 + Math.sin(this.state.worldTime * 0.02) * width * 0.22);
-
-    if (celestialY >= 2 && celestialY < horizonRow - 1) {
-      const isNight = dayNight.phase === 'NIGHT';
-      const disc = isNight
-        ? [
-            '  .---.  ',
-            ' / (o) \\ ',
-            '|   ( ) |',
-            ' \\     / ',
-            '  \'---\'  ',
-          ]
-        : [
-            '   \\ | /   ',
-            ' --.---.-- ',
-            '---| * |---',
-            ' --\'---\'-- ',
-            '   / | \\   ',
-          ];
-      const color = dayNight.sunColor;
-
-      for (let r = 0; r < disc.length; r++) {
-        const rowText = disc[r];
-        for (let c = 0; c < rowText.length; c++) {
-          const ch = rowText[c];
-          if (ch !== ' ') {
-            const targetX = celestialX - Math.floor(rowText.length / 2) + c;
-            if (targetX >= 0 && targetX < width) {
-              fb.setCell(targetX, celestialY - 2 + r, ch, color, 9950, undefined, true);
-            }
-          }
-        }
-      }
-    }
   }
 
   /**

@@ -191,6 +191,34 @@ export class DebugPanel {
           <span class="debug-val" style="color: #34d399">${biomeLabel}</span>
         </div>
         <div class="debug-row">
+          <span class="debug-label">SKY PHASE</span>
+          <span class="debug-val" style="color: #fde047">${worldState.sky ? worldState.sky.timePhase : dayNight.phase}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">SUN ELEV / HEADING</span>
+          <span class="debug-val">${worldState.sky ? `${worldState.sky.sunElevation.toFixed(2)} / ${worldState.sky.sunHeadingNorm.toFixed(2)}` : dayNight.sunElevation.toFixed(2)}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">MOON PHASE / ELEV</span>
+          <span class="debug-val" style="color: #e2e8f0">${worldState.sky ? `${worldState.sky.moonPhase} (${worldState.sky.moonElevation.toFixed(2)})` : '-'}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">STAR VISIBILITY</span>
+          <span class="debug-val" style="color: #38bdf8">${worldState.sky ? `${Math.round(worldState.sky.starVisibility * 100)}%` : `${Math.round(dayNight.starIntensity * 100)}%`}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">CLOUD COVERAGE</span>
+          <span class="debug-val">${worldState.sky ? `${worldState.sky.cloudCoverage} (${Math.round(worldState.sky.cloudCoverageRatio * 100)}%)` : '-'}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">WEATHER</span>
+          <span class="debug-val" style="color: #06b6d4">${worldState.sky ? worldState.sky.activeWeather : worldState.weather.type}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">SKY EVENT</span>
+          <span class="debug-val" style="color: #ec4899">${worldState.sky ? worldState.sky.specialEvent : 'NONE'}</span>
+        </div>
+        <div class="debug-row">
           <span class="debug-label">TRAFFIC COUNT</span>
           <span class="debug-val">${activeTrafficCount}</span>
         </div>

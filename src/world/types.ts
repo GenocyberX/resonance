@@ -1,4 +1,5 @@
 import { SpriteDefinition } from '../ascii/types';
+import { DayPhase as SkyDayPhase, MoonPhase, CloudCoverage, WeatherType as SkyWeatherType, SpecialSkyEvent, SkyState } from './sky/SkyTypes';
 
 export type BiomeId =
   | 'TROPICAL'
@@ -8,7 +9,10 @@ export type BiomeId =
   | 'NEON_CITY'
   | 'VOLCANIC';
 
-export type DayPhase = 'DAWN' | 'DAY' | 'DUSK' | 'NIGHT';
+export type DayPhase = SkyDayPhase;
+export type MoonPhaseType = MoonPhase;
+export type CloudCoverageType = CloudCoverage;
+export type WeatherType = SkyWeatherType;
 
 export type TerrainSurfaceType =
   | 'INLAND'
@@ -79,15 +83,13 @@ export interface DayNightState {
   normalizedCycle: number;     // [0.0, 1.0)
   phase: DayPhase;
   phaseProgress: number;       // [0.0, 1.0) within phase
-  ambientLight: number;        // [0.25, 1.0]
+  ambientLight: number;        // [0.20, 1.0]
   sunElevation: number;        // Screen row offset for sun/moon
   sunColor: string;
   starIntensity: number;       // [0.0, 1.0] for night sky stars
   blendedSkyTop: string;
   blendedSkyBottom: string;
 }
-
-export type WeatherType = 'CLEAR' | 'LIGHT_RAIN' | 'NEON_MIST' | 'HEAT_HAZE' | 'VOLCANIC_ASH';
 
 export interface WeatherState {
   type: WeatherType;
@@ -126,3 +128,5 @@ export interface WorldMusicParameters {
   particleDensity: number;
   environmentalGlow: number;
 }
+
+export type { SkyState, SpecialSkyEvent };

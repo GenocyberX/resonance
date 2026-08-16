@@ -2,7 +2,7 @@ import { PlayerVehicle } from '../entities/PlayerVehicle';
 import { TrafficVehicle } from '../entities/TrafficVehicle';
 import { SceneryObject } from '../entities/SceneryObject';
 import { Camera } from '../road/types';
-import { BiomeBlendState, DayNightState, WeatherState, WorldMusicParameters } from './types';
+import { BiomeBlendState, DayNightState, WeatherState, WorldMusicParameters, SkyState } from './types';
 
 export class WorldState {
   public distance: number = 0;       // Global longitudinal travel distance
@@ -15,6 +15,7 @@ export class WorldState {
   public biomeBlend!: BiomeBlendState;
   public dayNight!: DayNightState;
   public weather!: WeatherState;
+  public sky!: SkyState;
   public musicParams: WorldMusicParameters = {
     targetSpeedBonus: 0,
     cameraBounce: 0,

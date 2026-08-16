@@ -93,7 +93,7 @@ export class ResonanceApp {
       return;
     }
 
-    const hasVisualTest = params.has('visualTest') || params.has('scene') || params.has('time') || params.has('golden') || params.has('stability');
+    const hasVisualTest = params.has('visualTest') || params.has('scene') || params.has('time') || params.has('golden') || params.has('stability') || params.has('weather') || params.has('event');
 
     if (hasVisualTest) {
       const isGolden = params.get('golden') === 'tropical';
@@ -102,7 +102,10 @@ export class ResonanceApp {
       const stability: 'dynamic' | 'static' | 'none' = isStabilityStatic ? 'static' : (isStabilityDynamic ? 'dynamic' : 'none');
 
       const sceneParam = (params.get('scene') || 'straight').toLowerCase();
-      const timeParam = (params.get('time') || 'day').toLowerCase() as VisualTestTime;
+      const timeParam = (params.get('time') || (params.get('visualTest') === 'sky' ? 'midday' : 'day')).toLowerCase() as VisualTestTime;
+      const weatherParam = (params.get('weather') || '').toUpperCase();
+      const eventParam = (params.get('event') || '').toUpperCase();
+
       let scenario: RoadTestMode = 'FLAT_STRAIGHT';
 
       if (sceneParam.includes('curve_left') || sceneParam === 'left') {
@@ -115,22 +118,96 @@ export class ResonanceApp {
         scenario = 'S_CURVE';
       }
 
+      const weatherMap: Record<string, any> = {
+        CLEAR: 'CLEAR',
+        CLOUDY: 'CLOUDY',
+        RAIN: 'LIGHT_RAIN',
+        LIGHT_RAIN: 'LIGHT_RAIN',
+        HEAVY_RAIN: 'HEAVY_RAIN',
+        STORM: 'THUNDERSTORM',
+        THUNDERSTORM: 'THUNDERSTORM',
+        SNOW: 'SNOW',
+        BLIZZARD: 'BLIZZARD',
+        FOG: 'FOG',
+        HEAT_HAZE: 'HEAT_HAZE',
+        ASH: 'VOLCANIC_ASH',
+        VOLCANIC_ASH: 'VOLCANIC_ASH',
+        NEON_MIST: 'NEON_MIST',
+      };
+
+      const eventMap: Record<string, any> = {
+        AURORA: 'AURORA',
+        SHOOTING_STAR: 'SHOOTING_STAR',
+        METEOR: 'METEOR_SHOWER',
+        METEOR_SHOWER: 'METEOR_SHOWER',
+        HUGE_MOON: 'LOW_FULL_MOON',
+        MOON: 'LOW_FULL_MOON',
+        RED_SUNSET: 'RED_SUNSET',
+        GOLDEN_SUNSET: 'GOLDEN_SUNSET',
+        VIOLET_DUSK: 'VIOLET_DUSK',
+        RED_DAWN: 'RED_DAWN',
+      };
+
+      const activeWeather = weatherMap[weatherParam] || undefined;
+      const activeEvent = eventMap[eventParam] || 'NONE';
+
       this.worldEngine.setVisualTestMode(
         true,
         scenario,
-        ['day', 'sunset', 'night', 'dawn'].includes(timeParam) ? timeParam : 'day',
+        timeParam,
         isGolden,
-        stability
+        stability,
+        activeWeather,
+        activeEvent
       );
-      console.info(`[Resonance] Visual Test Mode active. Scenario: ${scenario}, Time: ${timeParam}, Golden: ${isGolden}, Stability: ${stability}`);
+      console.info(`[Resonance] Visual Test Mode active. Scenario: ${scenario}, Time: ${timeParam}, Weather: ${activeWeather || 'DEFAULT'}, Event: ${activeEvent}`);
     }
   }
 
   private setupKeybindings(): void {
     if (typeof window === 'undefined') return;
 
-    const timePhases: VisualTestTime[] = ['day', 'sunset', 'night', 'dawn'];
-    let timeIndex = 0;
+    const timePhases: VisualTestTime[] = [
+      'dawn',
+      'sunrise',
+      'morning',
+      'midday',
+      'afternoon',
+      'golden_hour',
+      'sunset',
+      'dusk',
+      'night',
+      'deep_night',
+      'pre_dawn',
+    ];
+    let timeIndex = 3; // midday
+
+    const weatherList = [
+      'CLEAR',
+      'CLOUDY',
+      'LIGHT_RAIN',
+      'HEAVY_RAIN',
+      'THUNDERSTORM',
+      'SNOW',
+      'BLIZZARD',
+      'FOG',
+      'HEAT_HAZE',
+      'VOLCANIC_ASH',
+    ];
+    let weatherIndex = 0;
+
+    const eventList = [
+      'NONE',
+      'AURORA',
+      'SHOOTING_STAR',
+      'METEOR_SHOWER',
+      'LOW_FULL_MOON',
+      'RED_SUNSET',
+      'GOLDEN_SUNSET',
+      'VIOLET_DUSK',
+      'RED_DAWN',
+    ];
+    let eventIndex = 0;
 
     window.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -224,6 +301,18 @@ export class ResonanceApp {
           timeIndex = (timeIndex + 1) % timePhases.length;
           this.worldEngine.setVisualTestTime(timePhases[timeIndex]);
           console.info(`[Resonance Test] Time of Day: ${timePhases[timeIndex]}`);
+          break;
+        case 'w':
+        case 'W':
+          weatherIndex = (weatherIndex + 1) % weatherList.length;
+          this.worldEngine.getSkyDirector().setWeather(weatherList[weatherIndex] as any, true);
+          console.info(`[Resonance Test] Weather: ${weatherList[weatherIndex]}`);
+          break;
+        case 'e':
+        case 'E':
+          eventIndex = (eventIndex + 1) % eventList.length;
+          this.worldEngine.getSkyDirector().setSpecialEvent(eventList[eventIndex] as any, 1.0);
+          console.info(`[Resonance Test] Special Event: ${eventList[eventIndex]}`);
           break;
         case '0':
         case 'Escape':
