@@ -7,6 +7,7 @@ import { Hud } from '../ui/Hud';
 import { DebugPanel } from '../ui/DebugPanel';
 import { APP_CONFIG } from './config';
 import { UiTelemetryData } from '../ui/types';
+import { RoadTestMode } from '../road/RoadGenerator';
 
 export class ResonanceApp {
   private audioEngine: AudioEngine;
@@ -48,8 +49,76 @@ export class ResonanceApp {
     this.hud = new Hud();
     this.debugPanel = new DebugPanel();
 
-    // 5. Setup Responsive Viewport Resize
+    // 5. Check URL parameters for Visual Test Mode
+    this.checkUrlVisualTestMode();
+
+    // 6. Setup Keyboard Shortcuts for Visual Test Scenarios
+    this.setupKeybindings();
+
+    // 7. Setup Responsive Viewport Resize
     this.setupResizeObserver();
+  }
+
+  private checkUrlVisualTestMode(): void {
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    const hasVisualTest = params.has('visualTest') || params.has('scene');
+
+    if (hasVisualTest) {
+      const sceneParam = (params.get('scene') || 'straight').toLowerCase();
+      let scenario: RoadTestMode = 'FLAT_STRAIGHT';
+
+      if (sceneParam.includes('curve_left') || sceneParam === 'left') {
+        scenario = 'FLAT_CURVE_LEFT';
+      } else if (sceneParam.includes('curve_right') || sceneParam === 'right') {
+        scenario = 'FLAT_CURVE_RIGHT';
+      } else if (sceneParam.includes('hill')) {
+        scenario = 'HILL';
+      } else if (sceneParam.includes('s_curve') || sceneParam === 's') {
+        scenario = 'S_CURVE';
+      }
+
+      this.worldEngine.setVisualTestMode(true, scenario);
+      console.info(`[Resonance] Visual Test Mode active. Scenario: ${scenario}`);
+    }
+  }
+
+  private setupKeybindings(): void {
+    if (typeof window === 'undefined') return;
+
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+      // Don't intercept when user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      switch (e.key) {
+        case '1':
+          this.worldEngine.setVisualTestMode(true, 'FLAT_STRAIGHT');
+          console.info('[Resonance Test] Scenario: FLAT_STRAIGHT');
+          break;
+        case '2':
+          this.worldEngine.setVisualTestMode(true, 'FLAT_CURVE_LEFT');
+          console.info('[Resonance Test] Scenario: FLAT_CURVE_LEFT');
+          break;
+        case '3':
+          this.worldEngine.setVisualTestMode(true, 'FLAT_CURVE_RIGHT');
+          console.info('[Resonance Test] Scenario: FLAT_CURVE_RIGHT');
+          break;
+        case '4':
+          this.worldEngine.setVisualTestMode(true, 'HILL');
+          console.info('[Resonance Test] Scenario: HILL');
+          break;
+        case '5':
+          this.worldEngine.setVisualTestMode(true, 'S_CURVE');
+          console.info('[Resonance Test] Scenario: S_CURVE');
+          break;
+        case '0':
+        case 'Escape':
+          this.worldEngine.setVisualTestMode(false);
+          console.info('[Resonance] Returned to Normal Procedural Mode');
+          break;
+      }
+    });
   }
 
   private setupResizeObserver(): void {
@@ -110,6 +179,7 @@ export class ResonanceApp {
       totalCollisions: this.worldEngine.getCollisionSystem().getTotalCollisions(),
       activeTrafficCount: this.worldEngine.getState().traffic.length,
       seed: APP_CONFIG.defaultSeed,
+      visualTestMode: this.worldEngine.getVisualTestMode(),
     };
 
     this.hud.update(telemetry);

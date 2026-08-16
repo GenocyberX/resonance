@@ -8,4 +8,8 @@ export interface UiTelemetryData {
   totalCollisions: number;
   activeTrafficCount: number;
   seed: number;
+  visualTestMode?: {
+    isVisualTest: boolean;
+    scenario: string;
+  };
 }

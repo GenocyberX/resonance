@@ -2,7 +2,8 @@ import { Camera, ProjectedPoint } from './types';
 
 export class Perspective {
   /**
-   * Projects a 3D world coordinate (x, y, z) into 2D ASCII screen grid coordinates.
+   * Mathematically calibrated 3D to 2D perspective projection for ASCII character grid.
+   * Ensures monotonic convergence to horizon, stable framing, and well-behaved road geometry.
    */
   public static project(
     worldX: number,
@@ -11,10 +12,11 @@ export class Perspective {
     camera: Camera,
     screenWidth: number,
     screenHeight: number,
-    horizonRowRatio: number = 0.42
+    horizonRowRatio: number = 0.40
   ): ProjectedPoint {
     const relZ = worldZ - camera.z;
 
+    // Reject points on or behind the camera lens
     if (relZ <= 2.0) {
       return {
         screenX: 0,
@@ -25,24 +27,26 @@ export class Perspective {
       };
     }
 
-    const effectiveFov = camera.distanceToPlane * (1.0 + camera.fovPulse * 0.15);
+    // Focal length / distance to projection plane
+    const effectiveFov = camera.distanceToPlane * (1.0 + (camera.fovPulse || 0) * 0.1);
     const scale = effectiveFov / relZ;
 
     const relX = worldX - camera.x;
     const relY = worldY - camera.y;
 
     const centerX = screenWidth * 0.5;
-    const centerY = screenHeight * horizonRowRatio + camera.pitch * screenHeight;
+    const horizonY = screenHeight * horizonRowRatio + (camera.pitch || 0) * screenHeight;
 
-    // In ASCII cells, horizontal cells are slightly narrower than vertical height (approx aspect ratio 1:1.8)
-    const aspectCorrection = 1.75;
-    const screenX = centerX + (relX * scale * screenWidth * 0.5 * aspectCorrection);
-    const screenY = centerY - (relY * scale * screenHeight * 0.5);
+    // In monospace font grids, characters are taller than they are wide (~1:1.8 ratio)
+    const aspectCorrection = 1.8;
+    const screenX = centerX + (relX * scale * screenWidth * 0.45 * aspectCorrection);
+    const screenY = horizonY - (relY * scale * screenHeight * 0.55);
 
-    const visible = screenX >= -screenWidth * 0.5 &&
-                    screenX <= screenWidth * 1.5 &&
-                    screenY >= 0 &&
-                    screenY <= screenHeight;
+    const visible = relZ > 10 &&
+                    screenX >= -screenWidth * 0.8 &&
+                    screenX <= screenWidth * 1.8 &&
+                    screenY >= horizonY - 10 &&
+                    screenY <= screenHeight + 20;
 
     return {
       screenX,
@@ -50,6 +54,48 @@ export class Perspective {
       scale,
       depth: relZ,
       visible,
+    };
+  }
+
+  /**
+   * Projects a road cross-section at longitudinal distance z.
+   * Returns screen center X, screen row Y, half-width in columns, and depth.
+   */
+  public static projectRoadSlice(
+    curveX: number,
+    elevationY: number,
+    worldZ: number,
+    halfRoadWidth: number,
+    camera: Camera,
+    screenWidth: number,
+    screenHeight: number,
+    horizonRowRatio: number = 0.40
+  ): { screenX: number; screenY: number; halfWidth: number; depth: number; visible: boolean } {
+    const centerProj = this.project(
+      curveX,
+      elevationY,
+      worldZ,
+      camera,
+      screenWidth,
+      screenHeight,
+      horizonRowRatio
+    );
+
+    if (centerProj.depth <= 2.0) {
+      return { screenX: 0, screenY: 0, halfWidth: 0, depth: centerProj.depth, visible: false };
+    }
+
+    const effectiveFov = camera.distanceToPlane * (1.0 + (camera.fovPulse || 0) * 0.1);
+    const scale = effectiveFov / centerProj.depth;
+    const aspectCorrection = 1.8;
+    const halfWidthScreen = Math.max(1.0, halfRoadWidth * scale * screenWidth * 0.45 * aspectCorrection);
+
+    return {
+      screenX: centerProj.screenX,
+      screenY: centerProj.screenY,
+      halfWidth: halfWidthScreen,
+      depth: centerProj.depth,
+      visible: centerProj.visible,
     };
   }
 }

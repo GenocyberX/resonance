@@ -22,13 +22,21 @@ export class Hud {
   }
 
   public update(telemetry: UiTelemetryData): void {
-    const { worldState, musicState } = telemetry;
+    const { worldState, musicState, visualTestMode } = telemetry;
     const player = worldState.player;
     const biome = worldState.biomeBlend.currentBiome;
     const dayNight = worldState.dayNight;
 
-    // 1. Biome Badge
-    this.badgeBiome.textContent = biome.name.toUpperCase();
+    // 1. Biome & Test Mode Badge
+    if (visualTestMode && visualTestMode.isVisualTest) {
+      this.badgeBiome.textContent = `TEST: ${visualTestMode.scenario} [1-5]`;
+      this.badgeBiome.style.color = '#fbbf24';
+      this.badgeBiome.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+    } else {
+      this.badgeBiome.textContent = biome.name.toUpperCase();
+      this.badgeBiome.style.color = 'var(--accent-emerald)';
+      this.badgeBiome.style.borderColor = 'rgba(52, 211, 153, 0.35)';
+    }
 
     // 2. Time Badge
     const totalMinutes = Math.floor(dayNight.normalizedCycle * 24 * 60);
