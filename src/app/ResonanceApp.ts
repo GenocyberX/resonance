@@ -180,6 +180,7 @@ export class ResonanceApp {
       activeTrafficCount: this.worldEngine.getState().traffic.length,
       seed: APP_CONFIG.defaultSeed,
       visualTestMode: this.worldEngine.getVisualTestMode(),
+      containment: this.worldEngine.getContainmentTelemetry(),
     };
 
     this.hud.update(telemetry);

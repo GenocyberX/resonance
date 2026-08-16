@@ -13,6 +13,7 @@ import { WorldDirector } from './WorldDirector';
 import { WorldState } from './WorldState';
 import { AmbientParticle, WorldMusicParameters } from './types';
 import { SeededRandom } from '../procedural/SeededRandom';
+import { PlayerContainmentTelemetry } from '../ui/types';
 
 interface Cloud {
   xNorm: number;
@@ -25,7 +26,7 @@ interface Cloud {
 // Chase Camera & Lateral Presentation Constants
 export const PLAYER_CAMERA_LATERAL_FOLLOW = 0.85;
 export const PLAYER_SCREEN_LATERAL_RESIDUAL = 0.15;
-export const CAMERA_SMOOTH_SPEED = 7.0;
+export const CAMERA_SMOOTH_RATE = 8.5;
 
 export class WorldEngine {
   private state: WorldState;
@@ -52,6 +53,15 @@ export class WorldEngine {
   private scanlineCenter: Float32Array = new Float32Array(100);
   private scanlineHalfWidth: Float32Array = new Float32Array(100);
   private scanlineDepth: Float32Array = new Float32Array(100);
+
+  // Telemetry telemetry state
+  private lastTargetCamX: number = 0;
+  private lastPlayerScreenX: number = 0;
+  private lastRoadCenterAtPlayerRow: number = 0;
+  private lastRoadHalfWidthAtPlayerRow: number = 0;
+  private lastIsVisualClamped: boolean = false;
+  private lastIsWorldClamped: boolean = false;
+  private lastMaxDriveableOffset: number = 270;
 
   constructor(seed: number = 2026) {
     this.rng = new SeededRandom(seed);
@@ -101,6 +111,20 @@ export class WorldEngine {
       center: this.scanlineCenter[iy],
       halfWidth: this.scanlineHalfWidth[iy],
       depth: this.scanlineDepth[iy],
+    };
+  }
+
+  public getContainmentTelemetry(): PlayerContainmentTelemetry {
+    return {
+      maxDriveableOffset: this.lastMaxDriveableOffset,
+      cameraTargetX: this.lastTargetCamX,
+      playerScreenX: this.lastPlayerScreenX,
+      roadCenterAtPlayerY: this.lastRoadCenterAtPlayerRow,
+      roadHalfWidthAtPlayerY: this.lastRoadHalfWidthAtPlayerRow,
+      roadLeftAtPlayerY: this.lastRoadCenterAtPlayerRow - this.lastRoadHalfWidthAtPlayerRow,
+      roadRightAtPlayerY: this.lastRoadCenterAtPlayerRow + this.lastRoadHalfWidthAtPlayerRow,
+      isVisualClamped: this.lastIsVisualClamped,
+      isWorldClamped: this.lastIsWorldClamped,
     };
   }
 
@@ -173,7 +197,7 @@ export class WorldEngine {
   }
 
   /**
-   * Main simulation tick.
+   * Main simulation tick with strict physical road containment and smooth chase camera tracking.
    */
   public update(dt: number, musicParams: WorldMusicParameters, viewportWidth: number = 120, viewportHeight: number = 42): void {
     this.state.worldTime += dt;
@@ -221,19 +245,27 @@ export class WorldEngine {
     for (const evt of collisionEvents) {
       this.state.cameraShake = Math.max(this.state.cameraShake, evt.cameraShakeAmount);
     }
-    // Ensure player is safely clamped
-    this.state.player.lateralOffset = this.road.clampLateralOffset(this.state.player.lateralOffset, this.state.player.boundingBox.width, 20);
-    this.state.player.x = playerRoadCurve + this.state.player.lateralOffset;
 
-    // 4. Smooth Chase Camera Follow Model
+    // 4. Physical road containment normalization (guarantees player is strictly on driveable road)
+    const normResult = this.road.normalizePlayerToRoad(this.state.player);
+    this.lastIsWorldClamped = normResult.isWorldClamped;
+    this.lastMaxDriveableOffset = normResult.maxDriveableOffset;
+
+    // 5. Chase Camera Follow Model (aims at the player's road heading trajectory)
     const camZ = this.state.player.z - 130;
-    const roadCurveAtCamZ = this.road.getCurveAt(camZ);
-    const targetCamX = roadCurveAtCamZ + this.state.player.lateralOffset * PLAYER_CAMERA_LATERAL_FOLLOW;
+    const curveAtPlayerZ = this.road.getCurveAt(this.state.player.z);
+    const curveAtCamZ = this.road.getCurveAt(camZ);
+
+    // Target Camera X blends the vehicle's heading with trailing position + lateral lane follow
+    const targetCamX = (curveAtPlayerZ * 0.75 + curveAtCamZ * 0.25) + this.state.player.lateralOffset * PLAYER_CAMERA_LATERAL_FOLLOW;
+    this.lastTargetCamX = targetCamX;
+
     const camElevation = this.road.getElevationAt(camZ);
     const shakeOffset = this.isVisualTest ? 0 : (this.rng.next() - 0.5) * this.state.cameraShake * 18;
 
-    // Smooth exponential interpolation for camera lateral movement
-    this.state.camera.x += (targetCamX - this.state.camera.x) * Math.min(1.0, dt * CAMERA_SMOOTH_SPEED);
+    // Framerate-independent exponential smoothing for camera lateral position
+    const alpha = 1.0 - Math.exp(-CAMERA_SMOOTH_RATE * dt);
+    this.state.camera.x += (targetCamX - this.state.camera.x) * alpha;
     this.state.camera.z = camZ;
     this.state.camera.y = 280 + camElevation + this.state.musicParams.cameraBounce + shakeOffset;
     this.state.camera.distanceToPlane = 0.44;
@@ -244,16 +276,16 @@ export class WorldEngine {
       this.state.cameraShake = Math.max(0, this.state.cameraShake - dt * 2.5);
     }
 
-    // 5. Update traffic and scenery
+    // 6. Update traffic and scenery
     this.traffic.update(dt, this.state.player, this.road);
     this.director.update(this.state.camera.z, this.road, 1200);
 
-    // 6. Update clouds drift
+    // 7. Update clouds drift
     for (const cloud of this.clouds) {
       cloud.xNorm = (cloud.xNorm + cloud.speed * dt) % 1.0;
     }
 
-    // 7. Update ambient particles
+    // 8. Update ambient particles
     if (!this.isVisualTest) {
       this.updateAmbientParticles(dt, this.state.musicParams);
     }
@@ -364,7 +396,7 @@ export class WorldEngine {
     // Render sorted scenery & traffic
     this.depthSorter.render(frameBuffer);
 
-    // 6. PROTAGONIST PLAYER VEHICLE (ARCADE SCREEN-SPACE ANCHOR)
+    // 6. PROTAGONIST PLAYER VEHICLE (ARCADE SCREEN-SPACE ANCHOR WITH HARD CONTAINMENT CLAMP)
     this.renderPlayerVehicle(frameBuffer, width, height, horizonRow);
 
     // 7. AMBIENT PARTICLES
@@ -713,11 +745,54 @@ export class WorldEngine {
   }
 
   /**
+   * Retrieves robust road center and half-width around target screen row using local window averaging.
+   */
+  public getStableRoadGeometryAtRow(targetY: number, height: number, horizonRow: number): { center: number; halfWidth: number } {
+    const clampedY = Math.max(horizonRow + 1, Math.min(height - 1, Math.round(targetY)));
+
+    // 1. Try a 3-row local average if target row has valid road geometry
+    if (this.scanlineHalfWidth[clampedY] > 10) {
+      let sumCenter = 0;
+      let sumWidth = 0;
+      let count = 0;
+      for (let dy = -1; dy <= 1; dy++) {
+        const y = clampedY + dy;
+        if (y >= 0 && y < height && this.scanlineHalfWidth[y] > 5) {
+          sumCenter += this.scanlineCenter[y];
+          sumWidth += this.scanlineHalfWidth[y];
+          count++;
+        }
+      }
+      if (count > 0) {
+        return { center: sumCenter / count, halfWidth: sumWidth / count };
+      }
+    }
+
+    // 2. Search vertically for closest valid scanline with width > 10
+    for (let r = 1; r <= 8; r++) {
+      const yBelow = clampedY + r;
+      if (yBelow < height && this.scanlineHalfWidth[yBelow] > 10) {
+        return { center: this.scanlineCenter[yBelow], halfWidth: this.scanlineHalfWidth[yBelow] };
+      }
+      const yAbove = clampedY - r;
+      if (yAbove >= horizonRow + 1 && this.scanlineHalfWidth[yAbove] > 10) {
+        return { center: this.scanlineCenter[yAbove], halfWidth: this.scanlineHalfWidth[yAbove] };
+      }
+    }
+
+    // 3. Fallback to center screen and calibrated base width
+    return {
+      center: this.scanlineCenter[clampedY] || 60,
+      halfWidth: Math.max(25, this.scanlineHalfWidth[clampedY] || 35),
+    };
+  }
+
+  /**
    * Renders Protagonist Sports Car with chase camera residual framing and strict road containment.
    */
   private renderPlayerVehicle(
     fb: FrameBuffer,
-    _width: number,
+    width: number,
     height: number,
     horizonRow: number
   ): void {
@@ -726,8 +801,11 @@ export class WorldEngine {
 
     if (playerScreenY < horizonRow || playerScreenY >= height) return;
 
-    const roadCenterX = this.scanlineCenter[playerScreenY];
-    const halfW = this.scanlineHalfWidth[playerScreenY];
+    // Retrieve robust road geometry around player anchor row
+    const { center: roadCenterX, halfWidth: halfW } = this.getStableRoadGeometryAtRow(playerScreenY, height, horizonRow);
+
+    this.lastRoadCenterAtPlayerRow = roadCenterX;
+    this.lastRoadHalfWidthAtPlayerRow = halfW;
 
     // Normalized lateral position in road space: [-1.0, 1.0]
     const normalizedLateral = player.lateralOffset / (this.road.defaultRoadWidth * 0.5);
@@ -744,10 +822,34 @@ export class WorldEngine {
 
     // Strict containment clamp: keep the full sprite body safely on the road tarmac
     const spriteHalfW = (variant ? variant.width : 28) * 0.5;
-    const curbMargin = 2;
-    const minCarCenter = (roadCenterX - halfW) + spriteHalfW + curbMargin;
-    const maxCarCenter = (roadCenterX + halfW) - spriteHalfW - curbMargin;
-    const playerScreenX = Math.max(minCarCenter, Math.min(maxCarCenter, calculatedX));
+    const visualMargin = 3;
+    const minCarCenter = (roadCenterX - halfW) + spriteHalfW + visualMargin;
+    const maxCarCenter = (roadCenterX + halfW) - spriteHalfW - visualMargin;
+
+    let playerScreenX = calculatedX;
+    let isVisualClamped = false;
+
+    if (playerScreenX < minCarCenter) {
+      playerScreenX = minCarCenter;
+      isVisualClamped = true;
+    } else if (playerScreenX > maxCarCenter) {
+      playerScreenX = maxCarCenter;
+      isVisualClamped = true;
+    }
+
+    // Additional safety clamp: ensure car stays within 35%-65% of screen width
+    const screenMin = width * 0.35;
+    const screenMax = width * 0.65;
+    if (playerScreenX < screenMin) {
+      playerScreenX = screenMin;
+      isVisualClamped = true;
+    } else if (playerScreenX > screenMax) {
+      playerScreenX = screenMax;
+      isVisualClamped = true;
+    }
+
+    this.lastPlayerScreenX = playerScreenX;
+    this.lastIsVisualClamped = isVisualClamped;
 
     const isRecovering = player.collisionCooldown > 0;
     const isBraking = player.driverState === 'BRAKING';

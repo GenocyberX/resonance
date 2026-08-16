@@ -45,7 +45,7 @@ export class DebugPanel {
   public update(telemetry: UiTelemetryData): void {
     if (!this.isVisible) return;
 
-    const { fps, worldState, musicState, totalCollisions, activeTrafficCount, seed, visualTestMode } = telemetry;
+    const { fps, worldState, musicState, totalCollisions, activeTrafficCount, seed, visualTestMode, containment } = telemetry;
     const player = worldState.player;
     const biomeBlend = worldState.biomeBlend;
     const dayNight = worldState.dayNight;
@@ -57,10 +57,24 @@ export class DebugPanel {
 
     const testLabel = visualTestMode?.isVisualTest ? `<span style="color:#fbbf24">${visualTestMode.scenario}</span>` : 'OFF';
 
+    const maxDriveable = containment ? `±${containment.maxDriveableOffset.toFixed(1)}` : '±270.0';
+    const camTargetX = containment ? containment.cameraTargetX.toFixed(1) : worldState.camera.x.toFixed(1);
+    const screenX = containment ? containment.playerScreenX.toFixed(1) : '-';
+    const roadCenter = containment ? containment.roadCenterAtPlayerY.toFixed(1) : '-';
+    const roadHalfW = containment ? containment.roadHalfWidthAtPlayerY.toFixed(1) : '-';
+    const roadLeft = containment ? containment.roadLeftAtPlayerY.toFixed(1) : '-';
+    const roadRight = containment ? containment.roadRightAtPlayerY.toFixed(1) : '-';
+    const visualClamped = containment?.isVisualClamped ? '<span style="color:#f43f5e">YES</span>' : '<span style="color:#34d399">NO</span>';
+    const worldClamped = containment?.isWorldClamped ? '<span style="color:#f43f5e">YES</span>' : '<span style="color:#34d399">NO</span>';
+
     this.contentElement.innerHTML = `
       <div class="debug-row">
         <span class="debug-label">FPS</span>
         <span class="debug-val">${Math.round(fps)}</span>
+      </div>
+      <div class="debug-row">
+        <span class="debug-label">TEST MODE</span>
+        <span class="debug-val">${testLabel}</span>
       </div>
       <div class="debug-row">
         <span class="debug-label">SEED</span>
@@ -71,60 +85,80 @@ export class DebugPanel {
         <span class="debug-val" style="color: #fbbf24">${dayNight.phase} (${Math.round(dayNight.normalizedCycle * 100)}%)</span>
       </div>
       <div class="debug-row">
-        <span class="debug-label">TEST MODE</span>
-        <span class="debug-val">${testLabel}</span>
-      </div>
-      <div class="debug-row">
         <span class="debug-label">SPEED</span>
         <span class="debug-val">${Math.round(player.speed)} km/h</span>
-      </div>
-      <div class="debug-row">
-        <span class="debug-label">PLAYER LANE</span>
-        <span class="debug-val">${player.lane}</span>
-      </div>
-      <div class="debug-row">
-        <span class="debug-label">LATERAL OFFSET</span>
-        <span class="debug-val">${player.lateralOffset.toFixed(1)}</span>
-      </div>
-      <div class="debug-row">
-        <span class="debug-label">TARGET OFFSET</span>
-        <span class="debug-val">${player.targetLateralOffset.toFixed(1)}</span>
-      </div>
-      <div class="debug-row">
-        <span class="debug-label">MAX DRIVEABLE</span>
-        <span class="debug-val">±270.0</span>
-      </div>
-      <div class="debug-row">
-        <span class="debug-label">CAMERA X</span>
-        <span class="debug-val">${worldState.camera.x.toFixed(1)}</span>
       </div>
       <div class="debug-row">
         <span class="debug-label">DRIVER STATE</span>
         <span class="debug-val" style="color: #38bdf8">${player.driverState}</span>
       </div>
-      <div class="debug-row">
-        <span class="debug-label">BIOME</span>
-        <span class="debug-val" style="color: #34d399">${biomeLabel}</span>
-      </div>
-      <div class="debug-row">
-        <span class="debug-label">TRAFFIC COUNT</span>
-        <span class="debug-val">${activeTrafficCount}</span>
-      </div>
-      <div class="debug-row">
-        <span class="debug-label">COLLISIONS</span>
-        <span class="debug-val" style="color: ${totalCollisions > 0 ? '#f43f5e' : '#8b949e'}">${totalCollisions}</span>
+
+      <div style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+        <div class="debug-row">
+          <span class="debug-label">PLAYER LANE</span>
+          <span class="debug-val">${player.lane}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">LATERAL OFFSET</span>
+          <span class="debug-val">${player.lateralOffset.toFixed(1)}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">TARGET OFFSET</span>
+          <span class="debug-val">${player.targetLateralOffset.toFixed(1)}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">MAX DRIVEABLE</span>
+          <span class="debug-val">${maxDriveable}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">WORLD CLAMPED?</span>
+          <span class="debug-val">${worldClamped}</span>
+        </div>
       </div>
 
-      <div style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px;">
+      <div style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+        <div class="debug-row">
+          <span class="debug-label">CAMERA X</span>
+          <span class="debug-val">${worldState.camera.x.toFixed(1)}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">CAMERA TARGET X</span>
+          <span class="debug-val">${camTargetX}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">PLAYER SCREEN X</span>
+          <span class="debug-val">${screenX}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">ROAD CENTER @ Y</span>
+          <span class="debug-val">${roadCenter} (±${roadHalfW})</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">ROAD BOUNDS @ Y</span>
+          <span class="debug-val">[${roadLeft}, ${roadRight}]</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">VISUAL CLAMPED?</span>
+          <span class="debug-val">${visualClamped}</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+        <div class="debug-row">
+          <span class="debug-label">BIOME</span>
+          <span class="debug-val" style="color: #34d399">${biomeLabel}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">TRAFFIC COUNT</span>
+          <span class="debug-val">${activeTrafficCount}</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-label">COLLISIONS</span>
+          <span class="debug-val" style="color: ${totalCollisions > 0 ? '#f43f5e' : '#8b949e'}">${totalCollisions}</span>
+        </div>
         <div class="debug-row">
           <span class="debug-label">MUSIC STATE</span>
           <span class="debug-val" style="color: #e879f9">${musicState.state.toUpperCase()}</span>
-        </div>
-        <div class="debug-row">
-          <span class="debug-label">ENERGY</span>
-          <div class="debug-bar-wrap">
-            <div class="debug-bar-fill" style="width: ${Math.round(musicState.energy * 100)}%; background: #34d399;"></div>
-          </div>
         </div>
       </div>
     `;

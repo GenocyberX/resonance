@@ -1,5 +1,6 @@
 import { Noise } from '../procedural/Noise';
 import { RoadSegment } from './types';
+import { PlayerVehicle } from '../entities/PlayerVehicle';
 
 export type RoadTestMode =
   | 'NORMAL'
@@ -90,6 +91,33 @@ export class RoadGenerator {
     if (lateralOffset < -halfLane) return -1;
     if (lateralOffset > halfLane) return 1;
     return 0;
+  }
+
+  /**
+   * Normalizes and strictly bounds player vehicle position to the physical driveable road space.
+   * Handles safe lane recovery guidance during RECOVER state.
+   */
+  public normalizePlayerToRoad(player: PlayerVehicle): { isWorldClamped: boolean; maxDriveableOffset: number } {
+    const maxDriveableOffset = this.getDriveableHalfWidth(player.boundingBox.width, 20);
+    const originalOffset = player.lateralOffset;
+
+    // Physical clamp on current offset
+    player.lateralOffset = Math.max(-maxDriveableOffset, Math.min(maxDriveableOffset, player.lateralOffset));
+    player.targetLateralOffset = Math.max(-maxDriveableOffset, Math.min(maxDriveableOffset, player.targetLateralOffset));
+
+    const isWorldClamped = Math.abs(originalOffset) > maxDriveableOffset;
+
+    // During RECOVER: guide smoothly to nearest safe canonical lane
+    if (player.driverState === 'RECOVER') {
+      const nearestLane = this.getNearestLane(player.lateralOffset);
+      player.targetLateralOffset = this.getLaneCenterOffset(nearestLane);
+      player.lane = nearestLane;
+    }
+
+    // Synchronize world X
+    player.x = this.getCurveAt(player.z) + player.lateralOffset;
+
+    return { isWorldClamped, maxDriveableOffset };
   }
 
   /**
