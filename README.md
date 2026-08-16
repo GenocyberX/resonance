@@ -12,10 +12,11 @@ Rendered purely with colored ASCII characters — no Canvas, no Three.js, no Web
 - **Web Audio Signal Analysis**: FFT spectrum extraction into normalized continuous metrics (`bass`, `mids`, `treble`, `energy`, `rms`, `spectralCentroid`, `spectralFlux`, and dynamic `beat` onset detection).
 - **Music State Machine**: Organic exponential smoothing, tension tracking, decay filters, and discrete musical states (`calm`, `rising`, `energetic`, `breakdown`, `drop`, `silence`).
 - **Autonomous Driving**: AI driver system with perception, decision-making, overtaking, cornering deceleration, and post-collision recovery.
-- **Physical Collision System**: Proximity collision detection between player, traffic vehicles (sedans, trucks), and road obstacles with lateral pushback and camera shake.
-- **Config-Driven Biomes & Transitions**: 6 registered biomes (`TROPICAL`, `DESERT`, `FOREST`, `ALPINE`, `NEON_CITY`, `VOLCANIC`) with continuous probabilistic palette and object blending.
-- **Day & Night Simulation**: 5-minute real-time cycle (`DAWN` → `DAY` → `DUSK` → `NIGHT` → `DAWN`) with sky gradients, stars, sun/moon, and ambient lighting.
-- **Pure ASCII FrameBuffer Renderer**: Space transparency (`' '`), Depth sorting ($z$-buffer), Level of Detail (LOD) sprites, and span-batched high performance DOM updates.
+- **Contact Lifecycle Collision System**: Physical proximity detection in $(x, z)$ with explicit `ENTER`, `STAY`, and `EXIT` states ensuring continuous overlaps count once while maintaining lateral push separation.
+- **Accurate Traffic Alignment**: Each vehicle calculates its lateral position on curves using its own longitudinal position ($z$).
+- **Config-Driven Biomes & Transitions**: 6 registered biomes (`TROPICAL`, `DESERT`, `FOREST`, `ALPINE`, `NEON_CITY`, `VOLCANIC`) with continuous probabilistic palette, terrain character, and prop blending.
+- **Day & Night Simulation**: 5-minute real-time cycle (`DAWN` → `DAY` → `DUSK` → `NIGHT` → `DAWN`) with dynamic sky gradients, drifting clouds, starfields, sun/moon, and headlights on night roads.
+- **Pure ASCII FrameBuffer Renderer**: Strict separation between background painting and sprite space transparency (`' '`), Depth sorting ($z$-buffer), Level of Detail (LOD) sprites, and span-batched high performance DOM updates.
 - **Demo Mode**: Runs an autonomous road trip immediately upon launching even without music loaded.
 
 ---
@@ -27,6 +28,7 @@ Rendered purely with colored ASCII characters — no Canvas, no Three.js, no Web
 - **Bundler / Dev Server**: Vite
 - **Testing**: Vitest
 - **Linting**: ESLint
+- **CI**: GitHub Actions
 
 ---
 
@@ -49,11 +51,11 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ### Scripts
 
-- `npm run dev`: Launch local development server.
+- `npm run dev`: Launch local development server (port 5173).
 - `npm run build`: Build production bundle into `dist/`.
 - `npm run typecheck`: Run TypeScript compiler check without emitting files.
 - `npm run test`: Run unit tests with Vitest.
@@ -86,7 +88,7 @@ src/
 │   │   ├── BiomeRegistry.ts
 │   │   └── definitions/
 │   ├── weather/
-│   │   └── WeatherEngine.ts    # Procedural ASCII weather particles
+│   │   └── WeatherEngine.ts    # Responsive procedural ASCII weather particles
 │   └── transitions/
 │       ├── BiomeTransitionSystem.ts # Continuous distance-based biome blending
 │       └── DayNightCycle.ts    # 5-minute continuous day/night cycle
@@ -96,8 +98,8 @@ src/
 │   └── types.ts
 ├── driving/
 │   ├── AutonomousDriver.ts     # Perception -> Decision AI controller
-│   ├── TrafficController.ts    # Ambient traffic spawner & recycler
-│   └── CollisionSystem.ts      # Physical proximity & collision resolution
+│   ├── TrafficController.ts    # Ambient traffic spawner & curve positioning
+│   └── CollisionSystem.ts      # Contact lifecycle collision tracker
 ├── entities/
 │   ├── Entity.ts               # Base entity class
 │   ├── Vehicle.ts              # Vehicle base class

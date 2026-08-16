@@ -29,7 +29,7 @@ export class Sprite {
       lines,
       width,
       height,
-      anchorX: Math.round(width * anchorXRatio),
+      anchorX: Math.round((width - 1) * anchorXRatio),
       anchorY: Math.round((height - 1) * anchorYRatio),
       colorMask,
     };

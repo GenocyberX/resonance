@@ -95,10 +95,10 @@ export class ResonanceApp {
     const worldParams = this.musicMapper.map(musicState);
 
     // 3. Update Procedural World Simulation
-    this.worldEngine.update(dt, worldParams);
+    const fb = this.renderer.getFrameBuffer();
+    this.worldEngine.update(dt, worldParams, fb.width, fb.height);
 
     // 4. Render ASCII Frame
-    const fb = this.renderer.getFrameBuffer();
     this.worldEngine.render(fb);
     this.renderer.render();
 

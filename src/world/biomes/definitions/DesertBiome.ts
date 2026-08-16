@@ -2,32 +2,34 @@ import { BiomeDefinition } from '../../types';
 import { CactusSprite } from '../../../sprites/scenery/CactusSprite';
 import { RockSprite } from '../../../sprites/obstacles/RockSprite';
 import { BillboardSprite } from '../../../sprites/scenery/BillboardSprite';
+import { StreetLampSprite } from '../../../sprites/scenery/StreetLampSprite';
 
 export const DesertBiome: BiomeDefinition = {
   id: 'DESERT',
   name: 'Sunbaked Canyon',
   palette: {
-    skyTop: '#7c2d12',       // Burnt Sienna
-    skyBottom: '#f97316',    // Bright Orange
-    horizon: '#fde047',      // Amber Dunes
-    road: '#44403c',         // Dust Grey Road
-    roadMarking: '#fafaf9',  // White Stripe
-    roadShoulder: '#78350f', // Ochre Shoulder
-    ground: '#451a03',       // Sand Base
-    groundDetail: '#d97706', // Golden Dunes
-    mountains: '#9a3412',    // Red Mesas
-    fog: '#fed7aa',
+    skyTop: '#9a3412',       // Burnt Copper
+    skyBottom: '#f97316',    // Warm Amber
+    horizon: '#fde047',      // Golden Sand Dunes
+    road: '#292524',         // Dust-Worn Asphalt
+    roadMarking: '#fef08a',  // Pale Sun Line
+    roadShoulder: '#78350f', // Red Earth Shoulder
+    ground: '#451a03',       // Canyon Basin
+    groundDetail: '#d97706', // Sand Drifts
+    mountains: '#b45309',    // Red Rock Mesas
+    fog: '#ffedd5',
   },
   vegetationPool: [
     { sprite: CactusSprite, weight: 1.0 },
   ],
   structurePool: [
-    { sprite: BillboardSprite, weight: 0.15 },
+    { sprite: StreetLampSprite, weight: 0.3 },
+    { sprite: BillboardSprite, weight: 0.2 },
   ],
   obstaclePool: [
-    { sprite: RockSprite, weight: 0.6 },
+    { sprite: RockSprite, weight: 0.7 },
   ],
-  density: 0.7,
+  density: 0.8,
   groundChar: '.',
   mountainChar: 'M',
 };

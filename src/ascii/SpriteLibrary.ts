@@ -9,6 +9,7 @@ import { DeciduousTreeSprite } from '../sprites/scenery/DeciduousTreeSprite';
 import { BillboardSprite } from '../sprites/scenery/BillboardSprite';
 import { NeonTowerSprite } from '../sprites/scenery/NeonTowerSprite';
 import { MountainSprite } from '../sprites/scenery/MountainSprite';
+import { StreetLampSprite } from '../sprites/scenery/StreetLampSprite';
 import { TrafficConeSprite } from '../sprites/obstacles/TrafficConeSprite';
 import { RockSprite } from '../sprites/obstacles/RockSprite';
 
@@ -27,6 +28,7 @@ export class SpriteLibrary {
       BillboardSprite,
       NeonTowerSprite,
       MountainSprite,
+      StreetLampSprite,
       TrafficConeSprite,
       RockSprite,
     ];

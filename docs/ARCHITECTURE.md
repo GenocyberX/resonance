@@ -86,7 +86,7 @@ The `MusicWorldMapper` acts as an anti-corruption layer:
   - `fovPulse`: Camera FOV expansion on punchy kicks.
   - `tension`: Road curve sharpness and weather storms.
   - `particleDensity`: Roadside ambient neon sparks.
-  - `environmentalGlow`: Lighting saturation and star brightness.
+  - `environmentalGlow`: Lighting saturation, star brightness, and road highlights.
 
 ---
 
@@ -99,31 +99,36 @@ The vehicle is driven autonomously by `AutonomousDriver` across three distinct p
 2. **Decision**: State machine transitioning between `CRUISE`, `CORNERING`, `OVERTAKE`, `BRAKING`, and `RECOVER`.
 3. **Actuation**: Modulates lateral lane steering and longitudinal throttle/brake forces.
 
-### 4.2 Traffic & Physical Collisions
+### 4.2 Traffic Alignment & Contact Lifecycle Collisions
 
 - `TrafficController` spawns and recycles ambient vehicles (sedans, trucks).
-- `CollisionSystem` checks physical bounding box overlaps in $(x, z)$ world space.
-- On collision, vehicles are laterally separated (preventing visual ghosting), the player's speed is halved, driver state enters `RECOVER`, and camera shake is triggered.
+- Each vehicle evaluates road curvature $x(z)$ at its **own** longitudinal $z$ coordinate (`road.getCurveAt(vehicle.z)`).
+- `CollisionSystem` implements an explicit contact lifecycle:
+  - `ENTER`: Triggered on initial bounding box overlap $\to$ counts collision once, applies camera shake, sets driver to `RECOVER`.
+  - `STAY`: Ongoing overlap $\to$ applies lateral separation push without duplicate impact increments.
+  - `EXIT`: Overlap ends $\to$ resets contact pair.
 
 ### 4.3 Config-Driven Biomes & Continuous Transitions
 
 - Biomes (`TROPICAL`, `DESERT`, `FOREST`, `ALPINE`, `NEON_CITY`, `VOLCANIC`) are defined entirely as configuration data structures (palettes, vegetation pools, structure pools, obstacle pools, terrain characters).
-- `BiomeTransitionSystem` uses an S-curve cosine blend across a transition window (e.g. 700m). Palettes interpolate smoothly across RGB space, and scenery sprites are sampled probabilistically without hard visual pop-ins.
+- `BiomeTransitionSystem` uses an S-curve cosine blend across a transition window (e.g. 700m). Palettes interpolate smoothly across RGB space, and scenery sprites and terrain characters are sampled probabilistically without hard visual pop-ins.
 
 ### 4.4 5-Minute Continuous Day / Night Cycle
 
 - `DayNightCycle` runs continuously over 300 seconds.
 - Interpolates between `DAWN`, `DAY`, `DUSK`, and `NIGHT`.
-- Modulates sun/moon elevation and color, starfield density, sky top/bottom colors, and ambient lighting multipliers.
+- Modulates sun/moon elevation and shape, starfield density, sky gradients, and ambient lighting multipliers with headlight beams on night roads.
 
 ---
 
 ## 5. Pure ASCII FrameBuffer & Rendering
 
-### 5.1 FrameBuffer Principles
+### 5.1 FrameBuffer & Transparency Semantics
 
 - A 2D matrix of `Cell { char: string, color: string, bg?: string, z: number }`.
-- **Space Transparency**: The space character `' '` is strictly transparent and never overwrites background characters or updates the $z$-buffer.
+- **Background Painting vs. Sprite Transparency**:
+  - Direct scene layers (sky, ground, road, headlights) can write space characters with background colors (`isSprite = false`).
+  - Sprites (`isSprite = true`) treat spaces `' '` as strictly transparent, preventing black box artifacts.
 - **Depth Buffering**: Smaller $z$ indicates closer distance to camera; occluded background pixels are rejected.
 
 ### 5.2 Sprite Level of Detail (LOD)

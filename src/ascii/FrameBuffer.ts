@@ -27,6 +27,7 @@ export class FrameBuffer {
         this.cells[y][x] = {
           char: ' ',
           color: '#ffffff',
+          bg: '#000000',
           z: Infinity,
         };
       }
@@ -47,8 +48,8 @@ export class FrameBuffer {
   }
 
   /**
-   * Sets a single cell at (x, y) with space transparency and z-buffering.
-   * Space characters ' ' are non-opaque and will not overwrite the background.
+   * Sets a single cell at (x, y) with optional sprite transparency and z-buffering.
+   * Background layers can set space characters ' ' with colors/backgrounds without rejection.
    */
   public setCell(
     x: number,
@@ -56,7 +57,8 @@ export class FrameBuffer {
     char: string,
     color: string,
     z: number = 0,
-    bg?: string
+    bg?: string,
+    isSprite: boolean = false
   ): boolean {
     const ix = Math.round(x);
     const iy = Math.round(y);
@@ -65,8 +67,8 @@ export class FrameBuffer {
       return false;
     }
 
-    // Space transparency: spaces do not overwrite background or z-buffer
-    if (char === ' ') {
+    // Space transparency: spaces within sprites are transparent
+    if (isSprite && char === ' ') {
       return false;
     }
 
@@ -88,7 +90,7 @@ export class FrameBuffer {
   }
 
   /**
-   * Writes a horizontal line of characters.
+   * Writes a horizontal line of characters (e.g. background bands, road lines).
    */
   public drawHLine(
     startX: number,
@@ -106,7 +108,7 @@ export class FrameBuffer {
     const x2 = Math.min(this.width - 1, Math.max(Math.round(startX), Math.round(endX)));
 
     for (let x = x1; x <= x2; x++) {
-      this.setCell(x, iy, char, color, z, bg);
+      this.setCell(x, iy, char, color, z, bg, false);
     }
   }
 
@@ -127,7 +129,7 @@ export class FrameBuffer {
     let curX = Math.round(x);
     for (let i = 0; i < text.length; i++) {
       if (curX >= 0 && curX < this.width) {
-        this.setCell(curX, iy, text[i], color, z, bg);
+        this.setCell(curX, iy, text[i], color, z, bg, false);
       }
       curX++;
     }
@@ -158,7 +160,7 @@ export class FrameBuffer {
         if (targetX < 0 || targetX >= this.width) continue;
 
         const char = line[col];
-        if (char === ' ') continue; // Transparent space
+        if (char === ' ') continue; // Transparent space in sprite
 
         // Per-character color or global color
         let charColor = renderColor;
@@ -166,7 +168,7 @@ export class FrameBuffer {
           charColor = variant.colors[row][col];
         }
 
-        this.setCell(targetX, targetY, char, charColor, z);
+        this.setCell(targetX, targetY, char, charColor, z, undefined, true);
       }
     }
   }

@@ -1,6 +1,7 @@
 import { TrafficType, TrafficVehicle } from '../entities/TrafficVehicle';
 import { PlayerVehicle } from '../entities/PlayerVehicle';
 import { SeededRandom } from '../procedural/SeededRandom';
+import { RoadGenerator } from '../road/RoadGenerator';
 
 export class TrafficController {
   private trafficVehicles: TrafficVehicle[] = [];
@@ -16,10 +17,15 @@ export class TrafficController {
     return this.trafficVehicles;
   }
 
-  public update(dt: number, player: PlayerVehicle, roadCenterCurve: number): void {
-    // 1. Update existing traffic vehicles
+  /**
+   * Updates all traffic vehicles, evaluating the road geometry at each vehicle's OWN longitudinal z position.
+   */
+  public update(dt: number, player: PlayerVehicle, road: RoadGenerator): void {
+    // 1. Update existing traffic vehicles using their own updated road curvature
     for (const vehicle of this.trafficVehicles) {
-      vehicle.update(dt, roadCenterCurve);
+      const nextZ = vehicle.z + vehicle.speed * dt;
+      const curveAtVehicleZ = road.getCurveAt(nextZ);
+      vehicle.update(dt, curveAtVehicleZ);
     }
 
     // 2. Recycle out-of-range vehicles (behind player or way too far ahead)
