@@ -44,10 +44,10 @@ export class AtmospherePalette {
     SUNRISE: {
       skyTop: '#1e3a8a',         // Navy Blue Zenith
       skyMid: '#4338ca',         // Morning Indigo
-      skyBottom: '#dc2626',      // Fiery Crimson Transition
-      horizonGlow: '#f97316',    // Golden Amber Horizon Glow
-      cloudHighlight: '#fde047', // Radiant Gold Edge
-      cloudShadow: '#9f1239',    // Crimson Cloud Belly
+      skyBottom: '#ea580c',      // Warm Amber-Orange Transition
+      horizonGlow: '#fde047',    // Luminous Soft Gold Horizon Glow
+      cloudHighlight: '#fef08a', // Pale Gold Rim
+      cloudShadow: '#9a3412',    // Warm Amber Cloud Base
       ambientLight: 0.65,
     },
     MORNING: {
@@ -89,10 +89,10 @@ export class AtmospherePalette {
     SUNSET: {
       skyTop: '#1e1b4b',         // Deep Indigo Zenith
       skyMid: '#581c87',         // Rich Violet Mid-Sky
-      skyBottom: '#e11d48',      // Saturated Rose / Ruby
-      horizonGlow: '#ea580c',    // Incandescent Orange Horizon
+      skyBottom: '#c026d3',      // Soft Magenta-Rose
+      horizonGlow: '#f97316',    // Warm Amber-Orange Horizon
       cloudHighlight: '#fb7185', // Warm Coral Highlights
-      cloudShadow: '#701a75',    // Violet Plum Shadow Base
+      cloudShadow: '#581c87',    // Violet Plum Shadow Base
       ambientLight: 0.60,
     },
     DUSK: {

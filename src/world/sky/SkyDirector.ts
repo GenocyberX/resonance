@@ -29,6 +29,7 @@ export class SkyDirector {
   // Visual Test Overrides
   private isVisualTestMode: boolean = false;
   private forcedDayPhase: DayPhase | null = null;
+  private lastTargetWeather: WeatherType = 'CLEAR';
 
   constructor(seed: number) {
     this.celestial = new CelestialSystem(seed);
@@ -50,6 +51,7 @@ export class SkyDirector {
 
     if (weather) {
       this.weather.setTargetWeather(weather, true);
+      this.lastTargetWeather = weather;
       const coverageInfo = CloudManager.evaluateCoverage(weather);
       this.clouds.initCloudLayers(coverageInfo.coverage);
     }
@@ -70,6 +72,7 @@ export class SkyDirector {
 
   public setWeather(weather: WeatherType, immediate: boolean = false): void {
     this.weather.setTargetWeather(weather, immediate);
+    this.lastTargetWeather = weather;
     const coverageInfo = CloudManager.evaluateCoverage(weather);
     this.clouds.initCloudLayers(coverageInfo.coverage);
   }
@@ -115,18 +118,31 @@ export class SkyDirector {
     const wind = this.weather.getWind();
     const roadWetness = this.weather.getRoadWetness();
 
-    // 3. Cloud Coverage & Drift with Wind influence
-    const coverageInfo = CloudManager.evaluateCoverage(targetWeather);
-    const cloudSpeedMult = musicParams ? (1.0 + (musicParams.targetSpeedBonus || 0) * 0.2) : 1.0;
-    this.clouds.update(dt, cloudSpeedMult, wind.strength);
-
-    // 4. Celestial Calculations
+    // 3. Celestial Calculations
     const sunPos = this.celestial.calculateSunPosition(normalizedCycle);
     const moonPos = this.celestial.calculateMoonPosition(normalizedCycle);
     const moonPhaseInfo = this.celestial.getMoonPhaseAtDay(this.dayCount);
 
     const isNight = timePhase === 'DEEP_NIGHT' || timePhase === 'PRE_DAWN' || timePhase === 'NIGHT';
     const isTwilight = timePhase === 'DAWN' || timePhase === 'SUNRISE' || timePhase === 'GOLDEN_HOUR' || timePhase === 'SUNSET' || timePhase === 'DUSK';
+
+    // Determine prominent celestial heading for celestial clearing zone
+    let prominentHeading: number | null = null;
+    if (sunPos.visible && (timePhase === 'SUNRISE' || timePhase === 'GOLDEN_HOUR' || timePhase === 'SUNSET' || timePhase === 'DAWN')) {
+      prominentHeading = sunPos.headingNorm;
+    } else if (isNight && moonPos.visible && moonPhaseInfo.moonlightFactor > 0.5) {
+      prominentHeading = moonPos.headingNorm;
+    }
+
+    // 4. Cloud Coverage & Drift with Wind & Celestial Avoidance
+    const coverageInfo = CloudManager.evaluateCoverage(targetWeather);
+    if (this.lastTargetWeather !== targetWeather) {
+      this.lastTargetWeather = targetWeather;
+      this.clouds.initCloudLayers(coverageInfo.coverage, prominentHeading);
+    }
+
+    const cloudSpeedMult = musicParams ? (1.0 + (musicParams.targetSpeedBonus || 0) * 0.2) : 1.0;
+    this.clouds.update(dt, cloudSpeedMult, wind.strength);
 
     // Star visibility: attenuated by daylight, cloud coverage, fog, and moon brightness
     let starVisibility = 0.0;
@@ -243,7 +259,7 @@ export class SkyDirector {
     // 1. Precompute Cloud Occlusion Map
     this.clouds.buildOcclusionGrid(width, horizonRow);
 
-    // 2. Render Multi-Band Gradient & Horizon Glow
+    // 2. Render Clean, Smooth Sky Gradient & Subtle Horizon Transition
     this.renderSkyGradient(fb, width, horizonRow, state);
 
     // 3. Render Aurora Borealis (if active)
@@ -287,7 +303,7 @@ export class SkyDirector {
   }
 
   /**
-   * Renders background multi-band gradient with dithered ASCII transition rows and horizon glow.
+   * Renders a clean, smooth vertical sky background gradient with a subtle, non-intrusive horizon transition.
    */
   private renderSkyGradient(
     fb: FrameBuffer,
@@ -295,32 +311,22 @@ export class SkyDirector {
     horizonRow: number,
     state: SkyState
   ): void {
-    const horizonGlowRows = 3;
-    const gradientLimit = Math.max(1, horizonRow - horizonGlowRows);
-
     for (let y = 0; y < horizonRow; y++) {
-      if (y < gradientLimit) {
-        const t = y / gradientLimit;
-        const rowColor = t < 0.5
-          ? ColorPalette.lerp(state.skyTopColor, state.skyMidColor, t * 2.0)
-          : ColorPalette.lerp(state.skyMidColor, state.skyBottomColor, (t - 0.5) * 2.0);
+      const t = y / Math.max(1, horizonRow);
+      const rowColor = t < 0.5
+        ? ColorPalette.lerp(state.skyTopColor, state.skyMidColor, t * 2.0)
+        : ColorPalette.lerp(state.skyMidColor, state.skyBottomColor, (t - 0.5) * 2.0);
 
-        const rowBg = ColorPalette.scaleBrightness(rowColor, 0.32);
-        const skyChar = t > 0.82 ? '░' : ' ';
+      const rowBg = ColorPalette.scaleBrightness(rowColor, 0.35);
 
-        for (let x = 0; x < width; x++) {
-          fb.setCell(x, y, skyChar, rowColor, 10000, rowBg, false);
-        }
-      } else {
-        const glowIndex = y - gradientLimit;
-        const glowFactor = (glowIndex + 1) / horizonGlowRows;
-        const glowColor = ColorPalette.lerp(state.skyBottomColor, state.horizonGlowColor, glowFactor * 0.85);
-        const glowBg = ColorPalette.scaleBrightness(glowColor, 0.40);
-        const glowChar = glowIndex === 0 ? '░' : (glowIndex === 1 ? '▒' : '▓');
+      // Clean open sky: empty character with smooth rowBg
+      const isHorizonRow = y === horizonRow - 1;
+      const cellBg = isHorizonRow ? ColorPalette.lerp(rowBg, state.horizonGlowColor, 0.22) : rowBg;
+      const cellChar = ' ';
+      const cellFg = isHorizonRow ? state.horizonGlowColor : rowColor;
 
-        for (let x = 0; x < width; x++) {
-          fb.setCell(x, y, glowChar, glowColor, 9995, glowBg, false);
-        }
+      for (let x = 0; x < width; x++) {
+        fb.setCell(x, y, cellChar, cellFg, 10000, cellBg, false);
       }
     }
   }

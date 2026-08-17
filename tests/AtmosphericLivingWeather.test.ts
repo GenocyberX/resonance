@@ -246,4 +246,40 @@ describe('RESONANCE — Atmospheric Polish + Living Weather V2 Test Suite', () =
 
     expect(brightCount + heroCount).toBeGreaterThanOrEqual(2);
   });
+
+  // 17. Sky Complexity Budget & Open Negative Space
+  it('17. verifies that CLEAR sky coverage enforces <= 1 cloud instance for vast open space', () => {
+    const cm = new CloudManager(1234);
+    cm.initCloudLayers('CLEAR');
+    expect(cm.getInstances().length).toBeLessThanOrEqual(1);
+
+    cm.initCloudLayers('FEW');
+    expect(cm.getInstances().length).toBeLessThanOrEqual(2);
+
+    cm.initCloudLayers('SCATTERED');
+    expect(cm.getInstances().length).toBeLessThanOrEqual(4);
+  });
+
+  // 18. Celestial Clearing Zone Avoidance
+  it('18. verifies that clouds avoid spawning directly on top of the prominent Sun or Moon heading in clear weather', () => {
+    const cm = new CloudManager(777);
+    const sunHeading = 0.50; // High Noon / Sunset Center
+    cm.initCloudLayers('FEW', sunHeading);
+
+    for (const cloud of cm.getInstances()) {
+      const dist = Math.abs(cloud.xNorm - sunHeading);
+      expect(dist).toBeGreaterThanOrEqual(0.08);
+    }
+  });
+
+  // 19. Zero Forbidden Rectangular Platforms in Cloud Presets
+  it('19. audits all cloud presets: zero rectangular platform boxes, bracket rails, or solid block lines', () => {
+    for (const preset of CloudManager.CLOUD_PRESETS) {
+      for (const line of preset.lines) {
+        expect(line).not.toMatch(/\[=+/);
+        expect(line).not.toMatch(/=+\]/);
+        expect(line).not.toMatch(/████████/);
+      }
+    }
+  });
 });

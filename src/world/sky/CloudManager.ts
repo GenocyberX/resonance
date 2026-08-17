@@ -15,350 +15,321 @@ export class CloudManager {
   private gridWidth: number = 0;
   private gridHeight: number = 0;
 
-  // 27 Handcrafted Volumetric ASCII Cloud Formations across 9 Families
+  // 27 Handcrafted Delicate Outline ASCII Cloud Formations across 9 Families
   public static readonly CLOUD_PRESETS: CloudFormation[] = [
-    // 1. FAIR_SMALL (3 Variants)
+    // 1. FAIR_SMALL (3 Variants) - 8 to 12 chars wide, 3 lines
     {
       id: 'fair_small_1',
       type: 'FAIR_SMALL',
-      width: 14,
+      width: 10,
       height: 3,
       lines: [
-        '   .-----.    ',
-        ' .-( ░░░░ )-  ',
-        '(____________)',
+        '  .---.   ',
+        '.-(   )-. ',
+        '(_______) ',
       ],
     },
     {
       id: 'fair_small_2',
       type: 'FAIR_SMALL',
-      width: 16,
+      width: 12,
       height: 3,
       lines: [
-        '    .------.    ',
-        '  .-(  ░░░░  )-.',
-        ' (______________)',
+        '   .----.   ',
+        ' .-(    )-. ',
+        '(__________)',
       ],
     },
     {
       id: 'fair_small_3',
       type: 'FAIR_SMALL',
-      width: 12,
+      width: 8,
       height: 3,
       lines: [
-        '  .----.    ',
-        '.-( ░░  )-. ',
-        '(__________)',
+        ' .--.   ',
+        '.-(  )-.',
+        '(______) ',
       ],
     },
 
-    // 2. FAIR_MEDIUM (3 Variants)
+    // 2. FAIR_MEDIUM (3 Variants) - 14 to 18 chars wide, 4 lines
     {
       id: 'fair_med_1',
       type: 'FAIR_MEDIUM',
-      width: 20,
+      width: 16,
       height: 4,
       lines: [
-        '     .-------.      ',
-        '  .-/  ░░░░░  \\-.   ',
-        ' (    ░░░░░░░    )  ',
-        '(_________________) ',
+        '     .----.     ',
+        '  .-/      \\-.  ',
+        ' (            ) ',
+        '(______________) ',
       ],
     },
     {
       id: 'fair_med_2',
       type: 'FAIR_MEDIUM',
-      width: 22,
+      width: 16,
       height: 4,
       lines: [
-        '      .-------.       ',
-        '   .-/  ░░░░░░ \\-.    ',
-        ' .-(    ▒▒▒▒▒▒    )-. ',
-        '(____________________)',
+        '    .------.    ',
+        " .-'        '-. ",
+        '(              )',
+        ' (____________) ',
       ],
     },
     {
       id: 'fair_med_3',
       type: 'FAIR_MEDIUM',
-      width: 24,
+      width: 18,
       height: 4,
       lines: [
-        '    .----.   .----.     ',
-        ' .-/  ░░  \\-/  ░░  \\-.  ',
-        '(       ░░░░░░░       ) ',
-        '(______________________)',
+        '   .---.   .---.  ',
+        " .-'   '---'   '-.",
+        '(                )',
+        ' (______________) ',
       ],
     },
 
-    // 3. CUMULUS_SMALL (3 Variants)
+    // 3. CUMULUS_SMALL (3 Variants) - 16 to 20 chars wide, 4 lines
     {
       id: 'cumulus_small_1',
       type: 'CUMULUS_SMALL',
-      width: 22,
-      height: 5,
+      width: 16,
+      height: 4,
       lines: [
-        '        .----.        ',
-        '     .-/ ░░░░ \\-.     ',
-        '   .-/   ░░░░░   \\-.  ',
-        ' .-(     ▒▒▒▒▒     )-.',
-        '(____________________)',
+        '     .----.     ',
+        '  .-/      \\-.  ',
+        ".-'          '-.",
+        '(______________) ',
       ],
     },
     {
       id: 'cumulus_small_2',
       type: 'CUMULUS_SMALL',
-      width: 24,
-      height: 5,
+      width: 18,
+      height: 4,
       lines: [
-        '       .-------.        ',
-        '    .-/  ░░░░░  \\-.     ',
-        '  ./     ░░░░░░    \\.   ',
-        ' (       ▒▒▒▒▒▒      )  ',
-        '(______________________)',
+        '     .------.     ',
+        "  .-'        '-.  ",
+        ".'              `.",
+        '(________________)',
       ],
     },
     {
       id: 'cumulus_small_3',
       type: 'CUMULUS_SMALL',
-      width: 26,
-      height: 5,
+      width: 20,
+      height: 4,
       lines: [
-        '     .---.     .---.      ',
-        '  .-/ ░░  \\---/ ░░  \\-.   ',
-        './      ░░░░░░░░       \\.',
-        '(       ▒▒▒▒▒▒▒▒        )',
-        '(_______________________)',
+        '    .---.  .---.    ',
+        "  .-'   \\--/   '-.  ",
+        ' (                ) ',
+        '(__________________) ',
       ],
     },
 
-    // 4. CUMULUS_LARGE (3 Variants)
+    // 4. CUMULUS_LARGE (3 Variants) - 24 to 28 chars wide, 5-6 lines
     {
       id: 'cumulus_large_1',
       type: 'CUMULUS_LARGE',
-      width: 34,
-      height: 7,
+      width: 26,
+      height: 6,
       lines: [
-        '            .----------.          ',
-        '         .-/  ░░░░░░░░  \\-.       ',
-        '      .-/     ░░░░░░░░     \\-.    ',
-        '   .-/        ░░░░░░░░        \\-. ',
-        ' ./           ▒▒▒▒▒▒▒▒           \\',
-        '(             ▓▓▓▓▓▓▓▓            ',
-        '(________________________________)',
+        '         .-------.        ',
+        '      .-/         \\-.     ',
+        "    .-'             '-.   ",
+        "  .'                   `. ",
+        ' (                       )',
+        '  (_____________________) ',
       ],
     },
     {
       id: 'cumulus_large_2',
       type: 'CUMULUS_LARGE',
-      width: 36,
-      height: 6,
+      width: 28,
+      height: 5,
       lines: [
-        '        .-------.     .--------.    ',
-        '     .-/  ░░░░░  \\---/  ░░░░░░  \\-. ',
-        '  .-/     ░░░░░░░░░░░░░░░░░░░░     \\',
-        ' /        ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒      ',
-        '|         ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓     |',
-        ' \\________________________________/ ',
+        '       .----.     .----.     ',
+        '    .-/      \\---/      \\-.  ',
+        "  .-'                      '-.",
+        ' (                            )',
+        '  (__________________________) ',
       ],
     },
     {
       id: 'cumulus_large_3',
       type: 'CUMULUS_LARGE',
-      width: 38,
-      height: 6,
+      width: 26,
+      height: 5,
       lines: [
-        '      .------.   .------.   .------.  ',
-        '   .-/  ░░░░  \\-/  ░░░░  \\-/  ░░░░  \\-',
-        ' .-(      ░░░░░░░░░░░░░░░░░░░░      )',
-        '(         ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒       )',
-        '|         ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓       |',
-        '(____________________________________)',
+        '        .----------.      ',
+        '     .-/            \\-.   ',
+        "   .-'                '-. ",
+        '  (                      )',
+        ' (________________________)',
       ],
     },
 
-    // 5. HIGH_THIN / Cirrus (3 Variants)
+    // 5. HIGH_THIN / Cirrus (3 Variants) - 12 to 16 chars wide, 1 line
     {
       id: 'high_thin_1',
       type: 'HIGH_THIN',
-      width: 22,
-      height: 2,
+      width: 15,
+      height: 1,
       lines: [
-        ' ~~~---.....---~~~~~  ',
-        '    ~~~---.....---~~~~',
+        '---..     ..---',
       ],
     },
     {
       id: 'high_thin_2',
       type: 'HIGH_THIN',
-      width: 26,
-      height: 2,
+      width: 14,
+      height: 1,
       lines: [
-        '   ~~~~---......---~~~~   ',
-        '      ~~~~---......---~~~~',
+        '  ...------...  ',
       ],
     },
     {
       id: 'high_thin_3',
       type: 'HIGH_THIN',
-      width: 20,
-      height: 2,
+      width: 16,
+      height: 1,
       lines: [
-        ' ~~--.......--~~~~  ',
-        '   ~~--.......--~~~~',
+        '--.   .---.   .--',
       ],
     },
 
-    // 6. STRATUS (3 Variants)
+    // 6. STRATUS (3 Variants) - 20 to 24 chars wide, 2 lines
     {
       id: 'stratus_1',
       type: 'STRATUS',
-      width: 32,
-      height: 3,
+      width: 20,
+      height: 2,
       lines: [
-        ' ============================== ',
-        '|  ░░░░░░░░░░░░░░░░░░░░░░░░░░  |',
-        ' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ',
+        '  .~~--....--~~.    ',
+        ' (______________)-. ',
       ],
     },
     {
       id: 'stratus_2',
       type: 'STRATUS',
-      width: 36,
-      height: 3,
+      width: 22,
+      height: 2,
       lines: [
-        '  ==============================  ',
-        ' |  ░░░░░░░░░▒▒▒▒▒▒░░░░░░░░░░░░  | ',
-        '  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ',
+        ' .~~---......---~~.   ',
+        '(__________________)-.',
       ],
     },
     {
       id: 'stratus_3',
       type: 'STRATUS',
-      width: 30,
-      height: 3,
+      width: 20,
+      height: 2,
       lines: [
-        ' ============================ ',
-        '|  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  |',
-        ' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ',
+        '   .~~~--....--~~~. ',
+        ' (_________________)',
       ],
     },
 
-    // 7. OVERCAST (3 Variants)
+    // 7. OVERCAST (3 Variants) - 24 to 28 chars wide, 2 lines
     {
       id: 'overcast_1',
       type: 'OVERCAST',
-      width: 40,
-      height: 4,
+      width: 24,
+      height: 2,
       lines: [
-        '========================================',
-        '|  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  |',
-        '|  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  |',
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '.~~~~~~-------~~~~~~.   ',
+        '(___________________)-. ',
       ],
     },
     {
       id: 'overcast_2',
       type: 'OVERCAST',
-      width: 44,
-      height: 4,
+      width: 26,
+      height: 2,
       lines: [
-        '============================================',
-        '|  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  |',
-        '|  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  |',
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '.~~~~~---......---~~~~~.  ',
+        '(______________________)--',
       ],
     },
     {
       id: 'overcast_3',
       type: 'OVERCAST',
-      width: 38,
-      height: 4,
+      width: 22,
+      height: 2,
       lines: [
-        '======================================',
-        '|  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  |',
-        '|  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  |',
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '.~~~~---------~~~~.   ',
+        '(_________________)-. ',
       ],
     },
 
-    // 8. STORM (3 Variants)
+    // 8. STORM (3 Variants) - 26 to 30 chars wide, 5 lines
     {
       id: 'storm_1',
       type: 'STORM',
-      width: 34,
-      height: 7,
+      width: 26,
+      height: 5,
       lines: [
-        '          .------------.          ',
-        '       .-/  ░░░░░░░░░░  \\-.       ',
-        '    .-/     ▒▒▒▒▒▒▒▒▒▒     \\-.    ',
-        '  ./        ▓▓▓▓▓▓▓▓▓▓        \\.  ',
-        ' /          ██████████          \\ ',
-        '|================================|',
-        ' \\______________________________/ ',
+        '       .------------.     ',
+        '    .-/              \\-.  ',
+        "  .-'                  '-.",
+        ' (                        )',
+        '  \\______________________/ ',
       ],
     },
     {
       id: 'storm_2',
       type: 'STORM',
-      width: 38,
-      height: 7,
+      width: 28,
+      height: 5,
       lines: [
-        '        .------------.   .----.       ',
-        '     .-/  ░░░░░░░░░░  \\-/  ░░  \\-.    ',
-        '  .-/     ▒▒▒▒▒▒▒▒▒▒        ▒▒▒   \\-  ',
-        ' /        ▓▓▓▓▓▓▓▓▓▓        ▓▓▓     \\ ',
-        '|         ██████████        ███     | ',
-        '|===================================| ',
-        ' \\_________________________________/  ',
+        '      .----------.    .----.  ',
+        '   .-/            \\--/      \\-',
+        " .-'                          ",
+        '(                             ',
+        ' \\____________________________/ ',
       ],
     },
     {
       id: 'storm_3',
       type: 'STORM',
-      width: 36,
-      height: 6,
+      width: 26,
+      height: 5,
       lines: [
-        '      .------------------------.      ',
-        '   .-/    ░░░░░░░░░░░░░░░░░     \\-.   ',
-        ' .-(      ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒       )-. ',
-        '(         ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓          )',
-        '|====================================|',
-        ' \\__________________________________/ ',
+        '       .----------------. ',
+        '    .-/                  \\',
+        "  .-'                     ",
+        '(                         ',
+        '  \\______________________/',
       ],
     },
 
-    // 9. FOG_BANK (3 Variants)
+    // 9. FOG_BANK (3 Variants) - 16 to 20 chars wide, 1 line
     {
       id: 'fog_bank_1',
       type: 'FOG_BANK',
-      width: 30,
-      height: 3,
+      width: 18,
+      height: 1,
       lines: [
-        ' . ~ ~ ~ . . ~ ~ ~ . . ~ ~ ~ .',
-        '░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░',
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '.~ . ~ . ~ . ~ . ~',
       ],
     },
     {
       id: 'fog_bank_2',
       type: 'FOG_BANK',
-      width: 34,
-      height: 3,
+      width: 20,
+      height: 1,
       lines: [
-        ' . . ~ ~ ~ . . ~ ~ ~ . . ~ ~ ~ . .',
-        '░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░',
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '.. ~ ~ . . ~ ~ . .. ',
       ],
     },
     {
       id: 'fog_bank_3',
       type: 'FOG_BANK',
-      width: 28,
-      height: 3,
+      width: 16,
+      height: 1,
       lines: [
-        ' ~ . ~ . ~ . ~ . ~ . ~ . ~ .',
-        '░░░░░░░░░░░░░░░░░░░░░░░░░░░░',
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '~ . ~ . ~ . ~ . ',
       ],
     },
   ];
@@ -380,86 +351,135 @@ export class CloudManager {
       case 'HEAT_HAZE':
         return { coverage: 'CLEAR', ratio: 0.05 };
       case 'CLOUDY':
-        return { coverage: 'SCATTERED', ratio: 0.40 };
+        return { coverage: 'SCATTERED', ratio: 0.35 };
       case 'LIGHT_RAIN':
       case 'SNOW':
       case 'NEON_MIST':
-        return { coverage: 'BROKEN', ratio: 0.65 };
+        return { coverage: 'BROKEN', ratio: 0.60 };
       case 'HEAVY_RAIN':
       case 'THUNDERSTORM':
       case 'BLIZZARD':
-        return { coverage: 'OVERCAST', ratio: 0.92 };
+        return { coverage: 'OVERCAST', ratio: 0.90 };
       case 'FOG':
       case 'VOLCANIC_ASH':
-        return { coverage: 'BROKEN', ratio: 0.70 };
+        return { coverage: 'BROKEN', ratio: 0.60 };
       default:
-        return { coverage: 'FEW', ratio: 0.20 };
+        return { coverage: 'FEW', ratio: 0.15 };
     }
   }
 
+  public getInstances(): CloudLayerInstance[] {
+    return this.instances;
+  }
+
   /**
-   * Initializes or reconfigures cloud instances for the active coverage level.
+   * Initializes or reconfigures cloud instances strictly respecting the Complexity Budget and Celestial Clearing Zone.
    */
-  public initCloudLayers(coverage: CloudCoverage): void {
+  public initCloudLayers(coverage: CloudCoverage, celestialAvoidHeading: number | null = null): void {
     this.instances = [];
 
     // Filter presets by family
-    const highPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'HIGH_THIN' || p.type === 'FAIR_SMALL');
-    const midPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'FAIR_MEDIUM' || p.type === 'CUMULUS_SMALL' || p.type === 'STRATUS');
-    const lowPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'CUMULUS_LARGE' || p.type === 'STORM' || p.type === 'OVERCAST' || p.type === 'FOG_BANK');
+    const smallFairPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'FAIR_SMALL' || p.type === 'HIGH_THIN');
+    const medFairPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'FAIR_MEDIUM' || p.type === 'CUMULUS_SMALL' || p.type === 'STRATUS');
+    const largePresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'CUMULUS_LARGE' || p.type === 'STORM' || p.type === 'OVERCAST');
 
-    // Layer 1: HIGH Parallax Clouds (Very Slow, High Altitude)
-    const highCount = coverage === 'CLEAR' ? 1 : (coverage === 'OVERCAST' ? 4 : 3);
+    // STRICT COMPLEXITY BUDGET:
+    // CLEAR: 0-1 tiny high cloud (85-95% open negative space)
+    // FEW: 1-2 small clouds (70-85% open space)
+    // SCATTERED: 2-3 clouds (55-75% open space)
+    // BROKEN: 3-4 clouds (35-50% open space)
+    // OVERCAST: 4-5 connected clouds
+
+    let highCount = 0;
+    let midCount = 0;
+    let lowCount = 0;
+
+    switch (coverage) {
+      case 'CLEAR':
+        highCount = this.rng.next() < 0.5 ? 1 : 0;
+        midCount = 0;
+        lowCount = 0;
+        break;
+      case 'FEW':
+        highCount = 1;
+        midCount = 1;
+        lowCount = 0;
+        break;
+      case 'SCATTERED':
+        highCount = 1;
+        midCount = 1;
+        lowCount = 1;
+        break;
+      case 'BROKEN':
+        highCount = 1;
+        midCount = 2;
+        lowCount = 1;
+        break;
+      case 'OVERCAST':
+        highCount = 1;
+        midCount = 2;
+        lowCount = 2;
+        break;
+    }
+
+    // Helper: Select xNorm avoiding celestial buffer zone
+    const pickX = (baseX: number): number => {
+      let x = (baseX + this.rng.range(-0.08, 0.08) + 1.0) % 1.0;
+      if (celestialAvoidHeading !== null && coverage !== 'OVERCAST') {
+        const dist = Math.abs(x - celestialAvoidHeading);
+        if (dist < 0.16) {
+          // Shift away from sun/moon
+          x = (x + (x >= celestialAvoidHeading ? 0.20 : -0.20) + 1.0) % 1.0;
+        }
+      }
+      return x;
+    };
+
+    // Layer 1: HIGH Parallax (Cirrus / Fair Small)
     for (let i = 0; i < highCount; i++) {
-      const formation = this.rng.choice(highPresets);
+      const formation = this.rng.choice(smallFairPresets);
       this.instances.push({
-        xNorm: (i / highCount) + this.rng.range(0, 0.2),
-        yNorm: this.rng.range(0.04, 0.18),
+        xNorm: pickX(0.25 + i * 0.50),
+        yNorm: this.rng.range(0.04, 0.15),
         speed: 0.0008,
         formation,
         layer: 'HIGH',
-        alpha: 0.75,
+        alpha: 0.70,
       });
     }
 
-    // Layer 2: MID Parallax Clouds (Slow, Mid Altitude)
-    if (coverage !== 'CLEAR') {
-      const midCount = coverage === 'FEW' ? 2 : (coverage === 'SCATTERED' ? 3 : 5);
-      for (let i = 0; i < midCount; i++) {
-        const formation = this.rng.choice(midPresets);
-        this.instances.push({
-          xNorm: (i / midCount) + this.rng.range(0, 0.25),
-          yNorm: this.rng.range(0.16, 0.40),
-          speed: 0.0022,
-          formation,
-          layer: 'MID',
-          alpha: 0.90,
-        });
-      }
+    // Layer 2: MID Parallax (Fair Med / Cumulus Small)
+    for (let i = 0; i < midCount; i++) {
+      const formation = this.rng.choice(medFairPresets);
+      this.instances.push({
+        xNorm: pickX(0.65 + i * 0.45),
+        yNorm: this.rng.range(0.14, 0.32),
+        speed: 0.0022,
+        formation,
+        layer: 'MID',
+        alpha: 0.90,
+      });
     }
 
-    // Layer 3: LOW Parallax Clouds (Moderate Speed, Low Altitude & Storm/Overcast)
-    if (coverage === 'SCATTERED' || coverage === 'BROKEN' || coverage === 'OVERCAST') {
-      const lowCount = coverage === 'OVERCAST' ? 6 : (coverage === 'BROKEN' ? 4 : 2);
-      for (let i = 0; i < lowCount; i++) {
-        const formation = this.rng.choice(lowPresets);
-        this.instances.push({
-          xNorm: (i / lowCount) + this.rng.range(0, 0.2),
-          yNorm: this.rng.range(0.30, 0.62),
-          speed: 0.0045,
-          formation,
-          layer: 'LOW',
-          alpha: 1.0,
-        });
-      }
+    // Layer 3: LOW Parallax (Cumulus Large / Storm / Overcast)
+    for (let i = 0; i < lowCount; i++) {
+      const formation = this.rng.choice(largePresets);
+      this.instances.push({
+        xNorm: pickX(0.15 + i * 0.55),
+        yNorm: this.rng.range(0.26, 0.46),
+        speed: 0.0040,
+        formation,
+        layer: 'LOW',
+        alpha: 1.0,
+      });
     }
   }
 
   /**
-   * Advances cloud horizontal drift modulated by world wind and music tempo.
+   * Advances cloud horizontal drift.
    */
   public update(dt: number, speedMultiplier: number = 1.0, windStrength: number = 0): void {
-    const windSpeedBonus = windStrength * 0.001;
+    const windSpeedBonus = windStrength * 0.0008;
     for (const cloud of this.instances) {
       cloud.xNorm = (cloud.xNorm + (cloud.speed + windSpeedBonus) * dt * speedMultiplier) % 1.0;
     }
@@ -506,7 +526,7 @@ export class CloudManager {
   }
 
   /**
-   * Renders all cloud layers with atmospheric highlighting and shadow.
+   * Renders all cloud layers with delicate silhouette lines and zero dense dither fills.
    */
   public renderClouds(
     fb: FrameBuffer,
@@ -515,7 +535,7 @@ export class CloudManager {
     cloudHighlightColor: string,
     cloudShadowColor: string
   ): void {
-    // Sort layers so HIGH is rendered first (behind), then MID, then LOW (in front)
+    // Sort layers: HIGH behind, MID, LOW in front
     const sorted = [...this.instances].sort((a, b) => {
       const order = { HIGH: 1, MID: 2, LOW: 3 };
       return order[a.layer] - order[b.layer];
@@ -531,16 +551,17 @@ export class CloudManager {
         const cy = startY + r;
         if (cy < 0 || cy >= horizonRow) continue;
 
-        // Top line receives highlight rim; bottom lines receive shadow base; middle lines receive body tone
-        const rowColor = r === lines.length - 1
+        // Top line receives clean highlight; bottom lines receive soft shadow contour
+        const rowColor = (r === lines.length - 1 && lines.length > 2)
           ? cloudShadowColor
-          : (r === 0 ? cloudHighlightColor : ColorPalette.lerp(cloudHighlightColor, cloudShadowColor, 0.45));
+          : (r === 0 ? cloudHighlightColor : ColorPalette.lerp(cloudHighlightColor, cloudShadowColor, 0.35));
 
         for (let c = 0; c < line.length; c++) {
           const ch = line[c];
           if (ch !== ' ') {
             const cx = (startX + c + width) % width;
             const zOrder = cloud.layer === 'LOW' ? 9965 : (cloud.layer === 'MID' ? 9970 : 9975);
+            // Render cloud glyph with transparency (undefined bg) so negative sky background flows through
             fb.setCell(cx, cy, ch, rowColor, zOrder, undefined, true);
           }
         }
