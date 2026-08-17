@@ -492,9 +492,18 @@ export class PixelCanvasRenderer {
       if (e.image && e.image.complete && e.image.naturalWidth > 0) {
         const renderW = Math.round(e.width * e.scale);
         const renderH = Math.round(e.height * e.scale);
+        
+        // Custom trunk anchor for OutRun palm trees
+        let anchorX = 0.5;
+        if (e.image === this.spriteManager.palmRightImg) {
+          anchorX = 0.72; // Right palm trunk is at 72% width
+        } else if (e.image === this.spriteManager.palmImg) {
+          anchorX = 0.25; // Left palm trunk is at 25% width
+        }
+
         ctx.drawImage(
           e.image,
-          Math.round(e.screenX - renderW * 0.5),
+          Math.round(e.screenX - renderW * anchorX),
           Math.round(e.screenY - renderH),
           renderW,
           renderH
