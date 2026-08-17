@@ -29,89 +29,90 @@ export class CelestialSystem {
     'WANING_CRESCENT',
   ];
 
-  // Discrete Solid Character Discs for all 8 Lunar Phases (7x5 Solid Discs)
-  private static readonly MOON_PHASE_SHAPES: Record<MoonPhase, string[]> = {
+  // Discrete Solid Pixel Matrices for all 8 Lunar Phases (7 cols x 5 rows)
+  // 0 = Transparent, 1 = Solid Bright Moon, 2 = Crater Feature, 3 = Dim Unlit Limb
+  private static readonly MOON_PHASE_MATRICES: Record<MoonPhase, number[][]> = {
     NEW_MOON: [
-      '  .....  ',
-      ' ..:::.. ',
-      '.:::::::.',
-      ' ..:::.. ',
-      '  .....  ',
+      [0, 0, 3, 3, 3, 0, 0],
+      [0, 3, 3, 3, 3, 3, 0],
+      [3, 3, 3, 3, 3, 3, 3],
+      [0, 3, 3, 3, 3, 3, 0],
+      [0, 0, 3, 3, 3, 0, 0],
     ],
     WAXING_CRESCENT: [
-      '  .....  ',
-      ' ..::#.. ',
-      '.::::##..',
-      ' ..::#.. ',
-      '  .....  ',
+      [0, 0, 0, 0, 1, 0, 0],
+      [0, 0, 0, 1, 1, 1, 0],
+      [0, 0, 0, 1, 1, 1, 1],
+      [0, 0, 0, 1, 1, 1, 0],
+      [0, 0, 0, 0, 1, 0, 0],
     ],
     FIRST_QUARTER: [
-      '  .....  ',
-      ' ..:##.. ',
-      '.:::###..',
-      ' ..:##.. ',
-      '  .....  ',
+      [0, 0, 0, 1, 1, 0, 0],
+      [0, 0, 0, 1, 1, 1, 0],
+      [0, 0, 0, 1, 1, 1, 1],
+      [0, 0, 0, 1, 1, 1, 0],
+      [0, 0, 0, 1, 1, 0, 0],
     ],
     WAXING_GIBBOUS: [
-      '  .....  ',
-      ' ..###.. ',
-      '.::####..',
-      ' ..###.. ',
-      '  .....  ',
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 0, 1, 1, 1, 0, 0],
     ],
     FULL_MOON: [
-      '  .....  ',
-      ' ..###.. ',
-      '.##o###..',
-      ' ..###.. ',
-      '  .....  ',
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 1, 1, 2, 1, 1, 0],
+      [1, 1, 2, 1, 1, 1, 1],
+      [0, 1, 1, 1, 2, 1, 0],
+      [0, 0, 1, 1, 1, 0, 0],
     ],
     WANING_GIBBOUS: [
-      '  .....  ',
-      ' ..###.. ',
-      '.####::..',
-      ' ..###.. ',
-      '  .....  ',
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 0, 1, 1, 1, 0, 0],
     ],
     LAST_QUARTER: [
-      '  .....  ',
-      ' ..##:.. ',
-      '.###:::..',
-      ' ..##:.. ',
-      '  .....  ',
+      [0, 0, 1, 1, 0, 0, 0],
+      [0, 1, 1, 1, 0, 0, 0],
+      [1, 1, 1, 1, 0, 0, 0],
+      [0, 1, 1, 1, 0, 0, 0],
+      [0, 0, 1, 1, 0, 0, 0],
     ],
     WANING_CRESCENT: [
-      '  .....  ',
-      ' ..#::.. ',
-      '.##::::..',
-      ' ..#::.. ',
-      '  .....  ',
+      [0, 0, 1, 0, 0, 0, 0],
+      [0, 1, 1, 1, 0, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0],
+      [0, 1, 1, 1, 0, 0, 0],
+      [0, 0, 1, 0, 0, 0, 0],
     ],
   };
 
-  // Bold Solid Sun Discs with distinct visual weight for each diurnal phase
-  private static readonly SUN_SHAPES = {
+  // Bold Solid Pixel Sun Matrices for each diurnal phase
+  private static readonly SUN_MATRICES = {
     SUN_LOW: [
-      '   .......   ',
-      ' ..*******.. ',
-      '.***********.',
-      ' *********** ',
-      '  .*******.  ',
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
     ],
     SUN_HIGH: [
-      '   \\  |  /   ',
-      ' ..*******.. ',
-      '-***********-',
-      ' ..*******.. ',
-      '   /  |  \\   ',
+      [0, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 1, 1, 1, 0],
     ],
     SUNSET: [
-      '   ...........   ',
-      ' ..***********.. ',
-      '.***************.',
-      ' *************** ',
-      '  .***********.  ',
-      '    .........    ',
+      [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
     ],
   };
 
@@ -319,7 +320,7 @@ export class CelestialSystem {
   }
 
   /**
-   * Renders solid celestial bodies (Sun, Moon, Stars) with real spatial cloud occlusion.
+   * Renders solid pixel celestial bodies (Sun, Moon, Stars) with true spatial cloud occlusion.
    */
   public renderCelestialBodies(
     fb: FrameBuffer,
@@ -372,22 +373,22 @@ export class CelestialSystem {
       }
     }
 
-    // 2. Render Sun as Solid Character Disc
+    // 2. Render Sun as Solid Pixel Disc
     if (sunVisible && sunElev > 0.0) {
       const sunY = Math.floor(horizonRow * (1.0 - sunElev * 0.78));
       const sunX = Math.floor(sunHeading * width);
 
-      let shape = CelestialSystem.SUN_SHAPES.SUN_HIGH;
+      let matrix = CelestialSystem.SUN_MATRICES.SUN_HIGH;
       if (sunElev < 0.22) {
-        shape = CelestialSystem.SUN_SHAPES.SUN_LOW;
+        matrix = CelestialSystem.SUN_MATRICES.SUN_LOW;
       } else if (dayPhase === 'GOLDEN_HOUR' || dayPhase === 'SUNSET') {
-        shape = CelestialSystem.SUN_SHAPES.SUNSET;
+        matrix = CelestialSystem.SUN_MATRICES.SUNSET;
       }
 
-      const halfW = Math.floor(shape[0].length / 2);
-      const halfH = Math.floor(shape.length / 2);
+      const halfW = Math.floor(matrix[0].length / 2);
+      const halfH = Math.floor(matrix.length / 2);
 
-      // Radiant Halo Glow
+      // Fine External Halo Accents
       const haloProminence = (dayPhase === 'GOLDEN_HOUR' || dayPhase === 'SUNRISE' || dayPhase === 'SUNSET') ? 0.9 : 0.4;
       if (haloProminence > 0.1) {
         const haloPoints = [
@@ -407,44 +408,45 @@ export class CelestialSystem {
         }
       }
 
-      // Render Solid Sun Disc
-      for (let r = 0; r < shape.length; r++) {
-        const line = shape[r];
+      // Render Solid Sun Pixel Disc (Cell is the Pixel)
+      for (let r = 0; r < matrix.length; r++) {
+        const row = matrix[r];
         const py = sunY - halfH + r;
         if (py < 0 || py >= horizonRow) continue;
 
-        for (let c = 0; c < line.length; c++) {
-          const ch = line[c];
-          if (ch !== ' ') {
+        for (let c = 0; c < row.length; c++) {
+          if (row[c] === 1) {
             const px = (sunX - halfW + c + width) % width;
             if (!isOccluded(px, py)) {
               let cellColor = sunColor;
-              if (shape === CelestialSystem.SUN_SHAPES.SUNSET) {
-                // Sunset vertical gradient: yellow center -> orange -> crimson
-                const t = r / (shape.length - 1);
+              if (matrix === CelestialSystem.SUN_MATRICES.SUNSET) {
+                // Sunset vertical gradient: luminous gold -> orange -> crimson
+                const t = r / (matrix.length - 1);
                 cellColor = t < 0.5
                   ? ColorPalette.lerp('#fde047', '#f97316', t * 2)
                   : ColorPalette.lerp('#f97316', '#dc2626', (t - 0.5) * 2);
               }
-              fb.setCell(px, py, ch, cellColor, 9980, undefined, true);
+              // Cell is the pixel: char ' ', bg is cellColor
+              fb.setCell(px, py, ' ', cellColor, 9980, cellColor, true);
             }
           }
         }
       }
     }
 
-    // 3. Render Moon as Solid Character Disc
+    // 3. Render Moon as Solid Pixel Disc
     if (moonVisible && moonElev > 0.0) {
       const moonY = Math.floor(horizonRow * (1.0 - moonElev * 0.75));
       const moonX = Math.floor(moonHeading * width);
 
-      const shape = CelestialSystem.MOON_PHASE_SHAPES[moonPhase] || CelestialSystem.MOON_PHASE_SHAPES.FULL_MOON;
-      const halfW = Math.floor(shape[0].length / 2);
-      const halfH = Math.floor(shape.length / 2);
+      const matrix = CelestialSystem.MOON_PHASE_MATRICES[moonPhase] || CelestialSystem.MOON_PHASE_MATRICES.FULL_MOON;
+      const halfW = Math.floor(matrix[0].length / 2);
+      const halfH = Math.floor(matrix.length / 2);
 
       const isLowMoon = specialEvent === 'LOW_FULL_MOON' && moonPhase === 'FULL_MOON';
       const brightMoonColor = isLowMoon ? '#fde047' : '#f8fafc';
-      const shadowMoonColor = '#1e293b';
+      const craterColor = '#94a3b8';
+      const dimLimbColor = '#0f172a';
 
       // Full Moon Halo
       if (moonPhase === 'FULL_MOON') {
@@ -462,26 +464,24 @@ export class CelestialSystem {
         }
       }
 
-      // Render Solid Moon Disc
-      for (let r = 0; r < shape.length; r++) {
-        const line = shape[r];
+      // Render Solid Moon Pixel Disc (Cell is the Pixel)
+      for (let r = 0; r < matrix.length; r++) {
+        const row = matrix[r];
         const py = moonY - halfH + r;
         if (py < 0 || py >= horizonRow) continue;
 
-        for (let c = 0; c < line.length; c++) {
-          const ch = line[c];
-          if (ch !== ' ') {
+        for (let c = 0; c < row.length; c++) {
+          const val = row[c];
+          if (val > 0) {
             const px = (moonX - halfW + c + width) % width;
             if (!isOccluded(px, py)) {
-              let tint = brightMoonColor;
-              if (ch === ':') {
-                tint = shadowMoonColor;
-              } else if (ch === 'o') {
-                tint = '#94a3b8'; // Crater feature
-              } else if (ch === '.') {
-                tint = '#64748b'; // Soft rim
+              let cellBg = brightMoonColor;
+              if (val === 2) {
+                cellBg = craterColor;
+              } else if (val === 3) {
+                cellBg = dimLimbColor;
               }
-              fb.setCell(px, py, ch, tint, 9980, undefined, true);
+              fb.setCell(px, py, ' ', cellBg, 9980, cellBg, true);
             }
           }
         }

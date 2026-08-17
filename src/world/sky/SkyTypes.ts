@@ -34,7 +34,7 @@ export type CloudFormationType =
   | 'PUFF_SMALL'
   | 'CUMULUS_MEDIUM'
   | 'CUMULUS_LARGE'
-  | 'CLOUD_BANK'
+  | 'HORIZON_BANK'
   | 'STORM_MASS';
 
 export type WeatherType =
@@ -82,19 +82,28 @@ export interface AmbientAtmosphere {
   lightningFlashIntensity: number; // [0.0, 1.0]
 }
 
+export interface CloudPixelMask {
+  id: string;
+  type: CloudFormationType;
+  width: number;
+  height: number;
+  matrix: number[][]; // 0=transparent, 1=shadow, 2=body, 3=highlight
+}
+
 export interface CloudFormation {
   id: string;
   type: CloudFormationType;
   width: number;
   height: number;
-  lines: string[];
+  matrix: number[][];
+  lines?: string[];
 }
 
 export interface CloudLayerInstance {
   xNorm: number;          // [0, 1) horizontal normalized coordinate
   yNorm: number;          // [0, 1) normalized altitude in sky (0 = top, 1 = horizon)
   speed: number;          // Drift speed in norm units / sec
-  formation: CloudFormation;
+  mask: CloudPixelMask;
   layer: 'HIGH' | 'MID' | 'LOW';
   alpha: number;          // [0, 1] opacity
 }

@@ -35,4 +35,18 @@ describe('FrameBuffer Transparency & Background Painting', () => {
     expect(fb.cells[5][6].char).toBe('~');
     expect(fb.cells[5][6].color).toBe('#34d399');
   });
+
+  it('renders solid cell pixels in sprites when background color is explicitly set on space characters', () => {
+    const fb = new FrameBuffer(20, 10);
+    // Background blue sky
+    fb.setCell(5, 5, ' ', '#ffffff', 1000, '#0000ff', false);
+
+    // Sprite with solid pixel (char: ' ', bg: '#ffffff') at z=500
+    const success = fb.setCell(5, 5, ' ', '#ffffff', 500, '#ffffff', true);
+
+    expect(success).toBe(true);
+    expect(fb.cells[5][5].char).toBe(' ');
+    expect(fb.cells[5][5].bg).toBe('#ffffff');
+    expect(fb.cells[5][5].z).toBe(500);
+  });
 });

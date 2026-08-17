@@ -71,8 +71,8 @@ export class FrameBuffer {
       return false;
     }
 
-    // Space transparency: spaces within sprites are transparent
-    if (isSprite && char === ' ') {
+    // Space transparency: spaces within sprites are transparent UNLESS a background color is explicitly provided
+    if (isSprite && char === ' ' && bg === undefined) {
       return false;
     }
 

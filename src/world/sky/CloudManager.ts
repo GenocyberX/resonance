@@ -2,11 +2,11 @@ import { FrameBuffer } from '../../ascii/FrameBuffer';
 import { SeededRandom } from '../../procedural/SeededRandom';
 import {
   CloudCoverage,
-  CloudFormation,
   CloudLayerInstance,
+  CloudPixelMask,
   WeatherType,
 } from './SkyTypes';
-import { CloudSpriteLibrary } from './CloudSpriteLibrary';
+import { CloudPixelLibrary } from './CloudPixelLibrary';
 
 export class CloudManager {
   private rng: SeededRandom;
@@ -15,8 +15,8 @@ export class CloudManager {
   private gridWidth: number = 0;
   private gridHeight: number = 0;
 
-  // Expose CloudSpriteLibrary presets
-  public static readonly CLOUD_PRESETS: CloudFormation[] = CloudSpriteLibrary.PRESETS;
+  // Expose CloudPixelLibrary masks as presets
+  public static readonly CLOUD_PRESETS: CloudPixelMask[] = CloudPixelLibrary.MASKS;
 
   constructor(seed: number) {
     this.rng = new SeededRandom(seed ^ 0x3c6ef372);
@@ -57,16 +57,16 @@ export class CloudManager {
   }
 
   /**
-   * Initializes cloud compositions according to strict coverage rules and pseudo-pixel arcade density.
+   * Initializes cloud compositions according to strict coverage rules and cell-based pixel art density.
    */
   public initCloudLayers(coverage: CloudCoverage, celestialAvoidHeading: number | null = null): void {
     this.instances = [];
 
-    const smallPresets = CloudSpriteLibrary.PRESETS.filter(p => p.type === 'PUFF_SMALL');
-    const medPresets = CloudSpriteLibrary.PRESETS.filter(p => p.type === 'CUMULUS_MEDIUM');
-    const largePresets = CloudSpriteLibrary.PRESETS.filter(p => p.type === 'CUMULUS_LARGE');
-    const bankPresets = CloudSpriteLibrary.PRESETS.filter(p => p.type === 'CLOUD_BANK');
-    const stormPresets = CloudSpriteLibrary.PRESETS.filter(p => p.type === 'STORM_MASS');
+    const smallPresets = CloudPixelLibrary.MASKS.filter(p => p.type === 'PUFF_SMALL');
+    const medPresets = CloudPixelLibrary.MASKS.filter(p => p.type === 'CUMULUS_MEDIUM');
+    const largePresets = CloudPixelLibrary.MASKS.filter(p => p.type === 'CUMULUS_LARGE');
+    const bankPresets = CloudPixelLibrary.MASKS.filter(p => p.type === 'HORIZON_BANK');
+    const stormPresets = CloudPixelLibrary.MASKS.filter(p => p.type === 'STORM_MASS');
 
     // Helper: Pick X coordinate with celestial avoidance in clear/few weather
     const pickX = (baseX: number, isOvercast: boolean): number => {
@@ -82,17 +82,16 @@ export class CloudManager {
 
     switch (coverage) {
       case 'CLEAR': {
-        // 1-2 small puffs + 1 optional medium cumulus
-        const count = this.rng.rangeInt(1, 3);
+        // 1-2 small puffs
+        const count = this.rng.rangeInt(1, 2);
         for (let i = 0; i < count; i++) {
-          const formation = (i === 0) ? this.rng.choice(smallPresets) : this.rng.choice(medPresets);
           this.instances.push({
             xNorm: pickX(0.25 + i * 0.45, false),
             yNorm: this.rng.range(0.06, 0.22),
             speed: 0.0012,
-            formation,
-            layer: i === 0 ? 'HIGH' : 'MID',
-            alpha: 0.85,
+            mask: this.rng.choice(smallPresets),
+            layer: 'HIGH',
+            alpha: 0.90,
           });
         }
         break;
@@ -108,9 +107,9 @@ export class CloudManager {
             xNorm: pickX(0.15 + i * 0.50, false),
             yNorm: this.rng.range(0.05, 0.16),
             speed: 0.0012,
-            formation: this.rng.choice(smallPresets),
+            mask: this.rng.choice(smallPresets),
             layer: 'HIGH',
-            alpha: 0.85,
+            alpha: 0.90,
           });
         }
         for (let i = 0; i < medCount; i++) {
@@ -118,9 +117,9 @@ export class CloudManager {
             xNorm: pickX(0.40 + i * 0.45, false),
             yNorm: this.rng.range(0.18, 0.35),
             speed: 0.0026,
-            formation: this.rng.choice(medPresets),
+            mask: this.rng.choice(medPresets),
             layer: 'MID',
-            alpha: 0.95,
+            alpha: 1.0,
           });
         }
         break;
@@ -132,7 +131,7 @@ export class CloudManager {
           xNorm: pickX(0.60, false),
           yNorm: this.rng.range(0.14, 0.30),
           speed: 0.0040,
-          formation: this.rng.choice(largePresets),
+          mask: this.rng.choice(largePresets),
           layer: 'LOW',
           alpha: 1.0,
         });
@@ -142,9 +141,9 @@ export class CloudManager {
             xNorm: pickX(0.15 + i * 0.50, false),
             yNorm: this.rng.range(0.16, 0.36),
             speed: 0.0025,
-            formation: this.rng.choice(medPresets),
+            mask: this.rng.choice(medPresets),
             layer: 'MID',
-            alpha: 0.95,
+            alpha: 1.0,
           });
         }
 
@@ -153,22 +152,22 @@ export class CloudManager {
             xNorm: pickX(0.35 + i * 0.45, false),
             yNorm: this.rng.range(0.04, 0.18),
             speed: 0.0012,
-            formation: this.rng.choice(smallPresets),
+            mask: this.rng.choice(smallPresets),
             layer: 'HIGH',
-            alpha: 0.85,
+            alpha: 0.90,
           });
         }
         break;
       }
 
       case 'MOSTLY_CLOUDY': {
-        // 6-8 clouds: 2 large cumulus + 1-2 cloud banks + 2 medium cumulus + 2 small puffs (60-80% sky covered)
+        // 6-8 clouds: 2 large cumulus + 1-2 horizon banks + 2 medium cumulus + 2 small puffs (60-80% sky covered)
         for (let i = 0; i < 2; i++) {
           this.instances.push({
             xNorm: pickX(0.10 + i * 0.55, false),
             yNorm: this.rng.range(0.16, 0.35),
             speed: 0.0045,
-            formation: this.rng.choice(largePresets),
+            mask: this.rng.choice(largePresets),
             layer: 'LOW',
             alpha: 1.0,
           });
@@ -178,7 +177,7 @@ export class CloudManager {
           xNorm: pickX(0.40, false),
           yNorm: this.rng.range(0.32, 0.48),
           speed: 0.0035,
-          formation: this.rng.choice(bankPresets),
+          mask: this.rng.choice(bankPresets),
           layer: 'LOW',
           alpha: 1.0,
         });
@@ -188,9 +187,9 @@ export class CloudManager {
             xNorm: pickX(0.25 + i * 0.50, false),
             yNorm: this.rng.range(0.12, 0.28),
             speed: 0.0026,
-            formation: this.rng.choice(medPresets),
+            mask: this.rng.choice(medPresets),
             layer: 'MID',
-            alpha: 0.95,
+            alpha: 1.0,
           });
         }
 
@@ -199,22 +198,22 @@ export class CloudManager {
             xNorm: pickX(0.05 + i * 0.50, false),
             yNorm: this.rng.range(0.04, 0.16),
             speed: 0.0012,
-            formation: this.rng.choice(smallPresets),
+            mask: this.rng.choice(smallPresets),
             layer: 'HIGH',
-            alpha: 0.85,
+            alpha: 0.90,
           });
         }
         break;
       }
 
       case 'OVERCAST': {
-        // 8-10 dense connected storm masses + cloud banks spanning the sky (85-100% covered)
+        // 8-12 connected storm masses + horizon banks spanning the sky (85-100% covered)
         for (let i = 0; i < 3; i++) {
           this.instances.push({
             xNorm: pickX(i / 3.0, true),
             yNorm: this.rng.range(0.06, 0.28),
             speed: 0.0035,
-            formation: this.rng.choice(stormPresets),
+            mask: this.rng.choice(stormPresets),
             layer: 'LOW',
             alpha: 1.0,
           });
@@ -225,7 +224,7 @@ export class CloudManager {
             xNorm: pickX((i + 0.5) / 3.0, true),
             yNorm: this.rng.range(0.22, 0.48),
             speed: 0.0040,
-            formation: this.rng.choice(bankPresets),
+            mask: this.rng.choice(bankPresets),
             layer: 'LOW',
             alpha: 1.0,
           });
@@ -236,7 +235,7 @@ export class CloudManager {
             xNorm: pickX(i / 3.0, true),
             yNorm: this.rng.range(0.02, 0.18),
             speed: 0.0020,
-            formation: this.rng.choice(medPresets),
+            mask: this.rng.choice(medPresets),
             layer: 'MID',
             alpha: 1.0,
           });
@@ -271,15 +270,15 @@ export class CloudManager {
     for (const cloud of this.instances) {
       const startX = Math.floor(cloud.xNorm * width);
       const startY = Math.floor(cloud.yNorm * horizonRow);
-      const lines = cloud.formation.lines;
+      const matrix = cloud.mask.matrix;
 
-      for (let r = 0; r < lines.length; r++) {
-        const line = lines[r];
+      for (let r = 0; r < matrix.length; r++) {
+        const row = matrix[r];
         const cy = startY + r;
         if (cy < 0 || cy >= horizonRow) continue;
 
-        for (let c = 0; c < line.length; c++) {
-          if (line[c] !== ' ') {
+        for (let c = 0; c < row.length; c++) {
+          if (row[c] > 0) {
             const cx = (startX + c + width) % width;
             this.occlusionGrid[cy * width + cx] = 1;
           }
@@ -297,7 +296,7 @@ export class CloudManager {
   }
 
   /**
-   * Renders all cloud layers with solid pseudo-pixel masks and 3-tone lighting.
+   * Renders all cloud layers as true cell-based pixel art masses using solid cell backgrounds.
    */
   public renderClouds(
     fb: FrameBuffer,
@@ -316,40 +315,30 @@ export class CloudManager {
     for (const cloud of sorted) {
       const startX = Math.floor(cloud.xNorm * width);
       const startY = Math.floor(cloud.yNorm * horizonRow);
-      const lines = cloud.formation.lines;
-      const totalRows = lines.length;
+      const matrix = cloud.mask.matrix;
+      const totalRows = matrix.length;
 
       for (let r = 0; r < totalRows; r++) {
-        const line = lines[r];
+        const row = matrix[r];
         const cy = startY + r;
         if (cy < 0 || cy >= horizonRow) continue;
 
-        // 3-Tone Tonal Grading: Top highlight (0-25%), Body mass (25-70%), Underside shadow (70-100%)
-        const rowFraction = r / Math.max(1, totalRows - 1);
-        let defaultRowColor = cloudBodyColor;
-        if (rowFraction <= 0.25) {
-          defaultRowColor = cloudHighlightColor;
-        } else if (rowFraction >= 0.70) {
-          defaultRowColor = cloudShadowColor;
-        }
-
-        for (let c = 0; c < line.length; c++) {
-          const ch = line[c];
-          if (ch !== ' ') {
+        for (let c = 0; c < row.length; c++) {
+          const val = row[c];
+          if (val > 0) {
             const cx = (startX + c + width) % width;
             const zOrder = cloud.layer === 'LOW' ? 9965 : (cloud.layer === 'MID' ? 9970 : 9975);
 
-            // Per-character pixel density coloring
-            let charColor = defaultRowColor;
-            if (ch === '.') {
-              charColor = cloudHighlightColor;
-            } else if (ch === ':') {
-              charColor = (rowFraction >= 0.65) ? cloudShadowColor : cloudBodyColor;
-            } else if (ch === '▒' || ch === '#' || ch === '*') {
-              charColor = cloudShadowColor;
+            // 3-Tone Solid Pixel Fill (3 = Highlight, 2 = Body, 1 = Shadow)
+            let cellBg = cloudBodyColor;
+            if (val === 3) {
+              cellBg = cloudHighlightColor;
+            } else if (val === 1) {
+              cellBg = cloudShadowColor;
             }
 
-            fb.setCell(cx, cy, ch, charColor, zOrder, undefined, true);
+            // Cell is the pixel: char is ' ', bg is the solid pixel color
+            fb.setCell(cx, cy, ' ', cellBg, zOrder, cellBg, true);
           }
         }
       }

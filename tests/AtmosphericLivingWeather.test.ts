@@ -279,26 +279,34 @@ describe('RESONANCE — Atmospheric Polish + Living Weather V2 Test Suite', () =
     }
   });
 
-  // 19. All Cloud Presets Are Solid Filled Pseudo-Pixel Masks (Zero Empty Wireframe Outlines)
-  it('19. audits all cloud presets: solid pseudo-pixel mass with non-empty characters in every row', () => {
+  // 19. All Cloud Presets Are Solid 3-Tone Pixel Masks
+  it('19. audits all cloud presets: solid 3-tone pixel mass with valid matrix dimensions and tone values', () => {
     for (const preset of CloudManager.CLOUD_PRESETS) {
-      expect(preset.lines.length).toBeGreaterThanOrEqual(4);
-      for (const line of preset.lines) {
-        expect(line.trim().length).toBeGreaterThan(0);
-        // Must contain solid mask characters (. or :)
-        expect(line).toMatch(/[.:]/);
+      expect(preset.matrix.length).toBeGreaterThanOrEqual(4);
+      expect(preset.matrix.length).toBe(preset.height);
+      for (const row of preset.matrix) {
+        expect(row.length).toBe(preset.width);
+        // Each cell must be 0 (transparent), 1 (shadow), 2 (body), or 3 (highlight)
+        for (const val of row) {
+          expect([0, 1, 2, 3]).toContain(val);
+        }
       }
+      // Must contain at least highlight (3) and body (2) or shadow (1)
+      const flat = preset.matrix.flat();
+      expect(flat).toContain(3);
+      expect(flat).toContain(2);
+      expect(flat).toContain(1);
     }
   });
 
-  // 20. 5 Distinct Solid Cloud Families with 15 Handcrafted Masks
-  it('20. verifies that all 5 distinct solid cloud families and 15 masks are registered', () => {
-    expect(CloudManager.CLOUD_PRESETS.length).toBe(15);
+  // 20. 5 Distinct Solid Cloud Families with 17 Handcrafted Pixel Masks
+  it('20. verifies that all 5 distinct solid cloud families and 17 pixel masks are registered', () => {
+    expect(CloudManager.CLOUD_PRESETS.length).toBe(17);
     const families = new Set(CloudManager.CLOUD_PRESETS.map(p => p.type));
     expect(families.has('PUFF_SMALL')).toBe(true);
     expect(families.has('CUMULUS_MEDIUM')).toBe(true);
     expect(families.has('CUMULUS_LARGE')).toBe(true);
-    expect(families.has('CLOUD_BANK')).toBe(true);
+    expect(families.has('HORIZON_BANK')).toBe(true);
     expect(families.has('STORM_MASS')).toBe(true);
   });
 });

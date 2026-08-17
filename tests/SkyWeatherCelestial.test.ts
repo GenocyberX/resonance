@@ -231,4 +231,60 @@ describe('RESONANCE — Sky, Weather & Celestial System V1 Suite', () => {
     }
     expect(occludedCount).toBeGreaterThan(50);
   });
+
+  // 15. Cloud Sprite Masks Do Not Mutate During Render
+  it('guarantees cloud sprite masks do not mutate during render passes', () => {
+    const cm = new CloudManager(4321);
+    cm.initCloudLayers('SCATTERED');
+    const instances = cm.getInstances();
+    const originalWidths = instances.map(inst => inst.mask.width);
+    const originalHeights = instances.map(inst => inst.mask.height);
+
+    const fb = new FrameBuffer(120, 40);
+    cm.renderClouds(fb, 120, 20, '#ffffff', '#e2e8f0', '#94a3b8');
+
+    // Verify dimensions unchanged
+    instances.forEach((inst, idx) => {
+      expect(inst.mask.width).toBe(originalWidths[idx]);
+      expect(inst.mask.height).toBe(originalHeights[idx]);
+    });
+  });
+
+  // 16. Solid Moon Disc and Crescent Mask Cutout
+  it('renders solid Moon discs with proper opaque pixels and crescent cutouts', () => {
+    const celestial = new CelestialSystem(777);
+    const fbFull = new FrameBuffer(40, 20);
+    const fbCrescent = new FrameBuffer(40, 20);
+
+    // Render Full Moon
+    celestial.renderCelestialBodies(
+      fbFull, 40, 20, 0, 'DEEP_NIGHT', 1.0, 0, 0, false, '#ffffff', 0.5, 0.5, true, 'FULL_MOON',
+      () => false, 'NONE'
+    );
+
+    // Count solid moon pixels in center region
+    let fullMoonPixels = 0;
+    for (let y = 0; y < 20; y++) {
+      for (let x = 0; x < 40; x++) {
+        if (fbFull.cells[y][x].z === 9980) fullMoonPixels++;
+      }
+    }
+    expect(fullMoonPixels).toBeGreaterThanOrEqual(15);
+
+    // Render Waxing Crescent Moon
+    celestial.renderCelestialBodies(
+      fbCrescent, 40, 20, 0, 'DEEP_NIGHT', 1.0, 0, 0, false, '#ffffff', 0.5, 0.5, true, 'WAXING_CRESCENT',
+      () => false, 'NONE'
+    );
+
+    let crescentPixels = 0;
+    for (let y = 0; y < 20; y++) {
+      for (let x = 0; x < 40; x++) {
+        if (fbCrescent.cells[y][x].z === 9980) crescentPixels++;
+      }
+    }
+    expect(crescentPixels).toBeGreaterThan(0);
+    // Crescent must have fewer lighted pixels than full moon
+    expect(crescentPixels).toBeLessThan(fullMoonPixels);
+  });
 });
