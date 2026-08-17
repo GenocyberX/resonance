@@ -2,7 +2,7 @@ import { WorldEngine } from '../world/WorldEngine';
 import { WorldState } from '../world/WorldState';
 import { PixelSprite, PixelSpriteCatalog } from './PixelSpriteCatalog';
 import { ColorPalette } from '../ascii/ColorPalette';
-import { Perspective } from '../road/Perspective';
+import { Perspective, RoadSpaceResult } from '../road/Perspective';
 
 export class PixelCanvasRenderer {
   private canvas: HTMLCanvasElement;
@@ -10,6 +10,9 @@ export class PixelCanvasRenderer {
 
   public static readonly LOGICAL_WIDTH = 320;
   public static readonly LOGICAL_HEIGHT = 180;
+  public static readonly CANONICAL_HORIZON_RATIO = 0.42; // y = 75 on 180p (42% Sky, 58% Road & Terrain)
+
+  private isDebugOverlayEnabled: boolean = false;
 
   constructor(container: HTMLElement) {
     this.canvas = document.createElement('canvas');
@@ -32,21 +35,33 @@ export class PixelCanvasRenderer {
     if (!ctx) throw new Error('Could not acquire 2D context for PixelCanvasRenderer');
     this.ctx = ctx;
     this.ctx.imageSmoothingEnabled = false;
+
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('debugGeometry') === '1' || params.get('debug') === 'geometry') {
+        this.isDebugOverlayEnabled = true;
+      }
+    }
   }
 
   public getCanvas(): HTMLCanvasElement {
     return this.canvas;
   }
 
+  public toggleDebugOverlay(): void {
+    this.isDebugOverlayEnabled = !this.isDebugOverlayEnabled;
+  }
+
   /**
    * Main Unified Solid Pixel Art Render Pass.
-   * Prioritizes composition, road dominance, clean hierarchy, and authentic OutRun arcade aesthetics.
+   * Built on a Single Canonical Road-Space Projection System.
    */
   public render(worldEngine: WorldEngine, state: WorldState): void {
     const ctx = this.ctx;
     const width = PixelCanvasRenderer.LOGICAL_WIDTH;
     const height = PixelCanvasRenderer.LOGICAL_HEIGHT;
-    const horizonRow = Math.floor(height * 0.41); // y = 74 (41% Sky, 59% Dominant Road & Terrain)
+    const horizonRatio = PixelCanvasRenderer.CANONICAL_HORIZON_RATIO;
+    const horizonRow = Math.floor(height * horizonRatio); // y = 75
 
     const sky = state.sky;
     const biome = state.biomeBlend.currentBiome;
@@ -163,10 +178,9 @@ export class PixelCanvasRenderer {
     }
 
     // =========================================================================
-    // 4. VOLUMETRIC SOLID PIXEL CLOUDS (Restrained, Elegant, 3-Tone Masses)
+    // 4. VOLUMETRIC SOLID PIXEL CLOUDS (Restrained, Handcrafted 3-Tone Masses)
     // =========================================================================
     const clouds = worldEngine.getSkyDirector().getCloudManager().getInstances();
-    // Render up to 4 clouds to keep the sky breathable and stylish
     const visibleClouds = clouds.slice(0, 4);
     for (const cloud of visibleClouds) {
       const matrix = cloud.mask.matrix;
@@ -199,24 +213,31 @@ export class PixelCanvasRenderer {
     this.renderHorizonSilhouettes(ctx, width, horizonRow, biome.id, camera.x, palette.mountains, sky.horizonGlowColor);
 
     // =========================================================================
-    // 6. 3D PERSPECTIVE ARCADE ROAD & TERRAIN (Dominant OutRun Perspective)
+    // 6. 3D PERSPECTIVE CANONICAL ROAD & TERRAIN
     // =========================================================================
-    this.render3DRoadAndTerrain(ctx, width, height, horizonRow, worldEngine, state, palette);
+    const roadSlices = this.render3DRoadAndTerrain(ctx, width, height, horizonRow, horizonRatio, worldEngine, state, palette);
 
     // =========================================================================
-    // 7. PERSPECTIVE-SCALED SCENERY SPRITES & TRAFFIC (Strict Spacing & Hierarchy)
+    // 7. PERSPECTIVE-SCALED SCENERY SPRITES & TRAFFIC (Single Canonical Road-Space)
     // =========================================================================
-    this.renderWorldEntities(ctx, width, height, horizonRow, worldEngine, state);
+    this.renderWorldEntities(ctx, width, height, horizonRow, horizonRatio, worldEngine, state);
 
     // =========================================================================
-    // 8. PROTAGONIST PLAYER VEHICLE (OutRun Red Roadster with Turn Tilt)
+    // 8. PROTAGONIST PLAYER VEHICLE (Canonical Projection Anchor)
     // =========================================================================
-    this.renderPlayerVehicle(ctx, width, height, state);
+    this.renderPlayerVehicle(ctx, width, height, horizonRatio, worldEngine, state);
 
     // =========================================================================
     // 9. ATMOSPHERIC WEATHER (Rain, Snow, Lightning)
     // =========================================================================
     this.renderWeatherOverlay(ctx, width, height, state);
+
+    // =========================================================================
+    // 10. OPTIONAL CANONICAL GEOMETRY DEBUG OVERLAY
+    // =========================================================================
+    if (this.isDebugOverlayEnabled) {
+      this.renderGeometryDebugOverlay(ctx, width, horizonRow, roadSlices);
+    }
   }
 
   /**
@@ -237,13 +258,12 @@ export class PixelCanvasRenderer {
     const isCyber = biomeId === 'NEON_CITY';
 
     if (isCyber) {
-      // Atmospheric Cyber Horizon Glow
       ctx.fillStyle = horizonGlow;
       ctx.globalAlpha = 0.20;
       ctx.fillRect(0, horizonRow - 4, width, 4);
       ctx.globalAlpha = 1.0;
 
-      // Layer 1: Distant City Spire silhouettes
+      // Layer 1: Distant Spire silhouettes
       const camOffset1 = (cameraX * 0.008) % width;
       ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.35);
       for (let x = 0; x < width; x += 36) {
@@ -274,7 +294,6 @@ export class PixelCanvasRenderer {
         ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.55);
       }
     } else if (isDesert) {
-      // Red Rock Canyon Mesas & Flat-Topped Buttes (Layered)
       // Layer 1: Distant Pale Canyon Ridges
       const camOffset1 = (cameraX * 0.008) % width;
       ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.60);
@@ -292,13 +311,11 @@ export class PixelCanvasRenderer {
       ];
       for (const m of mesas) {
         const mx = (m.x - camOffset2 + width * 2) % width;
-        // Flat top mesa with stepped sides
         ctx.fillRect(mx + 6, horizonRow - m.h, m.w - 12, m.h);
         ctx.fillRect(mx + 3, horizonRow - m.h + 4, m.w - 6, m.h - 4);
         ctx.fillRect(mx, horizonRow - m.h + 8, m.w, m.h - 8);
       }
     } else if (isTropical) {
-      // Coastal Mountain Islands & Ocean Horizon
       // Layer 1: Distant Islands
       const camOffset1 = (cameraX * 0.006) % width;
       ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.50);
@@ -364,62 +381,37 @@ export class PixelCanvasRenderer {
   }
 
   /**
-   * Renders 3D perspective arcade road scanlines, alternating rumble curbs, and terrain bands.
-   * Dominant OutRun road geometry (wide foreground convergence to distant horizon).
+   * Renders 3D perspective road scanlines and terrain bands using CANONICAL projectRoadSpace.
+   * Returns calculated RoadSpace slices for entity anchoring and debug overlay.
    */
   private render3DRoadAndTerrain(
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
     horizonRow: number,
+    horizonRatio: number,
     worldEngine: WorldEngine,
     state: WorldState,
     palette: typeof state.biomeBlend.blendedPalette
-  ): void {
+  ): RoadSpaceResult[] {
     const road = worldEngine.getRoad();
     const camera = state.camera;
     const drawDistance = 1100;
     const stepZ = road.segmentLength;
     const startZ = Math.floor((camera.z + 10) / stepZ) * stepZ;
     const endZ = startZ + drawDistance;
-    const halfRoadWidth = road.defaultRoadWidth * 0.85; // Commanding OutRun road width
 
     const isTropical = state.biomeBlend.currentBiome.id === 'TROPICAL';
-
-    // Projected slices buffer
-    interface Slice {
-      sy: number;
-      sx: number;
-      hw: number;
-      z: number;
-    }
-    const slices: Slice[] = [];
+    const slices: RoadSpaceResult[] = [];
 
     for (let z = startZ; z <= endZ; z += stepZ) {
-      const curveX = road.getCurveAt(z);
-      const elevY = road.getElevationAt(z);
-      const proj = Perspective.projectRoadSlice(
-        curveX,
-        elevY,
-        z,
-        halfRoadWidth,
-        camera,
-        width,
-        height,
-        0.50 // Wider FOV for commanding arcade road perspective
-      );
-
+      const proj = Perspective.projectRoadSpace(z, 0, camera, road, width, height, horizonRatio);
       if (proj.visible && proj.screenY >= horizonRow - 1) {
-        slices.push({
-          sy: Math.max(horizonRow, proj.screenY),
-          sx: proj.screenX,
-          hw: proj.halfWidth,
-          z,
-        });
+        slices.push(proj);
       }
     }
 
-    if (slices.length < 2) return;
+    if (slices.length < 2) return slices;
 
     // Fill Ground Baseline
     ctx.fillStyle = palette.ground;
@@ -430,11 +422,11 @@ export class PixelCanvasRenderer {
       const near = slices[i];
       const far = slices[i + 1];
 
-      const yBot = Math.round(near.sy);
-      const yTop = Math.round(far.sy);
+      const yBot = Math.round(near.screenY);
+      const yTop = Math.round(far.screenY);
       if (yBot <= yTop) continue;
 
-      const isEven = Math.floor(near.z / 25) % 2 === 0;
+      const isEven = Math.floor(near.depth / 25) % 2 === 0;
 
       // 1. Terrain Sidewalk / Grass / Ocean
       const groundColor = isEven ? palette.ground : ColorPalette.scaleBrightness(palette.ground, 1.12);
@@ -443,8 +435,8 @@ export class PixelCanvasRenderer {
 
       // Tropical Right-Side Ocean with animated wave foam
       if (isTropical) {
-        const rightRoadX = near.sx + near.hw;
-        const oceanStart = rightRoadX + near.hw * 0.40;
+        const rightRoadX = near.roadRight;
+        const oceanStart = rightRoadX + near.roadHalfWidth * 0.40;
         if (oceanStart < width) {
           const oceanColor = isEven ? '#0284c7' : '#0369a1';
           ctx.fillStyle = oceanColor;
@@ -456,49 +448,48 @@ export class PixelCanvasRenderer {
         }
       }
 
-      // 2. OutRun Red & White Rumble Curbs (Kerbs) - Wide & Crisp
-      const curbWidthNear = Math.max(3, Math.round(near.hw * 0.15));
-      const curbWidthFar = Math.max(2, Math.round(far.hw * 0.15));
-      const curbColor = isEven ? '#dc2626' : '#f8fafc'; // Pure Red & White alternating stripes
+      // 2. OutRun Red & White Rumble Curbs (Kerbs) - Canonical Road Space
+      const curbWidthNear = Math.max(3, Math.round(near.roadHalfWidth * 0.15));
+      const curbWidthFar = Math.max(2, Math.round(far.roadHalfWidth * 0.15));
+      const curbColor = isEven ? '#dc2626' : '#f8fafc';
 
-      // Left Curb
+      // Left Kerb
       ctx.fillStyle = curbColor;
       ctx.beginPath();
-      ctx.moveTo(near.sx - near.hw - curbWidthNear, yBot);
-      ctx.lineTo(near.sx - near.hw, yBot);
-      ctx.lineTo(far.sx - far.hw, yTop);
-      ctx.lineTo(far.sx - far.hw - curbWidthFar, yTop);
+      ctx.moveTo(near.roadLeft - curbWidthNear, yBot);
+      ctx.lineTo(near.roadLeft, yBot);
+      ctx.lineTo(far.roadLeft, yTop);
+      ctx.lineTo(far.roadLeft - curbWidthFar, yTop);
       ctx.fill();
 
-      // Right Curb
+      // Right Kerb
       ctx.beginPath();
-      ctx.moveTo(near.sx + near.hw, yBot);
-      ctx.lineTo(near.sx + near.hw + curbWidthNear, yBot);
-      ctx.lineTo(far.sx + far.hw + curbWidthFar, yTop);
-      ctx.lineTo(far.sx + far.hw, yTop);
+      ctx.moveTo(near.roadRight, yBot);
+      ctx.lineTo(near.roadRight + curbWidthNear, yBot);
+      ctx.lineTo(far.roadRight + curbWidthFar, yTop);
+      ctx.lineTo(far.roadRight, yTop);
       ctx.fill();
 
       // 3. Solid High-Contrast Asphalt Road
       const roadColor = isEven ? palette.road : ColorPalette.scaleBrightness(palette.road, 1.20);
       ctx.fillStyle = roadColor;
       ctx.beginPath();
-      ctx.moveTo(near.sx - near.hw, yBot);
-      ctx.lineTo(near.sx + near.hw, yBot);
-      ctx.lineTo(far.sx + far.hw, yTop);
-      ctx.lineTo(far.sx - far.hw, yTop);
+      ctx.moveTo(near.roadLeft, yBot);
+      ctx.lineTo(near.roadRight, yBot);
+      ctx.lineTo(far.roadRight, yTop);
+      ctx.lineTo(far.roadLeft, yTop);
       ctx.fill();
 
       // 4. Dashed Gold Center Lane Markers (3 Lanes)
       if (isEven) {
-        const laneWNear = Math.max(1, Math.round(near.hw * 0.035));
-        const laneWFar = Math.max(1, Math.round(far.hw * 0.035));
+        const laneWNear = Math.max(1, Math.round(near.roadHalfWidth * 0.035));
+        const laneWFar = Math.max(1, Math.round(far.roadHalfWidth * 0.035));
         ctx.fillStyle = '#fde047'; // Bright Gold
 
-        // 3-Lane dividers (left divider, right divider)
-        const leftLaneNear = near.sx - near.hw * 0.33;
-        const leftLaneFar = far.sx - far.hw * 0.33;
-        const rightLaneNear = near.sx + near.hw * 0.33;
-        const rightLaneFar = far.sx + far.hw * 0.33;
+        const leftLaneNear = near.roadCenterX - near.roadHalfWidth * 0.33;
+        const leftLaneFar = far.roadCenterX - far.roadHalfWidth * 0.33;
+        const rightLaneNear = near.roadCenterX + near.roadHalfWidth * 0.33;
+        const rightLaneFar = far.roadCenterX + far.roadHalfWidth * 0.33;
 
         ctx.beginPath();
         ctx.moveTo(leftLaneNear - laneWNear, yBot);
@@ -515,24 +506,27 @@ export class PixelCanvasRenderer {
         ctx.fill();
       }
     }
+
+    return slices;
   }
 
   /**
-   * Renders 3D perspective-scaled solid pixel sprites for scenery props and traffic vehicles.
-   * Enforces strict spatial culling, safe lateral margins, and depth tier hierarchy.
+   * Renders 3D perspective-scaled solid pixel sprites for scenery props and traffic vehicles
+   * using the CANONICAL projectRoadSpace projection.
    */
   private renderWorldEntities(
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
     horizonRow: number,
+    horizonRatio: number,
     worldEngine: WorldEngine,
     state: WorldState
   ): void {
     const camera = state.camera;
+    const road = worldEngine.getRoad();
     const biomeId = state.biomeBlend.currentBiome.id;
 
-    // Collect all renderable entities with depth Z
     interface EntityToRender {
       z: number;
       screenX: number;
@@ -542,11 +536,11 @@ export class PixelCanvasRenderer {
     }
     const entities: EntityToRender[] = [];
 
-    // 1. Scenery Props from WorldDirector with Anti-Clutter Spacing Filter
+    // 1. Scenery Props with Canonical Road-Space Projection & Anti-Clutter Filter
     const visibleScenery = worldEngine.getDirector().getScenery();
     let lastLeftZ = -9999;
     let lastRightZ = -9999;
-    const minZSpacing = 85; // Minimum 85 units between consecutive props on the same side
+    const minZSpacing = 85;
 
     for (const item of visibleScenery) {
       const relZ = item.z - camera.z;
@@ -555,20 +549,19 @@ export class PixelCanvasRenderer {
         if (isLeft && Math.abs(item.z - lastLeftZ) < minZSpacing) continue;
         if (!isLeft && Math.abs(item.z - lastRightZ) < minZSpacing) continue;
 
-        const roadElevation = worldEngine.getRoad().getElevationAt(item.z);
-        const proj = Perspective.project(
-          item.x,
-          roadElevation,
+        const proj = Perspective.projectRoadSpace(
           item.z,
+          item.lateralOffset,
           camera,
+          road,
           width,
           height,
-          0.50
+          horizonRatio
         );
 
         if (proj.visible && proj.screenY >= horizonRow) {
           const sprite = PixelSpriteCatalog.getScenerySprite(item.sprite.id, biomeId);
-          // Proportional scaling clamped to prevent screen-covering oversized sprites
+          // Scale is derived strictly from perspective depth
           const clampedScale = Math.min(1.85, Math.max(0.22, proj.scale * 2.0));
           entities.push({
             z: proj.depth,
@@ -588,19 +581,17 @@ export class PixelCanvasRenderer {
     entities.sort((a, b) => a.z - b.z);
     const culledScenery = entities.slice(0, 8);
 
-    // 2. Traffic Vehicles (Max 1-2 visible)
+    // 2. Traffic Vehicles with Canonical Road-Space Projection
     const traffic = worldEngine.getTraffic().getVehicles();
     for (const veh of traffic) {
-      const roadX = worldEngine.getRoad().getCurveAt(veh.z);
-      const elevY = worldEngine.getRoad().getElevationAt(veh.z);
-      const proj = Perspective.project(
-        roadX + veh.x,
-        elevY,
+      const proj = Perspective.projectRoadSpace(
         veh.z,
+        veh.lateralOffset,
         camera,
+        road,
         width,
         height,
-        0.50
+        horizonRatio
       );
 
       if (proj.visible && proj.screenY >= horizonRow && proj.depth > 15) {
@@ -626,16 +617,30 @@ export class PixelCanvasRenderer {
   }
 
   /**
-   * Renders the Player's OutRun Retro Red Roadster with Turn Banking & Brake Glow.
+   * Renders the Player's OutRun Retro Red Roadster using Canonical Road-Space Projection.
    */
   private renderPlayerVehicle(
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
+    horizonRatio: number,
+    worldEngine: WorldEngine,
     state: WorldState
   ): void {
-    const playerX = Math.round(width * 0.5 + state.player.x * 0.10);
-    const playerY = height - 12;
+    const road = worldEngine.getRoad();
+    const camera = state.camera;
+    const proj = Perspective.projectRoadSpace(
+      state.player.z,
+      state.player.lateralOffset,
+      camera,
+      road,
+      width,
+      height,
+      horizonRatio
+    );
+
+    const playerX = Math.round(proj.screenX);
+    const playerY = Math.max(height - 24, Math.round(proj.screenY));
     const sprite = PixelSpriteCatalog.PLAYER_CAR_STRAIGHT;
 
     // Road contact shadow under tires
@@ -742,6 +747,51 @@ export class PixelCanvasRenderer {
           ctx.fillRect(px, py, scaledPixelSize, scaledPixelSize);
         }
       }
+    }
+  }
+
+  /**
+   * Diagnostic Debug Overlay displaying mathematical perspective vectors,
+   * horizon line, vanishing point, and canonical road boundary guides.
+   */
+  private renderGeometryDebugOverlay(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    horizonRow: number,
+    slices: RoadSpaceResult[]
+  ): void {
+    ctx.strokeStyle = '#ef4444'; // Red Horizon Guide
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, horizonRow);
+    ctx.lineTo(width, horizonRow);
+    ctx.stroke();
+
+    // Road Left / Right Outer Geometry Lines
+    if (slices.length > 1) {
+      ctx.strokeStyle = '#38bdf8'; // Cyan Road Outer Guides
+      ctx.beginPath();
+      ctx.moveTo(slices[0].roadLeft, slices[0].screenY);
+      for (let i = 1; i < slices.length; i++) {
+        ctx.lineTo(slices[i].roadLeft, slices[i].screenY);
+      }
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(slices[0].roadRight, slices[0].screenY);
+      for (let i = 1; i < slices.length; i++) {
+        ctx.lineTo(slices[i].roadRight, slices[i].screenY);
+      }
+      ctx.stroke();
+
+      // Road Centerline
+      ctx.strokeStyle = '#fde047'; // Gold Center Guide
+      ctx.beginPath();
+      ctx.moveTo(slices[0].roadCenterX, slices[0].screenY);
+      for (let i = 1; i < slices.length; i++) {
+        ctx.lineTo(slices[i].roadCenterX, slices[i].screenY);
+      }
+      ctx.stroke();
     }
   }
 }

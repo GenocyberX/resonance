@@ -70,4 +70,24 @@ describe('Perspective & Coordinate Invariants', () => {
 
     expect(nearSlice.halfWidth).toBeGreaterThan(farSlice.halfWidth * 5);
   });
+
+  it('guarantees projectRoadSpace produces identical road center and halfWidth for road slice and lateral points', () => {
+    const mockRoad = {
+      getCurveAt: (z: number) => Math.sin(z * 0.01) * 50,
+      getElevationAt: (_z: number) => 0,
+      defaultRoadWidth: 800,
+    };
+
+    for (let z = 100; z <= 800; z += 100) {
+      const roadSpace = Perspective.projectRoadSpace(z, 0, camera, mockRoad, screenWidth, screenHeight, horizonRatio);
+      expect(roadSpace.screenX).toBeCloseTo(roadSpace.roadCenterX, 3);
+      expect(roadSpace.roadRight - roadSpace.roadLeft).toBeCloseTo(roadSpace.roadHalfWidth * 2, 3);
+
+      const leftProp = Perspective.projectRoadSpace(z, -600, camera, mockRoad, screenWidth, screenHeight, horizonRatio);
+      expect(leftProp.screenX).toBeLessThan(roadSpace.roadLeft);
+
+      const rightProp = Perspective.projectRoadSpace(z, 600, camera, mockRoad, screenWidth, screenHeight, horizonRatio);
+      expect(rightProp.screenX).toBeGreaterThan(roadSpace.roadRight);
+    }
+  });
 });

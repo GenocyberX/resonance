@@ -1,12 +1,24 @@
 import { Camera, ProjectedPoint } from './types';
 
+export interface RoadSpaceResult {
+  screenX: number;
+  screenY: number;
+  scale: number;
+  depth: number;
+  roadCenterX: number;
+  roadHalfWidth: number;
+  roadLeft: number;
+  roadRight: number;
+  visible: boolean;
+}
+
 export class Perspective {
   // Calibrated projection coefficients for balanced arcade composition & landscape visibility
   public static readonly PROJECTION_SCALE_X: number = 0.22;
   public static readonly PROJECTION_SCALE_Y: number = 0.55;
 
   /**
-   * Mathematically calibrated 3D to 2D perspective projection for ASCII character grid.
+   * Mathematically calibrated 3D to 2D perspective projection for ASCII character grid & pixel viewport.
    * Ensures monotonic convergence to horizon, balanced road width, and expansive landscape visibility.
    */
   public static project(
@@ -97,6 +109,44 @@ export class Perspective {
       halfWidth: halfWidthScreen,
       depth: centerProj.depth,
       visible: centerProj.visible,
+    };
+  }
+
+  /**
+   * Canonical Unified Road-Space Perspective Projection.
+   * Evaluates world road geometry at worldZ and projects any road-space object
+   * (road slice, kerb, lane divider, roadside prop, NPC vehicle, player)
+   * with guaranteed mathematical alignment and consistency.
+   */
+  public static projectRoadSpace(
+    worldZ: number,
+    lateralOffset: number,
+    camera: Camera,
+    road: { getCurveAt(z: number): number; getElevationAt(z: number): number; defaultRoadWidth: number },
+    screenWidth: number,
+    screenHeight: number,
+    horizonRowRatio: number = 0.40
+  ): RoadSpaceResult {
+    const curveX = road.getCurveAt(worldZ);
+    const elevationY = road.getElevationAt(worldZ);
+    const halfRoadWidth = road.defaultRoadWidth * 0.5;
+
+    const worldX = curveX + lateralOffset;
+    const worldY = elevationY;
+
+    const proj = this.project(worldX, worldY, worldZ, camera, screenWidth, screenHeight, horizonRowRatio);
+    const roadSlice = this.projectRoadSlice(curveX, elevationY, worldZ, halfRoadWidth, camera, screenWidth, screenHeight, horizonRowRatio);
+
+    return {
+      screenX: proj.screenX,
+      screenY: proj.screenY,
+      scale: proj.scale,
+      depth: proj.depth,
+      roadCenterX: roadSlice.screenX,
+      roadHalfWidth: roadSlice.halfWidth,
+      roadLeft: roadSlice.screenX - roadSlice.halfWidth,
+      roadRight: roadSlice.screenX + roadSlice.halfWidth,
+      visible: proj.visible && roadSlice.visible,
     };
   }
 }
