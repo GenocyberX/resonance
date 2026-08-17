@@ -390,12 +390,9 @@ export class PixelCanvasRenderer {
         if (isLeft && Math.abs(item.z - lastLeftZ) < minZSpacing) continue;
         if (!isLeft && Math.abs(item.z - lastRightZ) < minZSpacing) continue;
 
-        const setback = isLeft ? -120 : 120;
-        const adjustedOffset = item.lateralOffset + setback;
-
         const proj = Perspective.projectRoadSpace(
           item.z,
-          adjustedOffset,
+          item.lateralOffset,
           camera,
           road,
           width,
@@ -406,12 +403,18 @@ export class PixelCanvasRenderer {
         if (proj.visible && proj.screenY >= horizonRow) {
           if (isTropical) {
             const img = isLeft ? this.spriteManager.signImg : this.spriteManager.palmImg;
-            const w = isLeft ? 28 : 45;
-            const h = isLeft ? 40 : 115;
-            const scale = Math.min(1.6, Math.max(0.18, proj.scale * 1.8));
+            const w = isLeft ? 28 : 50;
+            const h = isLeft ? 40 : 112;
+            const scale = Math.min(1.0, Math.max(0.18, proj.scale * 1.5));
+            
+            // Anchor palms to the right sand beach, and signs to left margin
+            const sx = isLeft
+              ? Math.max(12, proj.roadLeft - Math.round(18 * scale * 2))
+              : Math.min(width - 25 * scale, proj.roadRight + Math.round(24 * scale * 2));
+
             entities.push({
               z: proj.depth,
-              screenX: proj.screenX,
+              screenX: sx,
               screenY: proj.screenY,
               scale,
               image: img,
