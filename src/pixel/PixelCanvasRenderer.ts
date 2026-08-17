@@ -537,11 +537,11 @@ export class PixelCanvasRenderer {
     ctx.fillStyle = '#020617';
     ctx.globalAlpha = 0.60;
     ctx.beginPath();
-    ctx.ellipse(playerX, playerY - 2, 34, 6, 0, 0, Math.PI * 2);
+    ctx.ellipse(playerX, playerY - 2, 42, 6, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1.0;
 
-    // Draw Full 16-Bit 64x28 Ferrari Roadster
+    // Draw Full 16-Bit 80x36 Ferrari Testarossa Roadster
     this.drawPixelSprite(ctx, sprite, playerX, playerY, 1.0);
   }
 
