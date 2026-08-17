@@ -555,10 +555,12 @@ export class PixelCanvasRenderer {
     bottomY: number,
     scale: number
   ): void {
-    const w = sprite.width;
-    const h = sprite.height;
+    if (!sprite || !sprite.matrix) return;
     const matrix = sprite.matrix;
     const palette = sprite.palette;
+    const h = matrix.length;
+    if (h === 0) return;
+    const w = matrix[0].length;
 
     const scaledPixelSize = Math.max(1, Math.round(scale));
     const renderWidth = w * scaledPixelSize;
@@ -569,12 +571,13 @@ export class PixelCanvasRenderer {
 
     for (let r = 0; r < h; r++) {
       const row = matrix[r];
+      if (!row) continue;
       const py = startY + r * scaledPixelSize;
       if (py < 0 || py >= PixelCanvasRenderer.LOGICAL_HEIGHT) continue;
 
-      for (let c = 0; c < w; c++) {
+      for (let c = 0; c < row.length; c++) {
         const colorIdx = row[c];
-        if (colorIdx > 0) {
+        if (colorIdx > 0 && colorIdx < palette.length) {
           const px = startX + c * scaledPixelSize;
           if (px < 0 || px >= PixelCanvasRenderer.LOGICAL_WIDTH) continue;
 

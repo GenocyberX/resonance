@@ -82,7 +82,7 @@ export class PixelSpriteCatalog {
   public static readonly PALM_OUTRUN_16BIT: PixelSprite = {
     id: 'palm_outrun_16bit',
     width: 52,
-    height: 76,
+    height: 60,
     palette: [
       'transparent',
       '#052e16', // 1: Darkest Frond Shadow
@@ -169,7 +169,7 @@ export class PixelSpriteCatalog {
   public static readonly SNOW_PINE_16BIT: PixelSprite = {
     id: 'snow_pine_16bit',
     width: 36,
-    height: 60,
+    height: 30,
     palette: [
       'transparent',
       '#0f172a', // 1: Deep Pine Shadow Slate
@@ -225,7 +225,7 @@ export class PixelSpriteCatalog {
   public static readonly SAGUARO_16BIT: PixelSprite = {
     id: 'saguaro_16bit',
     width: 32,
-    height: 56,
+    height: 28,
     palette: [
       'transparent',
       '#052e16', // 1: Rib Shadow Dark
