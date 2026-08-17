@@ -10,7 +10,7 @@ export class PixelCanvasRenderer {
 
   public static readonly LOGICAL_WIDTH = 320;
   public static readonly LOGICAL_HEIGHT = 180;
-  public static readonly CANONICAL_HORIZON_RATIO = 0.42; // y = 75 on 180p (42% Sky, 58% Road & Terrain)
+  public static readonly CANONICAL_HORIZON_RATIO = 0.44; // y = 79 on 180p
 
   private isDebugOverlayEnabled: boolean = false;
 
@@ -53,187 +53,67 @@ export class PixelCanvasRenderer {
   }
 
   /**
-   * Main Unified Solid Pixel Art Render Pass.
-   * Built on a Single Canonical Road-Space Projection System.
+   * Main 16-Bit Sega Super Scaler / OutRun Arcade Render Pass.
    */
   public render(worldEngine: WorldEngine, state: WorldState): void {
     const ctx = this.ctx;
     const width = PixelCanvasRenderer.LOGICAL_WIDTH;
     const height = PixelCanvasRenderer.LOGICAL_HEIGHT;
     const horizonRatio = PixelCanvasRenderer.CANONICAL_HORIZON_RATIO;
-    const horizonRow = Math.floor(height * horizonRatio); // y = 75
+    const horizonRow = Math.floor(height * horizonRatio); // y = 79
 
     const sky = state.sky;
     const biome = state.biomeBlend.currentBiome;
     const palette = state.biomeBlend.blendedPalette;
     const camera = state.camera;
-    const time = state.worldTime;
+    const isTropical = biome.id === 'TROPICAL';
 
     // =========================================================================
-    // 1. SKY GRADIENT (Rich Multi-Stop Diurnal Atmospheric Gradient)
+    // 1. 16-BIT SEGA BLUE SUMMER SKY GRADIENT
     // =========================================================================
     const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonRow);
-    skyGrad.addColorStop(0.0, sky.skyTopColor);
-    skyGrad.addColorStop(0.50, sky.skyMidColor);
-    skyGrad.addColorStop(0.90, sky.skyBottomColor);
-    skyGrad.addColorStop(1.0, sky.horizonGlowColor);
+    if (isTropical && sky.timePhase !== 'NIGHT') {
+      // Classic OutRun Radiant Cerulean Blue Sky
+      skyGrad.addColorStop(0.0, '#0284c7');
+      skyGrad.addColorStop(0.60, '#0ea5e9');
+      skyGrad.addColorStop(0.95, '#38bdf8');
+      skyGrad.addColorStop(1.0, '#bae6fd');
+    } else {
+      skyGrad.addColorStop(0.0, sky.skyTopColor);
+      skyGrad.addColorStop(0.50, sky.skyMidColor);
+      skyGrad.addColorStop(0.90, sky.skyBottomColor);
+      skyGrad.addColorStop(1.0, sky.horizonGlowColor);
+    }
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, width, horizonRow);
 
-    // Horizon Atmospheric Glow Band
-    ctx.fillStyle = sky.horizonGlowColor;
-    ctx.globalAlpha = 0.30;
-    ctx.fillRect(0, horizonRow - 4, width, 4);
-    ctx.globalAlpha = 1.0;
+    // =========================================================================
+    // 2. MONUMENTAL 16-BIT VOLUMETRIC CUMULUS CLOUDS
+    // =========================================================================
+    this.renderMonumental16BitClouds(ctx, width, horizonRow, state.worldTime);
 
     // =========================================================================
-    // 2. STARS (Twinkling Starlight Field in Night Phasing)
+    // 3. PARALLAX COASTAL HORIZON / ISLANDS
     // =========================================================================
-    if (sky.starVisibility > 0.05) {
-      const stars = worldEngine.getSkyDirector().getCelestialSystem().getStars();
-      for (const star of stars) {
-        const sx = Math.floor(star.xNorm * width);
-        const sy = Math.floor(star.yNorm * (horizonRow - 4));
-        if (sy >= horizonRow - 2) continue;
-
-        const twinkle = 0.70 + 0.30 * Math.sin(time * star.twinkleSpeed + star.twinkleOffset);
-        const alpha = Math.min(1.0, star.baseBrightness * sky.starVisibility * twinkle);
-        if (alpha > 0.1) {
-          ctx.fillStyle = star.tier === 'HERO' ? '#67e8f9' : '#ffffff';
-          ctx.globalAlpha = alpha;
-          ctx.fillRect(sx, sy, star.tier === 'HERO' ? 2 : 1, star.tier === 'HERO' ? 2 : 1);
-        }
-      }
-      ctx.globalAlpha = 1.0;
-    }
+    this.render16BitHorizon(ctx, width, horizonRow, biome.id, camera.x, palette.mountains);
 
     // =========================================================================
-    // 3. SOLID CELESTIAL BODIES (SUN & MOON)
+    // 4. EXPANSIVE 88% OUTRUN ROAD & COASTAL BEACH/OCEAN TERRAIN
     // =========================================================================
-    // A. Sun
-    if (sky.sunVisible && sky.sunElevation > 0.0) {
-      const sunX = Math.floor(sky.sunHeadingNorm * width);
-      const sunY = Math.floor(horizonRow * (1.0 - sky.sunElevation * 0.76));
-      const sunRadius = (sky.timePhase === 'GOLDEN_HOUR' || sky.timePhase === 'SUNSET') ? 13 : 9;
-
-      // Soft Sun Corona
-      const haloGrad = ctx.createRadialGradient(sunX, sunY, sunRadius * 0.4, sunX, sunY, sunRadius * 2.2);
-      haloGrad.addColorStop(0, sky.sunColor);
-      haloGrad.addColorStop(1, 'transparent');
-      ctx.fillStyle = haloGrad;
-      ctx.globalAlpha = 0.40;
-      ctx.beginPath();
-      ctx.arc(sunX, sunY, sunRadius * 2.2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
-
-      // Solid Sun Disc
-      if (sky.timePhase === 'GOLDEN_HOUR' || sky.timePhase === 'SUNSET') {
-        // OutRun Striated Synthwave Sunset Sun
-        for (let r = -sunRadius; r <= sunRadius; r++) {
-          const dy = r;
-          const halfSpan = Math.floor(Math.sqrt(Math.max(0, sunRadius * sunRadius - dy * dy)));
-          if (halfSpan <= 0) continue;
-
-          // OutRun horizontal scanline bands
-          if (dy > 0 && dy % 2 === 0) continue;
-
-          const t = (dy + sunRadius) / (sunRadius * 2);
-          ctx.fillStyle = t < 0.5
-            ? ColorPalette.lerp('#fde047', '#f97316', t * 2)
-            : ColorPalette.lerp('#f97316', '#dc2626', (t - 0.5) * 2);
-          ctx.fillRect(sunX - halfSpan, sunY + dy, halfSpan * 2, 1);
-        }
-      } else {
-        ctx.fillStyle = sky.sunColor;
-        ctx.beginPath();
-        ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    // B. Moon
-    if (sky.moonVisible && sky.moonElevation > 0.0) {
-      const moonX = Math.floor(sky.moonHeadingNorm * width);
-      const moonY = Math.floor(horizonRow * (1.0 - sky.moonElevation * 0.75));
-      const moonRadius = 7;
-
-      // Soft Moon Halo
-      ctx.fillStyle = '#67e8f9';
-      ctx.globalAlpha = 0.20;
-      ctx.beginPath();
-      ctx.arc(moonX, moonY, moonRadius * 1.6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
-
-      // Solid Moon Disc with Craters
-      ctx.fillStyle = '#f8fafc';
-      ctx.beginPath();
-      ctx.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillRect(moonX - 2, moonY - 2, 2, 2);
-      ctx.fillRect(moonX + 1, moonY + 1, 2, 2);
-    }
+    const roadSlices = this.render16BitRoadAndTerrain(ctx, width, height, horizonRow, horizonRatio, worldEngine, state, palette);
 
     // =========================================================================
-    // 4. VOLUMETRIC SOLID PIXEL CLOUDS (Restrained, Handcrafted 3-Tone Masses)
+    // 5. 16-BIT PERSPECTIVE SCENERY SPRITES (80px Fan Palms & Curve Signs)
     // =========================================================================
-    const clouds = worldEngine.getSkyDirector().getCloudManager().getInstances();
-    const visibleClouds = clouds.slice(0, 4);
-    for (const cloud of visibleClouds) {
-      const matrix = cloud.mask.matrix;
-      const startX = Math.floor(cloud.xNorm * width);
-      const startY = Math.floor(cloud.yNorm * (horizonRow - 12));
-
-      for (let r = 0; r < matrix.length; r++) {
-        const row = matrix[r];
-        const cy = startY + r;
-        if (cy < 0 || cy >= horizonRow) continue;
-
-        for (let c = 0; c < row.length; c++) {
-          const val = row[c];
-          if (val > 0) {
-            const cx = (startX + c + width) % width;
-            let color = sky.cloudBodyColor;
-            if (val === 3) color = sky.cloudHighlightColor;
-            if (val === 1) color = sky.cloudShadowColor;
-
-            ctx.fillStyle = color;
-            ctx.fillRect(cx, cy, 1, 1);
-          }
-        }
-      }
-    }
+    this.render16BitSceneryAndTraffic(ctx, width, height, horizonRow, horizonRatio, worldEngine, state);
 
     // =========================================================================
-    // 5. PARALLAX HORIZON MOUNTAINS / SKYLINE (Layered Multi-Depth Silhouettes)
+    // 6. PROTAGONIST 16-BIT FERRARI TESTAROSSA CABRIO (Driver + Passenger)
     // =========================================================================
-    this.renderHorizonSilhouettes(ctx, width, horizonRow, biome.id, camera.x, palette.mountains, sky.horizonGlowColor);
+    this.renderPlayerFerrari(ctx, width, height, horizonRatio, worldEngine, state);
 
     // =========================================================================
-    // 6. 3D PERSPECTIVE CANONICAL ROAD & TERRAIN
-    // =========================================================================
-    const roadSlices = this.render3DRoadAndTerrain(ctx, width, height, horizonRow, horizonRatio, worldEngine, state, palette);
-
-    // =========================================================================
-    // 7. PERSPECTIVE-SCALED SCENERY SPRITES & TRAFFIC (Single Canonical Road-Space)
-    // =========================================================================
-    this.renderWorldEntities(ctx, width, height, horizonRow, horizonRatio, worldEngine, state);
-
-    // =========================================================================
-    // 8. PROTAGONIST PLAYER VEHICLE (Canonical Projection Anchor)
-    // =========================================================================
-    this.renderPlayerVehicle(ctx, width, height, horizonRatio, worldEngine, state);
-
-    // =========================================================================
-    // 9. ATMOSPHERIC WEATHER (Rain, Snow, Lightning)
-    // =========================================================================
-    this.renderWeatherOverlay(ctx, width, height, state);
-
-    // =========================================================================
-    // 10. OPTIONAL CANONICAL GEOMETRY DEBUG OVERLAY
+    // 7. OPTIONAL CANONICAL GEOMETRY DEBUG OVERLAY
     // =========================================================================
     if (this.isDebugOverlayEnabled) {
       this.renderGeometryDebugOverlay(ctx, width, horizonRow, roadSlices);
@@ -241,150 +121,125 @@ export class PixelCanvasRenderer {
   }
 
   /**
-   * Renders solid pixel-art multi-layer parallax mountain ranges and skyline silhouettes.
+   * Renders majestic, towering 16-bit Sega OutRun volumetric cumulus cloud masses.
    */
-  private renderHorizonSilhouettes(
+  private renderMonumental16BitClouds(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    horizonRow: number,
+    time: number
+  ): void {
+    const cloudParallax = (time * 2.5) % width;
+
+    // Helper to draw a lush 16-bit rounded cloud puff with 3-tone shading
+    const drawCloudPuff = (cx: number, cy: number, rx: number, ry: number) => {
+      // Bottom Cool Shadow Base
+      ctx.fillStyle = '#cbd5e1';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + 4, rx, ry, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mid Volume Body
+      ctx.fillStyle = '#f1f5f9';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx * 0.95, ry * 0.95, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sunlit Pure White Rim Highlight
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(cx - 2, cy - 3, rx * 0.75, ry * 0.75, 0, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    // Bank 1: Giant Central Cumulus Cluster
+    const bank1X = Math.round((140 - cloudParallax + width * 2) % width);
+    drawCloudPuff(bank1X - 35, horizonRow - 24, 32, 22);
+    drawCloudPuff(bank1X + 35, horizonRow - 28, 38, 26);
+    drawCloudPuff(bank1X, horizonRow - 42, 46, 32);
+    drawCloudPuff(bank1X - 18, horizonRow - 38, 30, 24);
+    drawCloudPuff(bank1X + 22, horizonRow - 36, 34, 25);
+
+    // Bank 2: Right-Side Towering Cumulus
+    const bank2X = Math.round((290 - cloudParallax * 0.8 + width * 2) % width);
+    drawCloudPuff(bank2X - 25, horizonRow - 22, 28, 18);
+    drawCloudPuff(bank2X + 25, horizonRow - 32, 42, 28);
+    drawCloudPuff(bank2X, horizonRow - 48, 52, 36);
+    drawCloudPuff(bank2X - 10, horizonRow - 42, 38, 28);
+
+    // Bank 3: Left-Side Distant Cloud Bank
+    const bank3X = Math.round((20 - cloudParallax * 0.6 + width * 2) % width);
+    drawCloudPuff(bank3X - 20, horizonRow - 18, 24, 16);
+    drawCloudPuff(bank3X + 20, horizonRow - 20, 30, 18);
+    drawCloudPuff(bank3X, horizonRow - 28, 36, 22);
+  }
+
+  /**
+   * Renders 16-bit coastal horizon islands, peninsulas and palm tree silhouettes.
+   */
+  private render16BitHorizon(
     ctx: CanvasRenderingContext2D,
     width: number,
     horizonRow: number,
     biomeId: string,
     cameraX: number,
-    baseColor: string,
-    horizonGlow: string
+    baseColor: string
   ): void {
     const isTropical = biomeId === 'TROPICAL';
-    const isDesert = biomeId === 'DESERT';
-    const isAlpine = biomeId === 'ALPINE';
-    const isCyber = biomeId === 'NEON_CITY';
 
-    if (isCyber) {
-      ctx.fillStyle = horizonGlow;
-      ctx.globalAlpha = 0.20;
-      ctx.fillRect(0, horizonRow - 4, width, 4);
-      ctx.globalAlpha = 1.0;
+    if (isTropical) {
+      const camOffset = (cameraX * 0.008) % width;
 
-      // Layer 1: Distant Spire silhouettes
-      const camOffset1 = (cameraX * 0.008) % width;
-      ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.35);
-      for (let x = 0; x < width; x += 36) {
-        const bx = (x - camOffset1 + width * 2) % width;
-        ctx.fillRect(bx, horizonRow - 38, 12, 38);
-        ctx.fillRect(bx + 4, horizonRow - 48, 4, 10);
-      }
+      // Distant headlands / coastal islands
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(0, horizonRow - 1, width, 1);
 
-      // Layer 2: Mid Skyscrapers with Neon Windows
-      const camOffset2 = (cameraX * 0.016) % width;
-      ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.55);
-      const buildings = [
-        { x: 10, w: 22, h: 28 }, { x: 42, w: 18, h: 38 }, { x: 68, w: 24, h: 22 },
-        { x: 100, w: 20, h: 34 }, { x: 128, w: 28, h: 44 }, { x: 168, w: 18, h: 28 },
-        { x: 194, w: 24, h: 36 }, { x: 226, w: 20, h: 24 }, { x: 254, w: 26, h: 40 },
-        { x: 290, w: 18, h: 30 },
+      const islands = [
+        { x: 30, w: 70, h: 10 },
+        { x: 140, w: 85, h: 14 },
+        { x: 250, w: 65, h: 9 },
       ];
-      for (const b of buildings) {
-        const bx = (b.x - camOffset2 + width * 2) % width;
-        ctx.fillRect(bx, horizonRow - b.h, b.w, b.h);
 
-        // Neon Windows & Cyan Roof Edges
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(bx + 2, horizonRow - b.h + 2, b.w - 4, 1);
-        ctx.fillRect(bx + 4, horizonRow - b.h + 8, b.w - 8, 1);
-        ctx.fillStyle = '#ec4899';
-        ctx.fillRect(bx + 3, horizonRow - b.h + 14, b.w - 6, 1);
-        ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.55);
-      }
-    } else if (isDesert) {
-      // Layer 1: Distant Pale Canyon Ridges
-      const camOffset1 = (cameraX * 0.008) % width;
-      ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.60);
-      for (let x = 0; x < width; x += 55) {
-        const mx = (x - camOffset1 + width * 2) % width;
-        ctx.fillRect(mx, horizonRow - 12, 45, 12);
-      }
+      for (const isl of islands) {
+        const px = Math.round((isl.x - camOffset + width * 2) % width);
 
-      // Layer 2: Foreground Stepped Mesas
-      const camOffset2 = (cameraX * 0.016) % width;
-      ctx.fillStyle = baseColor;
-      const mesas = [
-        { x: 15, w: 48, h: 18 }, { x: 85, w: 38, h: 14 },
-        { x: 145, w: 55, h: 22 }, { x: 225, w: 42, h: 16 }, { x: 285, w: 50, h: 20 },
-      ];
-      for (const m of mesas) {
-        const mx = (m.x - camOffset2 + width * 2) % width;
-        ctx.fillRect(mx + 6, horizonRow - m.h, m.w - 12, m.h);
-        ctx.fillRect(mx + 3, horizonRow - m.h + 4, m.w - 6, m.h - 4);
-        ctx.fillRect(mx, horizonRow - m.h + 8, m.w, m.h - 8);
-      }
-    } else if (isTropical) {
-      // Layer 1: Distant Islands
-      const camOffset1 = (cameraX * 0.006) % width;
-      ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.50);
-      const distantIslands = [
-        { x: 20, w: 65, h: 14 }, { x: 125, w: 50, h: 10 },
-        { x: 210, w: 75, h: 18 }, { x: 305, w: 55, h: 12 },
-      ];
-      for (const p of distantIslands) {
-        const px = (p.x - camOffset1 + width * 2) % width;
+        // Lush green island body
+        ctx.fillStyle = '#15803d';
         ctx.beginPath();
         ctx.moveTo(px, horizonRow);
-        ctx.lineTo(px + p.w * 0.5, horizonRow - p.h);
-        ctx.lineTo(px + p.w, horizonRow);
-        ctx.fill();
-      }
-
-      // Layer 2: Foreground Headland Peaks
-      const camOffset2 = (cameraX * 0.014) % width;
-      ctx.fillStyle = baseColor;
-      const nearPeaks = [
-        { x: 50, w: 42, h: 12 }, { x: 165, w: 46, h: 14 }, { x: 275, w: 38, h: 10 },
-      ];
-      for (const p of nearPeaks) {
-        const px = (p.x - camOffset2 + width * 2) % width;
-        ctx.beginPath();
-        ctx.moveTo(px, horizonRow);
-        ctx.lineTo(px + p.w * 0.5, horizonRow - p.h);
-        ctx.lineTo(px + p.w, horizonRow);
-        ctx.fill();
-      }
-    } else if (isAlpine) {
-      // Jagged Glacial Peaks with Snow Caps
-      const camOffset = (cameraX * 0.014) % width;
-      ctx.fillStyle = baseColor;
-      for (let x = 0; x < width; x += 22) {
-        const px = (x - camOffset + width * 2) % width;
-        const h = 15 + Math.floor(Math.sin((x + 10) * 0.15) * 9);
-        ctx.beginPath();
-        ctx.moveTo(px, horizonRow);
-        ctx.lineTo(px + 11, horizonRow - h);
-        ctx.lineTo(px + 22, horizonRow);
+        ctx.lineTo(px + isl.w * 0.5, horizonRow - isl.h);
+        ctx.lineTo(px + isl.w, horizonRow);
         ctx.fill();
 
-        // Snow Cap
-        ctx.fillStyle = '#f8fafc';
-        ctx.beginPath();
-        ctx.moveTo(px + 5, horizonRow - h + 6);
-        ctx.lineTo(px + 11, horizonRow - h);
-        ctx.lineTo(px + 17, horizonRow - h + 6);
-        ctx.fill();
-        ctx.fillStyle = baseColor;
+        // White sand beach shoreline at water level
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(px + 4, horizonRow - 2, isl.w - 8, 2);
+
+        // Distant mini palm tree silhouettes
+        ctx.fillStyle = '#14532d';
+        const palmCount = Math.floor(isl.w / 18);
+        for (let p = 1; p <= palmCount; p++) {
+          const pmX = px + p * 16;
+          ctx.fillRect(pmX, horizonRow - isl.h + 2, 1, 4);
+          ctx.fillRect(pmX - 2, horizonRow - isl.h, 5, 2);
+        }
       }
     } else {
-      // Rolling Forest Ridges
+      // General biome mountain silhouettes
       const camOffset = (cameraX * 0.012) % width;
       ctx.fillStyle = baseColor;
       for (let x = 0; x < width; x += 2) {
         const wx = (x + camOffset) * 0.04;
-        const h = Math.max(5, Math.floor(Math.sin(wx) * 7 + Math.sin(wx * 2.3) * 3 + 10));
+        const h = Math.max(4, Math.floor(Math.sin(wx) * 7 + 9));
         ctx.fillRect(x, horizonRow - h, 2, h);
       }
     }
   }
 
   /**
-   * Renders 3D perspective road scanlines and terrain bands using CANONICAL projectRoadSpace.
-   * Returns calculated RoadSpace slices for entity anchoring and debug overlay.
+   * Renders the expansive 88% OutRun Road, Turquoise Ocean Surf & Golden Sand Beach.
    */
-  private render3DRoadAndTerrain(
+  private render16BitRoadAndTerrain(
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
@@ -400,13 +255,17 @@ export class PixelCanvasRenderer {
     const stepZ = road.segmentLength;
     const startZ = Math.floor((camera.z + 10) / stepZ) * stepZ;
     const endZ = startZ + drawDistance;
-
     const isTropical = state.biomeBlend.currentBiome.id === 'TROPICAL';
-    const slices: RoadSpaceResult[] = [];
 
+    // Projected slices buffer
+    const slices: RoadSpaceResult[] = [];
     for (let z = startZ; z <= endZ; z += stepZ) {
       const proj = Perspective.projectRoadSpace(z, 0, camera, road, width, height, horizonRatio);
       if (proj.visible && proj.screenY >= horizonRow - 1) {
+        // Expand road width by 1.35x to achieve the iconic 88% foreground road width
+        proj.roadHalfWidth = Math.round(proj.roadHalfWidth * 1.35);
+        proj.roadLeft = proj.roadCenterX - proj.roadHalfWidth;
+        proj.roadRight = proj.roadCenterX + proj.roadHalfWidth;
         slices.push(proj);
       }
     }
@@ -414,7 +273,7 @@ export class PixelCanvasRenderer {
     if (slices.length < 2) return slices;
 
     // Fill Ground Baseline
-    ctx.fillStyle = palette.ground;
+    ctx.fillStyle = isTropical ? '#fef3c7' : palette.ground;
     ctx.fillRect(0, horizonRow, width, height - horizonRow);
 
     // Rasterize consecutive trapezoids from near to far
@@ -428,30 +287,38 @@ export class PixelCanvasRenderer {
 
       const isEven = Math.floor(near.depth / 25) % 2 === 0;
 
-      // 1. Terrain Sidewalk / Grass / Ocean
-      const groundColor = isEven ? palette.ground : ColorPalette.scaleBrightness(palette.ground, 1.12);
-      ctx.fillStyle = groundColor;
-      ctx.fillRect(0, yTop, width, yBot - yTop);
-
-      // Tropical Right-Side Ocean with animated wave foam
+      // 1. TERRAIN SHOULDERS
       if (isTropical) {
-        const rightRoadX = near.roadRight;
-        const oceanStart = rightRoadX + near.roadHalfWidth * 0.40;
-        if (oceanStart < width) {
-          const oceanColor = isEven ? '#0284c7' : '#0369a1';
-          ctx.fillStyle = oceanColor;
-          ctx.fillRect(Math.floor(oceanStart), yTop, width - Math.floor(oceanStart), yBot - yTop);
+        // Left Side: Turquoise Ocean with White Wave Crests
+        const oceanColor = isEven ? '#0284c7' : '#0369a1';
+        ctx.fillStyle = oceanColor;
+        ctx.fillRect(0, yTop, Math.max(0, Math.floor(near.roadLeft)), yBot - yTop);
 
-          // Shoreline white foam ripple
-          ctx.fillStyle = '#f8fafc';
-          ctx.fillRect(Math.floor(oceanStart) - 2, yTop, 3, yBot - yTop);
+        // White shoreline wave foam ripple on left road edge
+        if (near.roadLeft > 0) {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(Math.floor(near.roadLeft) - 5, yTop, 5, yBot - yTop);
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(Math.floor(near.roadLeft) - 9, yTop, 4, yBot - yTop);
         }
+
+        // Right Side: Pure Golden/White Sand Beach
+        const sandColor = isEven ? '#fef3c7' : '#fde68a';
+        ctx.fillStyle = sandColor;
+        const rightSandX = Math.floor(near.roadRight);
+        if (rightSandX < width) {
+          ctx.fillRect(rightSandX, yTop, width - rightSandX, yBot - yTop);
+        }
+      } else {
+        const groundColor = isEven ? palette.ground : ColorPalette.scaleBrightness(palette.ground, 1.10);
+        ctx.fillStyle = groundColor;
+        ctx.fillRect(0, yTop, width, yBot - yTop);
       }
 
-      // 2. OutRun Red & White Rumble Curbs (Kerbs) - Canonical Road Space
-      const curbWidthNear = Math.max(3, Math.round(near.roadHalfWidth * 0.15));
-      const curbWidthFar = Math.max(2, Math.round(far.roadHalfWidth * 0.15));
-      const curbColor = isEven ? '#dc2626' : '#f8fafc';
+      // 2. OUTRUN RED & WHITE RUMBLE CURBS (KERBS)
+      const curbWidthNear = Math.max(3, Math.round(near.roadHalfWidth * 0.12));
+      const curbWidthFar = Math.max(2, Math.round(far.roadHalfWidth * 0.12));
+      const curbColor = isEven ? '#dc2626' : '#ffffff';
 
       // Left Kerb
       ctx.fillStyle = curbColor;
@@ -470,8 +337,8 @@ export class PixelCanvasRenderer {
       ctx.lineTo(far.roadRight, yTop);
       ctx.fill();
 
-      // 3. Solid High-Contrast Asphalt Road
-      const roadColor = isEven ? palette.road : ColorPalette.scaleBrightness(palette.road, 1.20);
+      // 3. SMOOTH HIGH-CONTRAST 16-BIT GREY ASPHALT
+      const roadColor = isEven ? '#64748b' : '#475569';
       ctx.fillStyle = roadColor;
       ctx.beginPath();
       ctx.moveTo(near.roadLeft, yBot);
@@ -480,11 +347,11 @@ export class PixelCanvasRenderer {
       ctx.lineTo(far.roadLeft, yTop);
       ctx.fill();
 
-      // 4. Dashed Gold Center Lane Markers (3 Lanes)
+      // 4. FINE CRISP WHITE/SILVER DASHED LANE MARKINGS (3 Lanes)
       if (isEven) {
-        const laneWNear = Math.max(1, Math.round(near.roadHalfWidth * 0.035));
-        const laneWFar = Math.max(1, Math.round(far.roadHalfWidth * 0.035));
-        ctx.fillStyle = '#fde047'; // Bright Gold
+        const laneWNear = Math.max(1, Math.round(near.roadHalfWidth * 0.025));
+        const laneWFar = Math.max(1, Math.round(far.roadHalfWidth * 0.025));
+        ctx.fillStyle = '#ffffff'; // Pure White OutRun Lane Markings
 
         const leftLaneNear = near.roadCenterX - near.roadHalfWidth * 0.33;
         const leftLaneFar = far.roadCenterX - far.roadHalfWidth * 0.33;
@@ -511,10 +378,9 @@ export class PixelCanvasRenderer {
   }
 
   /**
-   * Renders 3D perspective-scaled solid pixel sprites for scenery props and traffic vehicles
-   * using the CANONICAL projectRoadSpace projection.
+   * Renders 16-bit perspective-scaled scenery props and traffic.
    */
-  private renderWorldEntities(
+  private render16BitSceneryAndTraffic(
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
@@ -536,15 +402,15 @@ export class PixelCanvasRenderer {
     }
     const entities: EntityToRender[] = [];
 
-    // 1. Scenery Props with Canonical Road-Space Projection & Anti-Clutter Filter
+    // 1. Scenery Props with Anti-Clutter & Smooth 16-Bit Perspective Scaling
     const visibleScenery = worldEngine.getDirector().getScenery();
     let lastLeftZ = -9999;
     let lastRightZ = -9999;
-    const minZSpacing = 85;
+    const minZSpacing = 95;
 
     for (const item of visibleScenery) {
       const relZ = item.z - camera.z;
-      if (relZ > 25 && relZ < 1050) {
+      if (relZ > 20 && relZ < 1050) {
         const isLeft = item.lateralOffset < 0;
         if (isLeft && Math.abs(item.z - lastLeftZ) < minZSpacing) continue;
         if (!isLeft && Math.abs(item.z - lastRightZ) < minZSpacing) continue;
@@ -561,13 +427,13 @@ export class PixelCanvasRenderer {
 
         if (proj.visible && proj.screenY >= horizonRow) {
           const sprite = PixelSpriteCatalog.getScenerySprite(item.sprite.id, biomeId);
-          // Scale is derived strictly from perspective depth
-          const clampedScale = Math.min(1.85, Math.max(0.22, proj.scale * 2.0));
+          // 16-bit scaling multiplier
+          const scale = Math.min(2.0, Math.max(0.18, proj.scale * 2.2));
           entities.push({
             z: proj.depth,
             screenX: proj.screenX,
             screenY: proj.screenY,
-            scale: clampedScale,
+            scale,
             sprite,
           });
 
@@ -577,11 +443,11 @@ export class PixelCanvasRenderer {
       }
     }
 
-    // Limit maximum visible scenery objects to 8 for clean visual elegance
+    // Limit maximum visible scenery objects to 6 for clean OutRun composition
     entities.sort((a, b) => a.z - b.z);
-    const culledScenery = entities.slice(0, 8);
+    const culledScenery = entities.slice(0, 6);
 
-    // 2. Traffic Vehicles with Canonical Road-Space Projection
+    // 2. Traffic Vehicle (Max 1 visible in front)
     const traffic = worldEngine.getTraffic().getVehicles();
     for (const veh of traffic) {
       const proj = Perspective.projectRoadSpace(
@@ -594,32 +460,43 @@ export class PixelCanvasRenderer {
         horizonRatio
       );
 
-      if (proj.visible && proj.screenY >= horizonRow && proj.depth > 15) {
-        const sprite = veh.vehicleType === 'coupe' ? PixelSpriteCatalog.TRAFFIC_CABRIO : PixelSpriteCatalog.TRAFFIC_SEDAN;
-        const clampedScale = Math.min(1.8, Math.max(0.25, proj.scale * 1.8));
+      if (proj.visible && proj.screenY >= horizonRow && proj.depth > 30) {
+        const sprite = PixelSpriteCatalog.TRAFFIC_BEETLE_16BIT;
+        const scale = Math.min(1.8, Math.max(0.20, proj.scale * 1.9));
         culledScenery.push({
           z: proj.depth,
           screenX: proj.screenX,
           screenY: proj.screenY,
-          scale: clampedScale,
+          scale,
           sprite,
         });
+        break; // Max 1 traffic vehicle
       }
     }
 
     // Sort Far to Near (Painter's Algorithm)
     culledScenery.sort((a, b) => b.z - a.z);
 
-    // Draw Entities
+    // Draw Entities with ground contact shadows
     for (const e of culledScenery) {
+      // Ground Contact Shadow under roadside props & vehicles
+      const shadowW = Math.round(e.sprite.width * e.scale * 0.45);
+      const shadowH = Math.max(2, Math.round(e.scale * 3));
+      ctx.fillStyle = '#0f172a';
+      ctx.globalAlpha = 0.35;
+      ctx.beginPath();
+      ctx.ellipse(e.screenX, e.screenY - 1, shadowW, shadowH, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+
       this.drawPixelSprite(ctx, e.sprite, e.screenX, e.screenY, e.scale);
     }
   }
 
   /**
-   * Renders the Player's OutRun Retro Red Roadster using Canonical Road-Space Projection.
+   * Renders the 16-Bit Protagonist Ferrari Testarossa Roadster (Driver + Blonde Passenger).
    */
-  private renderPlayerVehicle(
+  private renderPlayerFerrari(
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
@@ -640,78 +517,23 @@ export class PixelCanvasRenderer {
     );
 
     const playerX = Math.round(proj.screenX);
-    const playerY = Math.max(height - 24, Math.round(proj.screenY));
-    const sprite = PixelSpriteCatalog.PLAYER_CAR_STRAIGHT;
+    const playerY = height - 4; // Anchored in bottom foreground
+    const sprite = PixelSpriteCatalog.PLAYER_CAR_16BIT;
 
-    // Road contact shadow under tires
+    // OutRun Oval Ground Shadow under Ferrari tires
     ctx.fillStyle = '#020617';
-    ctx.globalAlpha = 0.65;
+    ctx.globalAlpha = 0.60;
     ctx.beginPath();
-    ctx.ellipse(playerX, playerY - 1, 22, 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(playerX, playerY - 2, 34, 6, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1.0;
 
-    // Draw player roadster
-    this.drawPixelSprite(ctx, sprite, playerX, playerY, 1.40);
+    // Draw Full 16-Bit 64x28 Ferrari Roadster
+    this.drawPixelSprite(ctx, sprite, playerX, playerY, 1.0);
   }
 
   /**
-   * Renders weather overlays (rain, snow, fog, lightning flash).
-   */
-  private renderWeatherOverlay(
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-    state: WorldState
-  ): void {
-    const weather = state.weather;
-    const atmosphere = state.sky.ambientAtmosphere;
-
-    // Lightning Flash
-    if (atmosphere && atmosphere.lightningFlashIntensity > 0.05) {
-      ctx.fillStyle = '#ffffff';
-      ctx.globalAlpha = atmosphere.lightningFlashIntensity * 0.75;
-      ctx.fillRect(0, 0, width, height);
-      ctx.globalAlpha = 1.0;
-    }
-
-    // Rain Streaks
-    if (weather.type === 'LIGHT_RAIN' || weather.type === 'HEAVY_RAIN' || weather.type === 'THUNDERSTORM') {
-      ctx.strokeStyle = '#93c5fd';
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.50;
-      const count = weather.type === 'LIGHT_RAIN' ? 40 : 90;
-      const timeSeed = state.worldTime * 25;
-
-      for (let i = 0; i < count; i++) {
-        const rx = ((i * 17.3 + timeSeed * 4) % width);
-        const ry = ((i * 31.7 + timeSeed * 22) % height);
-        ctx.beginPath();
-        ctx.moveTo(rx, ry);
-        ctx.lineTo(rx - 3, ry + 8);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1.0;
-    }
-
-    // Snowflakes
-    if (weather.type === 'SNOW' || weather.type === 'BLIZZARD') {
-      ctx.fillStyle = '#f8fafc';
-      ctx.globalAlpha = 0.85;
-      const count = weather.type === 'BLIZZARD' ? 100 : 50;
-      const timeSeed = state.worldTime * 12;
-
-      for (let i = 0; i < count; i++) {
-        const sx = ((i * 23.5 + Math.sin(timeSeed + i) * 14 + timeSeed * 2.5) % width);
-        const sy = ((i * 41.2 + timeSeed * 9) % height);
-        ctx.fillRect(sx, sy, 1, 1);
-      }
-      ctx.globalAlpha = 1.0;
-    }
-  }
-
-  /**
-   * Fast 2D rasterizer for PixelSprite definitions scaled with nearest-neighbor integer mapping.
+   * Direct rasterizer for 16-bit PixelSprite definitions.
    */
   private drawPixelSprite(
     ctx: CanvasRenderingContext2D,
@@ -751,8 +573,7 @@ export class PixelCanvasRenderer {
   }
 
   /**
-   * Diagnostic Debug Overlay displaying mathematical perspective vectors,
-   * horizon line, vanishing point, and canonical road boundary guides.
+   * Diagnostic Debug Overlay displaying mathematical perspective vectors.
    */
   private renderGeometryDebugOverlay(
     ctx: CanvasRenderingContext2D,
@@ -760,16 +581,15 @@ export class PixelCanvasRenderer {
     horizonRow: number,
     slices: RoadSpaceResult[]
   ): void {
-    ctx.strokeStyle = '#ef4444'; // Red Horizon Guide
+    ctx.strokeStyle = '#ef4444';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(0, horizonRow);
     ctx.lineTo(width, horizonRow);
     ctx.stroke();
 
-    // Road Left / Right Outer Geometry Lines
     if (slices.length > 1) {
-      ctx.strokeStyle = '#38bdf8'; // Cyan Road Outer Guides
+      ctx.strokeStyle = '#38bdf8';
       ctx.beginPath();
       ctx.moveTo(slices[0].roadLeft, slices[0].screenY);
       for (let i = 1; i < slices.length; i++) {
@@ -784,8 +604,7 @@ export class PixelCanvasRenderer {
       }
       ctx.stroke();
 
-      // Road Centerline
-      ctx.strokeStyle = '#fde047'; // Gold Center Guide
+      ctx.strokeStyle = '#fde047';
       ctx.beginPath();
       ctx.moveTo(slices[0].roadCenterX, slices[0].screenY);
       for (let i = 1; i < slices.length; i++) {
