@@ -15,183 +15,223 @@ export class CloudManager {
   private gridWidth: number = 0;
   private gridHeight: number = 0;
 
-  // 27 Handcrafted Delicate Outline ASCII Cloud Formations across 9 Families
+  // Handcrafted Organic ASCII Cloud Formations with Soft Internal Texture across 7 Families
   public static readonly CLOUD_PRESETS: CloudFormation[] = [
-    // 1. FAIR_SMALL (3 Variants) - 8 to 12 chars wide, 3 lines
+    // 1. SMALL (3 Variants) - 10 to 14 chars wide, 3 lines
     {
-      id: 'fair_small_1',
-      type: 'FAIR_SMALL',
+      id: 'small_1',
+      type: 'SMALL',
       width: 10,
       height: 3,
       lines: [
         '  .---.   ',
-        '.-(   )-. ',
+        '.-( : )-. ',
         '(_______) ',
       ],
     },
     {
-      id: 'fair_small_2',
-      type: 'FAIR_SMALL',
+      id: 'small_2',
+      type: 'SMALL',
       width: 12,
       height: 3,
       lines: [
         '   .----.   ',
-        ' .-(    )-. ',
+        ' .-( .. )-. ',
         '(__________)',
       ],
     },
     {
-      id: 'fair_small_3',
-      type: 'FAIR_SMALL',
-      width: 8,
+      id: 'small_3',
+      type: 'SMALL',
+      width: 14,
       height: 3,
       lines: [
-        ' .--.   ',
-        '.-(  )-.',
-        '(______) ',
+        '  .--.  .--.  ',
+        '.-(  :..:  )-.',
+        '(____________)',
       ],
     },
 
-    // 2. FAIR_MEDIUM (3 Variants) - 14 to 18 chars wide, 4 lines
+    // 2. MEDIUM (3 Variants) - 16 to 20 chars wide, 4 lines
     {
-      id: 'fair_med_1',
-      type: 'FAIR_MEDIUM',
+      id: 'med_1',
+      type: 'MEDIUM',
       width: 16,
       height: 4,
       lines: [
         '     .----.     ',
-        '  .-/      \\-.  ',
-        ' (            ) ',
+        '  .-/  ..  \\-.  ',
+        ' (   :....:   ) ',
         '(______________) ',
       ],
     },
     {
-      id: 'fair_med_2',
-      type: 'FAIR_MEDIUM',
-      width: 16,
-      height: 4,
-      lines: [
-        '    .------.    ',
-        " .-'        '-. ",
-        '(              )',
-        ' (____________) ',
-      ],
-    },
-    {
-      id: 'fair_med_3',
-      type: 'FAIR_MEDIUM',
+      id: 'med_2',
+      type: 'MEDIUM',
       width: 18,
       height: 4,
       lines: [
-        '   .---.   .---.  ',
-        " .-'   '---'   '-.",
-        '(                )',
+        '    .------.      ',
+        " .-'   ::   '-.   ",
+        '(   :......:   )  ',
+        ' (____________)   ',
+      ],
+    },
+    {
+      id: 'med_3',
+      type: 'MEDIUM',
+      width: 18,
+      height: 4,
+      lines: [
+        '   .---.  .---.   ',
+        " .-' .  ''  . '-. ",
+        '(   :........:   )',
         ' (______________) ',
       ],
     },
 
-    // 3. CUMULUS_SMALL (3 Variants) - 16 to 20 chars wide, 4 lines
+    // 3. WIDE (3 Variants) - 24 to 28 chars wide, 3 lines
     {
-      id: 'cumulus_small_1',
-      type: 'CUMULUS_SMALL',
-      width: 16,
-      height: 4,
+      id: 'wide_1',
+      type: 'WIDE',
+      width: 24,
+      height: 3,
       lines: [
-        '     .----.     ',
-        '  .-/      \\-.  ',
-        ".-'          '-.",
-        '(______________) ',
+        '   .~~--......--~~.     ',
+        ' .-(   :......:   )-.   ',
+        '(____________________)  ',
       ],
     },
     {
-      id: 'cumulus_small_2',
-      type: 'CUMULUS_SMALL',
-      width: 18,
-      height: 4,
+      id: 'wide_2',
+      type: 'WIDE',
+      width: 28,
+      height: 3,
       lines: [
-        '     .------.     ',
-        "  .-'        '-.  ",
-        ".'              `.",
-        '(________________)',
+        '  .~~~~---........---~~~~.  ',
+        ' (     :............:     ) ',
+        '(__________________________)',
       ],
     },
     {
-      id: 'cumulus_small_3',
-      type: 'CUMULUS_SMALL',
-      width: 20,
-      height: 4,
+      id: 'wide_3',
+      type: 'WIDE',
+      width: 26,
+      height: 3,
       lines: [
-        '    .---.  .---.    ',
-        "  .-'   \\--/   '-.  ",
-        ' (                ) ',
-        '(__________________) ',
+        '   .---.            .---.   ',
+        " .-(   '--........--'   )-. ",
+        '(__________________________)',
       ],
     },
 
-    // 4. CUMULUS_LARGE (3 Variants) - 24 to 28 chars wide, 5-6 lines
+    // 4. DENSE (3 Variants) - 24 to 28 chars wide, 5 lines
     {
-      id: 'cumulus_large_1',
-      type: 'CUMULUS_LARGE',
-      width: 26,
-      height: 6,
+      id: 'dense_1',
+      type: 'DENSE',
+      width: 24,
+      height: 5,
       lines: [
-        '         .-------.        ',
-        '      .-/         \\-.     ',
-        "    .-'             '-.   ",
-        "  .'                   `. ",
-        ' (                       )',
-        '  (_____________________) ',
+        '       .------.         ',
+        '    .-/   ..   \\-.      ',
+        "  .-'   :....:   '-.    ",
+        ' (   :..........:   )   ',
+        '(____________________)  ',
       ],
     },
     {
-      id: 'cumulus_large_2',
-      type: 'CUMULUS_LARGE',
+      id: 'dense_2',
+      type: 'DENSE',
       width: 28,
       height: 5,
       lines: [
-        '       .----.     .----.     ',
-        '    .-/      \\---/      \\-.  ',
-        "  .-'                      '-.",
-        ' (                            )',
-        '  (__________________________) ',
+        '       .----.    .----.     ',
+        '    .-/  ..  \\--/  ..  \\-.  ',
+        "  .-'   :............:   '-.",
+        ' (   :..................:   )',
+        '(____________________________)',
       ],
     },
     {
-      id: 'cumulus_large_3',
-      type: 'CUMULUS_LARGE',
+      id: 'dense_3',
+      type: 'DENSE',
       width: 26,
       height: 5,
       lines: [
-        '        .----------.      ',
-        '     .-/            \\-.   ',
-        "   .-'                '-. ",
-        '  (                      )',
-        ' (________________________)',
+        '      .--------.        ',
+        "   .-'   ....   '-.     ",
+        " .-'   :......:   '-.   ",
+        '(   :............:   )  ',
+        '(____________________)  ',
       ],
     },
 
-    // 5. HIGH_THIN / Cirrus (3 Variants) - 12 to 16 chars wide, 1 line
+    // 5. STORM_HEAVY (3 Variants) - 30 to 34 chars wide, 6 lines
     {
-      id: 'high_thin_1',
-      type: 'HIGH_THIN',
-      width: 15,
-      height: 1,
+      id: 'storm_heavy_1',
+      type: 'STORM_HEAVY',
+      width: 30,
+      height: 6,
       lines: [
-        '---..     ..---',
+        '        .------------.        ',
+        '     .-/   :......:   \\-.     ',
+        "   .-'   :..........:   '-.   ",
+        '  /   :................:   \\  ',
+        ' |   :..................:   | ',
+        '  \\________________________/  ',
       ],
     },
     {
-      id: 'high_thin_2',
-      type: 'HIGH_THIN',
-      width: 14,
-      height: 1,
+      id: 'storm_heavy_2',
+      type: 'STORM_HEAVY',
+      width: 32,
+      height: 6,
       lines: [
-        '  ...------...  ',
+        '      .----------.    .----.    ',
+        '   .-/   :....:   \\--/  ..  \\-. ',
+        " .-'   :..................:   '-.",
+        '(   :........................:   )',
+        '|   :........................:   |',
+        ' \\______________________________/ ',
       ],
     },
     {
-      id: 'high_thin_3',
-      type: 'HIGH_THIN',
+      id: 'storm_heavy_3',
+      type: 'STORM_HEAVY',
+      width: 30,
+      height: 6,
+      lines: [
+        '       .----------------.     ',
+        '    .-/   :..........:   \\-.  ',
+        "  .-'   :..............:   '-.",
+        ' (   :....................:   )',
+        ' |   :....................:   |',
+        '  \\__________________________/ ',
+      ],
+    },
+
+    // 6. HIGH_CIRRUS (3 Variants) - 14 to 18 chars wide, 1 line
+    {
+      id: 'high_cirrus_1',
+      type: 'HIGH_CIRRUS',
+      width: 16,
+      height: 1,
+      lines: [
+        '---...    ...---',
+      ],
+    },
+    {
+      id: 'high_cirrus_2',
+      type: 'HIGH_CIRRUS',
+      width: 18,
+      height: 1,
+      lines: [
+        '   ...-------...  ',
+      ],
+    },
+    {
+      id: 'high_cirrus_3',
+      type: 'HIGH_CIRRUS',
       width: 16,
       height: 1,
       lines: [
@@ -199,137 +239,38 @@ export class CloudManager {
       ],
     },
 
-    // 6. STRATUS (3 Variants) - 20 to 24 chars wide, 2 lines
-    {
-      id: 'stratus_1',
-      type: 'STRATUS',
-      width: 20,
-      height: 2,
-      lines: [
-        '  .~~--....--~~.    ',
-        ' (______________)-. ',
-      ],
-    },
-    {
-      id: 'stratus_2',
-      type: 'STRATUS',
-      width: 22,
-      height: 2,
-      lines: [
-        ' .~~---......---~~.   ',
-        '(__________________)-.',
-      ],
-    },
-    {
-      id: 'stratus_3',
-      type: 'STRATUS',
-      width: 20,
-      height: 2,
-      lines: [
-        '   .~~~--....--~~~. ',
-        ' (_________________)',
-      ],
-    },
-
-    // 7. OVERCAST (3 Variants) - 24 to 28 chars wide, 2 lines
+    // 7. OVERCAST_CANOPY (3 Variants) - 36 to 40 chars wide, 3 lines
     {
       id: 'overcast_1',
-      type: 'OVERCAST',
-      width: 24,
-      height: 2,
+      type: 'OVERCAST_CANOPY',
+      width: 38,
+      height: 3,
       lines: [
-        '.~~~~~~-------~~~~~~.   ',
-        '(___________________)-. ',
+        '.~~~~~~-------..........-------~~~~~~.',
+        '(     :........................:     )',
+        '(____________________________________)',
       ],
     },
     {
       id: 'overcast_2',
-      type: 'OVERCAST',
-      width: 26,
-      height: 2,
+      type: 'OVERCAST_CANOPY',
+      width: 38,
+      height: 3,
       lines: [
-        '.~~~~~---......---~~~~~.  ',
-        '(______________________)--',
+        '.~~~~~---....................---~~~~~.',
+        '(    :..........................:    )',
+        '(____________________________________)',
       ],
     },
     {
       id: 'overcast_3',
-      type: 'OVERCAST',
-      width: 22,
-      height: 2,
+      type: 'OVERCAST_CANOPY',
+      width: 38,
+      height: 3,
       lines: [
-        '.~~~~---------~~~~.   ',
-        '(_________________)-. ',
-      ],
-    },
-
-    // 8. STORM (3 Variants) - 26 to 30 chars wide, 5 lines
-    {
-      id: 'storm_1',
-      type: 'STORM',
-      width: 26,
-      height: 5,
-      lines: [
-        '       .------------.     ',
-        '    .-/              \\-.  ',
-        "  .-'                  '-.",
-        ' (                        )',
-        '  \\______________________/ ',
-      ],
-    },
-    {
-      id: 'storm_2',
-      type: 'STORM',
-      width: 28,
-      height: 5,
-      lines: [
-        '      .----------.    .----.  ',
-        '   .-/            \\--/      \\-',
-        " .-'                          ",
-        '(                             ',
-        ' \\____________________________/ ',
-      ],
-    },
-    {
-      id: 'storm_3',
-      type: 'STORM',
-      width: 26,
-      height: 5,
-      lines: [
-        '       .----------------. ',
-        '    .-/                  \\',
-        "  .-'                     ",
-        '(                         ',
-        '  \\______________________/',
-      ],
-    },
-
-    // 9. FOG_BANK (3 Variants) - 16 to 20 chars wide, 1 line
-    {
-      id: 'fog_bank_1',
-      type: 'FOG_BANK',
-      width: 18,
-      height: 1,
-      lines: [
-        '.~ . ~ . ~ . ~ . ~',
-      ],
-    },
-    {
-      id: 'fog_bank_2',
-      type: 'FOG_BANK',
-      width: 20,
-      height: 1,
-      lines: [
-        '.. ~ ~ . . ~ ~ . .. ',
-      ],
-    },
-    {
-      id: 'fog_bank_3',
-      type: 'FOG_BANK',
-      width: 16,
-      height: 1,
-      lines: [
-        '~ . ~ . ~ . ~ . ',
+        '.~~~~---------..........---------~~~~.',
+        '(    :..........................:    )',
+        '(____________________________________)',
       ],
     },
   ];
@@ -349,22 +290,22 @@ export class CloudManager {
     switch (weather) {
       case 'CLEAR':
       case 'HEAT_HAZE':
-        return { coverage: 'CLEAR', ratio: 0.05 };
+        return { coverage: 'CLEAR', ratio: 0.12 };
       case 'CLOUDY':
-        return { coverage: 'SCATTERED', ratio: 0.35 };
+        return { coverage: 'SCATTERED', ratio: 0.48 };
       case 'LIGHT_RAIN':
       case 'SNOW':
       case 'NEON_MIST':
-        return { coverage: 'BROKEN', ratio: 0.60 };
+        return { coverage: 'MOSTLY_CLOUDY', ratio: 0.72 };
       case 'HEAVY_RAIN':
       case 'THUNDERSTORM':
       case 'BLIZZARD':
-        return { coverage: 'OVERCAST', ratio: 0.90 };
+        return { coverage: 'OVERCAST', ratio: 0.94 };
       case 'FOG':
       case 'VOLCANIC_ASH':
-        return { coverage: 'BROKEN', ratio: 0.60 };
+        return { coverage: 'MOSTLY_CLOUDY', ratio: 0.75 };
       default:
-        return { coverage: 'FEW', ratio: 0.15 };
+        return { coverage: 'FEW', ratio: 0.28 };
     }
   }
 
@@ -373,101 +314,94 @@ export class CloudManager {
   }
 
   /**
-   * Initializes or reconfigures cloud instances strictly respecting the Complexity Budget and Celestial Clearing Zone.
+   * Initializes or reconfigures cloud instances across parallax layers for vibrant, living skies.
    */
   public initCloudLayers(coverage: CloudCoverage, celestialAvoidHeading: number | null = null): void {
     this.instances = [];
 
     // Filter presets by family
-    const smallFairPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'FAIR_SMALL' || p.type === 'HIGH_THIN');
-    const medFairPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'FAIR_MEDIUM' || p.type === 'CUMULUS_SMALL' || p.type === 'STRATUS');
-    const largePresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'CUMULUS_LARGE' || p.type === 'STORM' || p.type === 'OVERCAST');
+    const smallPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'SMALL' || p.type === 'HIGH_CIRRUS');
+    const medWidePresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'MEDIUM' || p.type === 'WIDE');
+    const denseStormPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'DENSE' || p.type === 'STORM_HEAVY' || p.type === 'OVERCAST_CANOPY');
 
-    // STRICT COMPLEXITY BUDGET:
-    // CLEAR: 0-1 tiny high cloud (85-95% open negative space)
-    // FEW: 1-2 small clouds (70-85% open space)
-    // SCATTERED: 2-3 clouds (55-75% open space)
-    // BROKEN: 3-4 clouds (35-50% open space)
-    // OVERCAST: 4-5 connected clouds
-
+    // Rich instance count distribution
     let highCount = 0;
     let midCount = 0;
     let lowCount = 0;
 
     switch (coverage) {
       case 'CLEAR':
-        highCount = this.rng.next() < 0.5 ? 1 : 0;
-        midCount = 0;
+        highCount = 1;
+        midCount = 1;
         lowCount = 0;
         break;
       case 'FEW':
-        highCount = 1;
-        midCount = 1;
+        highCount = 2;
+        midCount = 2;
         lowCount = 0;
         break;
       case 'SCATTERED':
-        highCount = 1;
-        midCount = 1;
-        lowCount = 1;
+        highCount = 2;
+        midCount = 3;
+        lowCount = 2;
         break;
-      case 'BROKEN':
-        highCount = 1;
-        midCount = 2;
-        lowCount = 1;
+      case 'MOSTLY_CLOUDY':
+        highCount = 3;
+        midCount = 4;
+        lowCount = 3;
         break;
       case 'OVERCAST':
-        highCount = 1;
-        midCount = 2;
-        lowCount = 2;
+        highCount = 4;
+        midCount = 5;
+        lowCount = 5;
         break;
     }
 
-    // Helper: Select xNorm avoiding celestial buffer zone
-    const pickX = (baseX: number): number => {
-      let x = (baseX + this.rng.range(-0.08, 0.08) + 1.0) % 1.0;
-      if (celestialAvoidHeading !== null && coverage !== 'OVERCAST') {
+    // Helper: Select xNorm with optional gentle celestial buffer in clear weather
+    const pickX = (baseX: number, isOvercast: boolean): number => {
+      let x = (baseX + this.rng.range(-0.06, 0.06) + 1.0) % 1.0;
+      if (celestialAvoidHeading !== null && !isOvercast && (coverage === 'CLEAR' || coverage === 'FEW')) {
         const dist = Math.abs(x - celestialAvoidHeading);
-        if (dist < 0.16) {
-          // Shift away from sun/moon
-          x = (x + (x >= celestialAvoidHeading ? 0.20 : -0.20) + 1.0) % 1.0;
+        if (dist < 0.12) {
+          x = (x + (x >= celestialAvoidHeading ? 0.15 : -0.15) + 1.0) % 1.0;
         }
       }
       return x;
     };
 
-    // Layer 1: HIGH Parallax (Cirrus / Fair Small)
+    // Layer 1: HIGH Parallax Layer (Cirrus & Small Puffs, High Altitude)
     for (let i = 0; i < highCount; i++) {
-      const formation = this.rng.choice(smallFairPresets);
+      const formation = this.rng.choice(smallPresets);
       this.instances.push({
-        xNorm: pickX(0.25 + i * 0.50),
-        yNorm: this.rng.range(0.04, 0.15),
-        speed: 0.0008,
+        xNorm: pickX((i + 0.3) / Math.max(1, highCount), coverage === 'OVERCAST'),
+        yNorm: this.rng.range(0.04, 0.18),
+        speed: 0.0012,
         formation,
         layer: 'HIGH',
-        alpha: 0.70,
+        alpha: 0.75,
       });
     }
 
-    // Layer 2: MID Parallax (Fair Med / Cumulus Small)
+    // Layer 2: MID Parallax Layer (Medium Cumulus & Wide Stratus, Mid Altitude)
     for (let i = 0; i < midCount; i++) {
-      const formation = this.rng.choice(medFairPresets);
+      const formation = this.rng.choice(medWidePresets);
       this.instances.push({
-        xNorm: pickX(0.65 + i * 0.45),
-        yNorm: this.rng.range(0.14, 0.32),
-        speed: 0.0022,
+        xNorm: pickX((i + 0.15) / Math.max(1, midCount), coverage === 'OVERCAST'),
+        yNorm: this.rng.range(0.16, 0.38),
+        speed: 0.0028,
         formation,
         layer: 'MID',
         alpha: 0.90,
       });
     }
 
-    // Layer 3: LOW Parallax (Cumulus Large / Storm / Overcast)
+    // Layer 3: LOW Parallax Layer (Dense Masses, Storm Clouds, Overcast Canopy)
     for (let i = 0; i < lowCount; i++) {
-      const formation = this.rng.choice(largePresets);
+      const formation = this.rng.choice(denseStormPresets);
       this.instances.push({
-        xNorm: pickX(0.15 + i * 0.55),
-        yNorm: this.rng.range(0.26, 0.46),
-        speed: 0.0040,
+        xNorm: pickX((i + 0.5) / Math.max(1, lowCount), coverage === 'OVERCAST'),
+        yNorm: this.rng.range(0.28, 0.55),
+        speed: 0.0048,
         formation,
         layer: 'LOW',
         alpha: 1.0,
@@ -479,7 +413,7 @@ export class CloudManager {
    * Advances cloud horizontal drift.
    */
   public update(dt: number, speedMultiplier: number = 1.0, windStrength: number = 0): void {
-    const windSpeedBonus = windStrength * 0.0008;
+    const windSpeedBonus = windStrength * 0.0012;
     for (const cloud of this.instances) {
       cloud.xNorm = (cloud.xNorm + (cloud.speed + windSpeedBonus) * dt * speedMultiplier) % 1.0;
     }
@@ -526,7 +460,7 @@ export class CloudManager {
   }
 
   /**
-   * Renders all cloud layers with delicate silhouette lines and zero dense dither fills.
+   * Renders all cloud layers with highlight crowns, soft textured bodies, and shadow underbellies.
    */
   public renderClouds(
     fb: FrameBuffer,
@@ -551,18 +485,26 @@ export class CloudManager {
         const cy = startY + r;
         if (cy < 0 || cy >= horizonRow) continue;
 
-        // Top line receives clean highlight; bottom lines receive soft shadow contour
-        const rowColor = (r === lines.length - 1 && lines.length > 2)
+        // Top line receives clean highlight; bottom lines receive soft shadow contour; middle lines receive body tone
+        const isTop = r === 0;
+        const isBottom = r === lines.length - 1 && lines.length > 2;
+        const rowColor = isBottom
           ? cloudShadowColor
-          : (r === 0 ? cloudHighlightColor : ColorPalette.lerp(cloudHighlightColor, cloudShadowColor, 0.35));
+          : (isTop ? cloudHighlightColor : ColorPalette.lerp(cloudHighlightColor, cloudShadowColor, 0.40));
 
         for (let c = 0; c < line.length; c++) {
           const ch = line[c];
           if (ch !== ' ') {
             const cx = (startX + c + width) % width;
             const zOrder = cloud.layer === 'LOW' ? 9965 : (cloud.layer === 'MID' ? 9970 : 9975);
-            // Render cloud glyph with transparency (undefined bg) so negative sky background flows through
-            fb.setCell(cx, cy, ch, rowColor, zOrder, undefined, true);
+
+            // Internal textured characters (. or :) use slightly softer body tint
+            const isInternalTexture = ch === '.' || ch === ':' || ch === '~';
+            const charColor = isInternalTexture
+              ? ColorPalette.lerp(rowColor, cloudShadowColor, 0.30)
+              : rowColor;
+
+            fb.setCell(cx, cy, ch, charColor, zOrder, undefined, true);
           }
         }
       }

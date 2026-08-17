@@ -27,19 +27,17 @@ export type CloudCoverage =
   | 'CLEAR'
   | 'FEW'
   | 'SCATTERED'
-  | 'BROKEN'
+  | 'MOSTLY_CLOUDY'
   | 'OVERCAST';
 
 export type CloudFormationType =
-  | 'FAIR_SMALL'
-  | 'FAIR_MEDIUM'
-  | 'CUMULUS_SMALL'
-  | 'CUMULUS_LARGE'
-  | 'HIGH_THIN'
-  | 'STRATUS'
-  | 'OVERCAST'
-  | 'STORM'
-  | 'FOG_BANK';
+  | 'SMALL'
+  | 'MEDIUM'
+  | 'WIDE'
+  | 'DENSE'
+  | 'STORM_HEAVY'
+  | 'HIGH_CIRRUS'
+  | 'OVERCAST_CANOPY';
 
 export type WeatherType =
   | 'CLEAR'

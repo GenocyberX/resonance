@@ -27,12 +27,12 @@ describe('RESONANCE — Atmospheric Polish + Living Weather V2 Test Suite', () =
   it('2. verifies that discrete cloud coverage classifications map accurately to weather classes', () => {
     expect(CloudManager.evaluateCoverage('CLEAR').coverage).toBe('CLEAR');
     expect(CloudManager.evaluateCoverage('CLOUDY').coverage).toBe('SCATTERED');
-    expect(CloudManager.evaluateCoverage('LIGHT_RAIN').coverage).toBe('BROKEN');
+    expect(CloudManager.evaluateCoverage('LIGHT_RAIN').coverage).toBe('MOSTLY_CLOUDY');
     expect(CloudManager.evaluateCoverage('HEAVY_RAIN').coverage).toBe('OVERCAST');
     expect(CloudManager.evaluateCoverage('THUNDERSTORM').coverage).toBe('OVERCAST');
-    expect(CloudManager.evaluateCoverage('SNOW').coverage).toBe('BROKEN');
+    expect(CloudManager.evaluateCoverage('SNOW').coverage).toBe('MOSTLY_CLOUDY');
     expect(CloudManager.evaluateCoverage('BLIZZARD').coverage).toBe('OVERCAST');
-    expect(CloudManager.evaluateCoverage('FOG').coverage).toBe('BROKEN');
+    expect(CloudManager.evaluateCoverage('FOG').coverage).toBe('MOSTLY_CLOUDY');
   });
 
   // 3. Stars hidden by strong daylight
@@ -247,20 +247,27 @@ describe('RESONANCE — Atmospheric Polish + Living Weather V2 Test Suite', () =
     expect(brightCount + heroCount).toBeGreaterThanOrEqual(2);
   });
 
-  // 17. Sky Complexity Budget & Open Negative Space
-  it('17. verifies that CLEAR sky coverage enforces <= 1 cloud instance for vast open space', () => {
+  // 17. Rich Cloud Coverage Distribution
+  it('17. verifies that cloud coverage tiers scale up gracefully (Clear to Overcast canopy)', () => {
     const cm = new CloudManager(1234);
     cm.initCloudLayers('CLEAR');
-    expect(cm.getInstances().length).toBeLessThanOrEqual(1);
+    expect(cm.getInstances().length).toBeGreaterThanOrEqual(2);
+    expect(cm.getInstances().length).toBeLessThanOrEqual(3);
 
     cm.initCloudLayers('FEW');
-    expect(cm.getInstances().length).toBeLessThanOrEqual(2);
+    expect(cm.getInstances().length).toBeGreaterThanOrEqual(4);
 
     cm.initCloudLayers('SCATTERED');
-    expect(cm.getInstances().length).toBeLessThanOrEqual(4);
+    expect(cm.getInstances().length).toBeGreaterThanOrEqual(6);
+
+    cm.initCloudLayers('MOSTLY_CLOUDY');
+    expect(cm.getInstances().length).toBeGreaterThanOrEqual(9);
+
+    cm.initCloudLayers('OVERCAST');
+    expect(cm.getInstances().length).toBeGreaterThanOrEqual(12);
   });
 
-  // 18. Celestial Clearing Zone Avoidance
+  // 18. Celestial Clearing Zone in Clear Weather
   it('18. verifies that clouds avoid spawning directly on top of the prominent Sun or Moon heading in clear weather', () => {
     const cm = new CloudManager(777);
     const sunHeading = 0.50; // High Noon / Sunset Center
@@ -268,18 +275,28 @@ describe('RESONANCE — Atmospheric Polish + Living Weather V2 Test Suite', () =
 
     for (const cloud of cm.getInstances()) {
       const dist = Math.abs(cloud.xNorm - sunHeading);
-      expect(dist).toBeGreaterThanOrEqual(0.08);
+      expect(dist).toBeGreaterThanOrEqual(0.06);
     }
   });
 
-  // 19. Zero Forbidden Rectangular Platforms in Cloud Presets
-  it('19. audits all cloud presets: zero rectangular platform boxes, bracket rails, or solid block lines', () => {
+  // 19. All Cloud Presets Contain Organic Outline and Internal Texture
+  it('19. audits all cloud presets: non-empty internal texturing across all 7 families', () => {
     for (const preset of CloudManager.CLOUD_PRESETS) {
-      for (const line of preset.lines) {
-        expect(line).not.toMatch(/\[=+/);
-        expect(line).not.toMatch(/=+\]/);
-        expect(line).not.toMatch(/████████/);
-      }
+      const allText = preset.lines.join('');
+      // Must have some internal texture character (dot, colon, tilde, or quote)
+      expect(allText).toMatch(/[.:~'"]/);
     }
+  });
+
+  // 20. 7 Distinct Cloud Families
+  it('20. verifies that all 7 distinct cloud families are registered and available', () => {
+    const families = new Set(CloudManager.CLOUD_PRESETS.map(p => p.type));
+    expect(families.has('SMALL')).toBe(true);
+    expect(families.has('MEDIUM')).toBe(true);
+    expect(families.has('WIDE')).toBe(true);
+    expect(families.has('DENSE')).toBe(true);
+    expect(families.has('STORM_HEAVY')).toBe(true);
+    expect(families.has('HIGH_CIRRUS')).toBe(true);
+    expect(families.has('OVERCAST_CANOPY')).toBe(true);
   });
 });

@@ -147,7 +147,7 @@ export class SkyDirector {
     // Star visibility: attenuated by daylight, cloud coverage, fog, and moon brightness
     let starVisibility = 0.0;
     if (isNight) {
-      starVisibility = (1.0 - (coverageInfo.ratio * 0.85)) * (1.1 - moonPhaseInfo.moonlightFactor * 0.25);
+      starVisibility = Math.min(1.0, (1.0 - (coverageInfo.ratio * 0.70)) * (1.1 - moonPhaseInfo.moonlightFactor * 0.15));
     } else if (isTwilight) {
       const twilightFactor = timePhase === 'DUSK' || timePhase === 'DAWN' ? 0.45 : 0.20;
       starVisibility = twilightFactor * (1.0 - coverageInfo.ratio);

@@ -123,9 +123,9 @@ describe('RESONANCE — Sky, Weather & Celestial System V1 Suite', () => {
   });
 
   // 7. Snow Implies Appropriate Cloud Coverage
-  it('guarantees snow sets appropriate BROKEN or OVERCAST cloud coverage', () => {
+  it('guarantees snow sets appropriate MOSTLY_CLOUDY or OVERCAST cloud coverage', () => {
     const snowCov = CloudManager.evaluateCoverage('SNOW');
-    expect(snowCov.coverage).toBe('BROKEN');
+    expect(snowCov.coverage).toBe('MOSTLY_CLOUDY');
     expect(snowCov.ratio).toBeGreaterThanOrEqual(0.60);
 
     const blizzardCov = CloudManager.evaluateCoverage('BLIZZARD');
@@ -140,7 +140,7 @@ describe('RESONANCE — Sky, Weather & Celestial System V1 Suite', () => {
     const state = skyDirector.update(0, 'FOREST', { targetSpeedBonus: 0, cameraBounce: 0, fovPulse: 0, tension: 0, particleDensity: 0, environmentalGlow: 0 }, 120, 40);
 
     expect(state.fogAmount).toBeGreaterThan(0.70);
-    expect(state.cloudCoverage).toBe('BROKEN');
+    expect(state.cloudCoverage).toBe('MOSTLY_CLOUDY');
   });
 
   // 9. Weather Transitions Do Not Instant-Snap
