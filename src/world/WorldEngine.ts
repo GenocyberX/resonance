@@ -279,6 +279,10 @@ export class WorldEngine {
     return this.collisions;
   }
 
+  public getTraffic(): TrafficController {
+    return this.traffic;
+  }
+
   public setTimeOfDayNormalized(t: number): void {
     this.dayNightCycle.setNormalizedTime(t);
   }

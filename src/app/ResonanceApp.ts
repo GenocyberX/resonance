@@ -2,6 +2,7 @@ import { AudioEngine } from '../audio/AudioEngine';
 import { MusicWorldMapper } from '../music-world/MusicWorldMapper';
 import { WorldEngine, VisualTestTime } from '../world/WorldEngine';
 import { AsciiRenderer } from '../ascii/AsciiRenderer';
+import { PixelCanvasRenderer } from '../pixel/PixelCanvasRenderer';
 import { AudioControls } from '../ui/AudioControls';
 import { Hud } from '../ui/Hud';
 import { DebugPanel } from '../ui/DebugPanel';
@@ -14,6 +15,7 @@ export class ResonanceApp {
   private musicMapper: MusicWorldMapper;
   private worldEngine: WorldEngine;
   private renderer: AsciiRenderer;
+  private pixelRenderer?: PixelCanvasRenderer;
   private audioControls: AudioControls;
   private hud: Hud;
   private debugPanel: DebugPanel;
@@ -44,13 +46,16 @@ export class ResonanceApp {
     // 2. Initialize World Simulation
     this.worldEngine = new WorldEngine(APP_CONFIG.defaultSeed);
 
-    // 3. Initialize ASCII Renderer
+    // 3. Initialize Unified Pixel Canvas & ASCII Renderers
     const screenElement = document.getElementById('ascii-screen') as HTMLElement;
     this.renderer = new AsciiRenderer(
       screenElement,
       APP_CONFIG.defaultGrid.cols,
       APP_CONFIG.defaultGrid.rows
     );
+    if (screenElement) {
+      this.pixelRenderer = new PixelCanvasRenderer(screenElement);
+    }
 
     // 4. Initialize UI Subsystems
     this.audioControls = new AudioControls(this.audioEngine, {
@@ -394,7 +399,11 @@ export class ResonanceApp {
       }
 
       this.worldEngine.render(fb);
-      this.renderer.render();
+      if (this.pixelRenderer) {
+        this.pixelRenderer.render(this.worldEngine, this.worldEngine.getState());
+      } else {
+        this.renderer.render();
+      }
     }
 
     // 5. Throttled UI & Telemetry update (10 Hz)
