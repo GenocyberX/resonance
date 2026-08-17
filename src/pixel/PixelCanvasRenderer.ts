@@ -402,15 +402,17 @@ export class PixelCanvasRenderer {
 
         if (proj.visible && proj.screenY >= horizonRow) {
           if (isTropical) {
-            const img = isLeft ? this.spriteManager.signImg : this.spriteManager.palmImg;
-            const w = isLeft ? 28 : 50;
-            const h = isLeft ? 40 : 112;
-            const scale = Math.min(1.0, Math.max(0.18, proj.scale * 1.5));
+            const img = isLeft ? this.spriteManager.signImg : this.spriteManager.palmRightImg;
+            const w = isLeft ? 28 : 95;
+            const h = isLeft ? 40 : 190;
+            const scale = isLeft
+              ? Math.min(1.2, Math.max(0.20, proj.scale * 1.6))
+              : Math.min(0.85, Math.max(0.18, proj.scale * 1.25));
             
             // Anchor palms to the right sand beach, and signs to left margin
             const sx = isLeft
               ? Math.max(12, proj.roadLeft - Math.round(18 * scale * 2))
-              : Math.min(width - 25 * scale, proj.roadRight + Math.round(24 * scale * 2));
+              : Math.min(width - Math.round(w * scale * 0.40), proj.roadRight + Math.round(28 * scale * 2));
 
             entities.push({
               z: proj.depth,

@@ -5,6 +5,8 @@ def main():
     sprites = {
         'FERRARI_PLAYER': 'public/assets/sprites/ferrari_player.png',
         'PALM_OUTRUN': 'public/assets/sprites/palm_outrun.png',
+        'PALM_OUTRUN_RIGHT': 'public/assets/sprites/palm_outrun_right.png',
+        'OVERHEAD_FORK_SIGN': 'public/assets/sprites/overhead_fork_sign.png',
         'CURVE_SIGN': 'public/assets/sprites/curve_sign.png',
         'TRAFFIC_BEETLE': 'public/assets/sprites/traffic_beetle.png',
         'OUTRUN_SKY': 'public/assets/sprites/outrun_sky_clouds.png',
@@ -20,7 +22,7 @@ def main():
     with open('src/pixel/SpriteAtlasData.ts', 'w', encoding='utf-8') as f:
         f.writelines(ts_lines)
 
-    print('Generated SpriteAtlasData.ts successfully!')
+    print('Generated SpriteAtlasData.ts with all HD sprites!')
 
 if __name__ == '__main__':
     main()
