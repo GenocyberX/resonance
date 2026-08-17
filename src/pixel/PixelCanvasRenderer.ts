@@ -45,7 +45,7 @@ export class PixelCanvasRenderer {
     const ctx = this.ctx;
     const width = PixelCanvasRenderer.LOGICAL_WIDTH;
     const height = PixelCanvasRenderer.LOGICAL_HEIGHT;
-    const horizonRow = Math.floor(height * 0.42); // y = 75
+    const horizonRow = Math.floor(height * 0.43); // y = 77 (43% Sky, 57% Road & Terrain)
 
     const sky = state.sky;
     const biome = state.biomeBlend.currentBiome;
@@ -53,32 +53,33 @@ export class PixelCanvasRenderer {
     const camera = state.camera;
     const time = state.worldTime;
 
-    // 1. SKY GRADIENT (Pure Solid Pixel Art Gradient)
+    // 1. SKY GRADIENT (Rich Multi-Stop Diurnal Atmospheric Gradient)
     const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonRow);
     skyGrad.addColorStop(0.0, sky.skyTopColor);
-    skyGrad.addColorStop(0.5, sky.skyMidColor);
-    skyGrad.addColorStop(1.0, sky.skyBottomColor);
+    skyGrad.addColorStop(0.45, sky.skyMidColor);
+    skyGrad.addColorStop(0.85, sky.skyBottomColor);
+    skyGrad.addColorStop(1.0, sky.horizonGlowColor);
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, width, horizonRow);
 
-    // Horizon Atmospheric Glow
+    // Horizon Atmospheric Glow Band
     ctx.fillStyle = sky.horizonGlowColor;
-    ctx.globalAlpha = 0.25;
-    ctx.fillRect(0, horizonRow - 4, width, 4);
+    ctx.globalAlpha = 0.35;
+    ctx.fillRect(0, horizonRow - 6, width, 6);
     ctx.globalAlpha = 1.0;
 
-    // 2. STARS (Pixel Stars with Twinkle)
+    // 2. STARS (128-Star Dynamic Field with Twinkling & Shooting Stars)
     if (sky.starVisibility > 0.05) {
       const stars = worldEngine.getSkyDirector().getCelestialSystem().getStars();
       for (const star of stars) {
         const sx = Math.floor(star.xNorm * width);
-        const sy = Math.floor(star.yNorm * horizonRow);
+        const sy = Math.floor(star.yNorm * (horizonRow - 4));
         if (sy >= horizonRow - 2) continue;
 
-        const twinkle = 0.75 + 0.25 * Math.sin(time * star.twinkleSpeed + star.twinkleOffset);
+        const twinkle = 0.70 + 0.30 * Math.sin(time * star.twinkleSpeed + star.twinkleOffset);
         const alpha = Math.min(1.0, star.baseBrightness * sky.starVisibility * twinkle);
-        if (alpha > 0.1) {
-          ctx.fillStyle = '#ffffff';
+        if (alpha > 0.08) {
+          ctx.fillStyle = star.tier === 'HERO' ? '#67e8f9' : '#ffffff';
           ctx.globalAlpha = alpha;
           ctx.fillRect(sx, sy, star.tier === 'HERO' ? 2 : 1, star.tier === 'HERO' ? 2 : 1);
         }
@@ -91,29 +92,29 @@ export class PixelCanvasRenderer {
     if (sky.sunVisible && sky.sunElevation > 0.0) {
       const sunX = Math.floor(sky.sunHeadingNorm * width);
       const sunY = Math.floor(horizonRow * (1.0 - sky.sunElevation * 0.78));
-      const sunRadius = (sky.timePhase === 'GOLDEN_HOUR' || sky.timePhase === 'SUNSET') ? 12 : 9;
+      const sunRadius = (sky.timePhase === 'GOLDEN_HOUR' || sky.timePhase === 'SUNSET') ? 14 : 10;
 
-      // Sun Halo
-      const haloGrad = ctx.createRadialGradient(sunX, sunY, sunRadius * 0.5, sunX, sunY, sunRadius * 2.2);
+      // Sun Halo Corona
+      const haloGrad = ctx.createRadialGradient(sunX, sunY, sunRadius * 0.4, sunX, sunY, sunRadius * 2.5);
       haloGrad.addColorStop(0, sky.sunColor);
       haloGrad.addColorStop(1, 'transparent');
       ctx.fillStyle = haloGrad;
-      ctx.globalAlpha = 0.4;
+      ctx.globalAlpha = 0.45;
       ctx.beginPath();
-      ctx.arc(sunX, sunY, sunRadius * 2.2, 0, Math.PI * 2);
+      ctx.arc(sunX, sunY, sunRadius * 2.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalAlpha = 1.0;
 
       // Solid Sun Disc
       if (sky.timePhase === 'GOLDEN_HOUR' || sky.timePhase === 'SUNSET') {
-        // Striated Synthwave / Arcade Sunset Sun
+        // Striated Synthwave / OutRun Sunset Sun with horizontal slit bands
         for (let r = -sunRadius; r <= sunRadius; r++) {
           const dy = r;
           const halfSpan = Math.floor(Math.sqrt(Math.max(0, sunRadius * sunRadius - dy * dy)));
           if (halfSpan <= 0) continue;
 
-          // OutRun horizontal slit bands
-          if (dy > 0 && dy % 3 === 0) continue;
+          // OutRun horizontal scanline bands
+          if (dy > 0 && dy % 2 === 0) continue;
 
           const t = (dy + sunRadius) / (sunRadius * 2);
           ctx.fillStyle = t < 0.5
@@ -133,20 +134,30 @@ export class PixelCanvasRenderer {
     if (sky.moonVisible && sky.moonElevation > 0.0) {
       const moonX = Math.floor(sky.moonHeadingNorm * width);
       const moonY = Math.floor(horizonRow * (1.0 - sky.moonElevation * 0.75));
-      const moonRadius = 7;
+      const moonRadius = 8;
 
+      // Soft Moon Halo
+      ctx.fillStyle = '#67e8f9';
+      ctx.globalAlpha = 0.25;
+      ctx.beginPath();
+      ctx.arc(moonX, moonY, moonRadius * 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+
+      // Solid Moon Disc
       ctx.fillStyle = '#f8fafc';
       ctx.beginPath();
       ctx.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
       ctx.fill();
 
-      // Subtle Craters
+      // Craters
       ctx.fillStyle = '#94a3b8';
-      ctx.fillRect(moonX - 2, moonY - 1, 2, 2);
+      ctx.fillRect(moonX - 3, moonY - 2, 2, 2);
       ctx.fillRect(moonX + 1, moonY + 1, 2, 2);
+      ctx.fillRect(moonX - 1, moonY + 3, 2, 1);
     }
 
-    // 4. SOLID VOLUMETRIC CLOUDS
+    // 4. VOLUMETRIC SOLID PIXEL CLOUDS
     const clouds = worldEngine.getSkyDirector().getCloudManager().getInstances();
     for (const cloud of clouds) {
       const matrix = cloud.mask.matrix;
@@ -173,16 +184,16 @@ export class PixelCanvasRenderer {
       }
     }
 
-    // 5. PARALLAX HORIZON MOUNTAINS / SKYLINE
-    this.renderHorizonSilhouettes(ctx, width, horizonRow, biome.id, camera.x, palette.mountains);
+    // 5. PARALLAX HORIZON MOUNTAINS / SKYLINE (3-Layer Depth)
+    this.renderHorizonSilhouettes(ctx, width, horizonRow, biome.id, camera.x, palette.mountains, sky.horizonGlowColor);
 
-    // 6. 3D PERSPECTIVE ROAD & MULTI-BAND TERRAIN
+    // 6. 3D PERSPECTIVE ARCADE ROAD & TERRAIN (Dominant OutRun Perspective)
     this.render3DRoadAndTerrain(ctx, width, height, horizonRow, worldEngine, state, palette);
 
-    // 7. PERSPECTIVE-SCALED SCENERY SPRITES & VEHICLES
+    // 7. PERSPECTIVE-SCALED SCENERY SPRITES & TRAFFIC
     this.renderWorldEntities(ctx, width, height, horizonRow, worldEngine, state);
 
-    // 8. PLAYER VEHICLE (OutRun Red Roadster)
+    // 8. PROTAGONIST PLAYER VEHICLE (OutRun Red Roadster with Turn Tilt)
     this.renderPlayerVehicle(ctx, width, height, state);
 
     // 9. ATMOSPHERIC WEATHER (Rain, Snow, Lightning)
@@ -190,7 +201,7 @@ export class PixelCanvasRenderer {
   }
 
   /**
-   * Renders solid pixel-art parallax mountain ranges and silhouettes.
+   * Renders solid pixel-art multi-layer parallax mountain ranges and skyline silhouettes.
    */
   private renderHorizonSilhouettes(
     ctx: CanvasRenderingContext2D,
@@ -198,7 +209,8 @@ export class PixelCanvasRenderer {
     horizonRow: number,
     biomeId: string,
     cameraX: number,
-    baseColor: string
+    baseColor: string,
+    horizonGlow: string
   ): void {
     const isTropical = biomeId === 'TROPICAL';
     const isDesert = biomeId === 'DESERT';
@@ -206,48 +218,93 @@ export class PixelCanvasRenderer {
     const isCyber = biomeId === 'NEON_CITY';
 
     if (isCyber) {
+      // Atmospheric Cyber Horizon Glow
+      ctx.fillStyle = horizonGlow;
+      ctx.globalAlpha = 0.25;
+      ctx.fillRect(0, horizonRow - 4, width, 4);
+      ctx.globalAlpha = 1.0;
+
       // Cyberpunk Metropolis Skyline
-      const camOffset = (cameraX * 0.02) % width;
-      ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.45);
+      // Layer 1: Distant Spire silhouettes
+      const camOffset1 = (cameraX * 0.008) % width;
+      ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.35);
+      for (let x = 0; x < width; x += 32) {
+        const bx = (x - camOffset1 + width * 2) % width;
+        ctx.fillRect(bx, horizonRow - 45, 12, 45);
+        ctx.fillRect(bx + 4, horizonRow - 58, 4, 13);
+      }
+
+      // Layer 2: Mid Skyscrapers with Neon Windows
+      const camOffset2 = (cameraX * 0.016) % width;
+      ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.55);
       const buildings = [
-        { x: 10, w: 18, h: 28 }, { x: 35, w: 14, h: 42 }, { x: 55, w: 22, h: 22 },
-        { x: 85, w: 16, h: 36 }, { x: 110, w: 26, h: 48 }, { x: 145, w: 15, h: 30 },
-        { x: 170, w: 20, h: 38 }, { x: 200, w: 18, h: 25 }, { x: 225, w: 24, h: 45 },
-        { x: 260, w: 16, h: 34 }, { x: 285, w: 22, h: 40 },
+        { x: 10, w: 22, h: 32 }, { x: 40, w: 18, h: 46 }, { x: 65, w: 26, h: 26 },
+        { x: 98, w: 20, h: 40 }, { x: 125, w: 30, h: 52 }, { x: 165, w: 18, h: 34 },
+        { x: 190, w: 24, h: 42 }, { x: 220, w: 22, h: 28 }, { x: 250, w: 28, h: 48 },
+        { x: 288, w: 20, h: 36 },
       ];
       for (const b of buildings) {
-        const bx = (b.x - camOffset + width * 2) % width;
+        const bx = (b.x - camOffset2 + width * 2) % width;
         ctx.fillRect(bx, horizonRow - b.h, b.w, b.h);
-        // Illuminated Windows / Neon Trims
+
+        // Neon Windows & Cyan Roof Edges
         ctx.fillStyle = '#38bdf8';
         ctx.fillRect(bx + 2, horizonRow - b.h + 2, b.w - 4, 1);
-        ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.45);
+        ctx.fillRect(bx + 4, horizonRow - b.h + 8, b.w - 8, 1);
+        ctx.fillStyle = '#ec4899';
+        ctx.fillRect(bx + 3, horizonRow - b.h + 16, b.w - 6, 1);
+        ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.55);
       }
     } else if (isDesert) {
-      // Red Rock Canyon Mesas & Flat-Topped Buttes
-      const camOffset = (cameraX * 0.015) % width;
+      // Red Rock Canyon Mesas & Flat-Topped Buttes (Layered)
+      // Layer 1: Distant Pale Canyon Ridges
+      const camOffset1 = (cameraX * 0.008) % width;
+      ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.65);
+      for (let x = 0; x < width; x += 55) {
+        const mx = (x - camOffset1 + width * 2) % width;
+        ctx.fillRect(mx, horizonRow - 12, 45, 12);
+      }
+
+      // Layer 2: Foreground Stepped Mesas
+      const camOffset2 = (cameraX * 0.016) % width;
       ctx.fillStyle = baseColor;
       const mesas = [
-        { x: 15, w: 45, h: 18 }, { x: 80, w: 35, h: 14 },
-        { x: 135, w: 55, h: 22 }, { x: 210, w: 40, h: 16 }, { x: 270, w: 50, h: 20 },
+        { x: 15, w: 50, h: 20 }, { x: 85, w: 40, h: 15 },
+        { x: 145, w: 60, h: 24 }, { x: 225, w: 45, h: 18 }, { x: 285, w: 55, h: 22 },
       ];
       for (const m of mesas) {
-        const mx = (m.x - camOffset + width * 2) % width;
-        // Flat top mesa with steep stepped sides
-        ctx.fillRect(mx + 4, horizonRow - m.h, m.w - 8, m.h);
-        ctx.fillRect(mx + 2, horizonRow - m.h + 3, m.w - 4, m.h - 3);
-        ctx.fillRect(mx, horizonRow - m.h + 6, m.w, m.h - 6);
+        const mx = (m.x - camOffset2 + width * 2) % width;
+        // Flat top mesa with stepped sides
+        ctx.fillRect(mx + 6, horizonRow - m.h, m.w - 12, m.h);
+        ctx.fillRect(mx + 3, horizonRow - m.h + 4, m.w - 6, m.h - 4);
+        ctx.fillRect(mx, horizonRow - m.h + 8, m.w, m.h - 8);
       }
     } else if (isTropical) {
-      // Distant Coastal Island Mountains & Ocean Horizon
-      const camOffset = (cameraX * 0.012) % width;
-      ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.65);
-      const peaks = [
-        { x: 30, w: 55, h: 18 }, { x: 120, w: 40, h: 12 },
-        { x: 190, w: 65, h: 24 }, { x: 275, w: 45, h: 15 },
+      // Coastal Mountain Islands & Ocean Horizon
+      // Layer 1: Distant Islands
+      const camOffset1 = (cameraX * 0.006) % width;
+      ctx.fillStyle = ColorPalette.scaleBrightness(baseColor, 0.50);
+      const distantIslands = [
+        { x: 20, w: 70, h: 16 }, { x: 130, w: 55, h: 12 },
+        { x: 215, w: 80, h: 20 }, { x: 310, w: 60, h: 14 },
       ];
-      for (const p of peaks) {
-        const px = (p.x - camOffset + width * 2) % width;
+      for (const p of distantIslands) {
+        const px = (p.x - camOffset1 + width * 2) % width;
+        ctx.beginPath();
+        ctx.moveTo(px, horizonRow);
+        ctx.lineTo(px + p.w * 0.5, horizonRow - p.h);
+        ctx.lineTo(px + p.w, horizonRow);
+        ctx.fill();
+      }
+
+      // Layer 2: Foreground Headland
+      const camOffset2 = (cameraX * 0.014) % width;
+      ctx.fillStyle = baseColor;
+      const nearPeaks = [
+        { x: 50, w: 45, h: 12 }, { x: 170, w: 50, h: 15 }, { x: 280, w: 40, h: 10 },
+      ];
+      for (const p of nearPeaks) {
+        const px = (p.x - camOffset2 + width * 2) % width;
         ctx.beginPath();
         ctx.moveTo(px, horizonRow);
         ctx.lineTo(px + p.w * 0.5, horizonRow - p.h);
@@ -258,29 +315,39 @@ export class PixelCanvasRenderer {
       // Jagged Glacial Peaks with Snow Caps
       const camOffset = (cameraX * 0.014) % width;
       ctx.fillStyle = baseColor;
-      for (let x = 0; x < width; x += 18) {
+      for (let x = 0; x < width; x += 22) {
         const px = (x - camOffset + width * 2) % width;
-        const h = 12 + Math.floor(Math.sin((x + 10) * 0.15) * 8);
+        const h = 16 + Math.floor(Math.sin((x + 10) * 0.15) * 10);
         ctx.beginPath();
         ctx.moveTo(px, horizonRow);
-        ctx.lineTo(px + 10, horizonRow - h);
-        ctx.lineTo(px + 20, horizonRow);
+        ctx.lineTo(px + 11, horizonRow - h);
+        ctx.lineTo(px + 22, horizonRow);
         ctx.fill();
+
+        // Snow Cap
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.moveTo(px + 5, horizonRow - h + 7);
+        ctx.lineTo(px + 11, horizonRow - h);
+        ctx.lineTo(px + 17, horizonRow - h + 7);
+        ctx.fill();
+        ctx.fillStyle = baseColor;
       }
     } else {
       // Rolling Forest Ridges
       const camOffset = (cameraX * 0.012) % width;
       ctx.fillStyle = baseColor;
       for (let x = 0; x < width; x += 2) {
-        const wx = (x + camOffset) * 0.05;
-        const h = Math.max(4, Math.floor(Math.sin(wx) * 6 + Math.sin(wx * 2.3) * 3 + 10));
+        const wx = (x + camOffset) * 0.04;
+        const h = Math.max(6, Math.floor(Math.sin(wx) * 8 + Math.sin(wx * 2.3) * 4 + 12));
         ctx.fillRect(x, horizonRow - h, 2, h);
       }
     }
   }
 
   /**
-   * Renders 3D perspective road scanlines, alternating rumble curbs, and terrain bands.
+   * Renders 3D perspective arcade road scanlines, alternating rumble curbs, and terrain bands.
+   * Dominant OutRun road geometry (wide foreground convergence to distant horizon).
    */
   private render3DRoadAndTerrain(
     ctx: CanvasRenderingContext2D,
@@ -293,11 +360,11 @@ export class PixelCanvasRenderer {
   ): void {
     const road = worldEngine.getRoad();
     const camera = state.camera;
-    const drawDistance = 1000;
+    const drawDistance = 1100;
     const stepZ = road.segmentLength;
     const startZ = Math.floor((camera.z + 10) / stepZ) * stepZ;
     const endZ = startZ + drawDistance;
-    const halfRoadWidth = road.defaultRoadWidth * 0.5;
+    const halfRoadWidth = road.defaultRoadWidth * 0.82; // Wider OutRun road width
 
     const isTropical = state.biomeBlend.currentBiome.id === 'TROPICAL';
 
@@ -321,12 +388,12 @@ export class PixelCanvasRenderer {
         camera,
         width,
         height,
-        0.40
+        0.48 // Wider FOV for imposing arcade road
       );
 
-      if (proj.visible && proj.screenY >= horizonRow) {
+      if (proj.visible && proj.screenY >= horizonRow - 1) {
         slices.push({
-          sy: proj.screenY,
+          sy: Math.max(horizonRow, proj.screenY),
           sx: proj.screenX,
           hw: proj.halfWidth,
           z,
@@ -349,32 +416,32 @@ export class PixelCanvasRenderer {
       const yTop = Math.round(far.sy);
       if (yBot <= yTop) continue;
 
-      const isEven = Math.floor(near.z / 30) % 2 === 0;
+      const isEven = Math.floor(near.z / 25) % 2 === 0;
 
       // 1. Terrain Sidewalk / Grass / Ocean
-      const groundColor = isEven ? palette.ground : ColorPalette.scaleBrightness(palette.ground, 1.12);
+      const groundColor = isEven ? palette.ground : ColorPalette.scaleBrightness(palette.ground, 1.15);
       ctx.fillStyle = groundColor;
       ctx.fillRect(0, yTop, width, yBot - yTop);
 
       // Tropical Right-Side Ocean with animated wave foam
       if (isTropical) {
         const rightRoadX = near.sx + near.hw;
-        const oceanStart = rightRoadX + near.hw * 0.8;
+        const oceanStart = rightRoadX + near.hw * 0.45;
         if (oceanStart < width) {
           const oceanColor = isEven ? '#0284c7' : '#0369a1';
           ctx.fillStyle = oceanColor;
           ctx.fillRect(Math.floor(oceanStart), yTop, width - Math.floor(oceanStart), yBot - yTop);
 
           // Shoreline white foam ripple
-          ctx.fillStyle = '#e0f2fe';
-          ctx.fillRect(Math.floor(oceanStart) - 1, yTop, 2, yBot - yTop);
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillRect(Math.floor(oceanStart) - 2, yTop, 3, yBot - yTop);
         }
       }
 
-      // 2. OutRun Red & White Rumble Curbs (Kerbs)
-      const curbWidthNear = Math.max(3, Math.round(near.hw * 0.12));
-      const curbWidthFar = Math.max(2, Math.round(far.hw * 0.12));
-      const curbColor = isEven ? '#ef4444' : '#f8fafc'; // Red & White alternating stripes
+      // 2. OutRun Red & White Rumble Curbs (Kerbs) - Wide & Bold
+      const curbWidthNear = Math.max(3, Math.round(near.hw * 0.16));
+      const curbWidthFar = Math.max(2, Math.round(far.hw * 0.16));
+      const curbColor = isEven ? '#dc2626' : '#f8fafc'; // Pure Red & White alternating stripes
 
       // Left Curb
       ctx.fillStyle = curbColor;
@@ -393,8 +460,8 @@ export class PixelCanvasRenderer {
       ctx.lineTo(far.sx + far.hw, yTop);
       ctx.fill();
 
-      // 3. Solid Asphalt Road
-      const roadColor = isEven ? palette.road : ColorPalette.scaleBrightness(palette.road, 1.15);
+      // 3. Solid High-Contrast Asphalt Road
+      const roadColor = isEven ? palette.road : ColorPalette.scaleBrightness(palette.road, 1.25);
       ctx.fillStyle = roadColor;
       ctx.beginPath();
       ctx.moveTo(near.sx - near.hw, yBot);
@@ -403,11 +470,11 @@ export class PixelCanvasRenderer {
       ctx.lineTo(far.sx - far.hw, yTop);
       ctx.fill();
 
-      // 4. Dashed Gold Center Lane Markers
+      // 4. Dashed Gold Center Lane Markers (3 Lanes)
       if (isEven) {
-        const laneWNear = Math.max(1, Math.round(near.hw * 0.035));
-        const laneWFar = Math.max(1, Math.round(far.hw * 0.035));
-        ctx.fillStyle = palette.roadMarking;
+        const laneWNear = Math.max(1, Math.round(near.hw * 0.04));
+        const laneWFar = Math.max(1, Math.round(far.hw * 0.04));
+        ctx.fillStyle = '#fde047'; // Bright Gold
 
         // 3-Lane dividers (left divider, right divider)
         const leftLaneNear = near.sx - near.hw * 0.33;
@@ -460,7 +527,7 @@ export class PixelCanvasRenderer {
     const visibleScenery = worldEngine.getDirector().getScenery();
     for (const item of visibleScenery) {
       const relZ = item.z - camera.z;
-      if (relZ > 15 && relZ < 1050) {
+      if (relZ > 20 && relZ < 1050) {
         const roadElevation = worldEngine.getRoad().getElevationAt(item.z);
         const proj = Perspective.project(
           item.x,
@@ -469,16 +536,18 @@ export class PixelCanvasRenderer {
           camera,
           width,
           height,
-          0.40
+          0.48
         );
 
         if (proj.visible && proj.screenY >= horizonRow) {
           const sprite = PixelSpriteCatalog.getScenerySprite(item.sprite.id, biomeId);
+          // Proportional scaling clamped to prevent screen-covering oversized sprites
+          const clampedScale = Math.min(2.4, Math.max(0.25, proj.scale * 2.4));
           entities.push({
             z: proj.depth,
             screenX: proj.screenX,
             screenY: proj.screenY,
-            scale: proj.scale,
+            scale: clampedScale,
             sprite,
           });
         }
@@ -497,16 +566,17 @@ export class PixelCanvasRenderer {
         camera,
         width,
         height,
-        0.40
+        0.48
       );
 
       if (proj.visible && proj.screenY >= horizonRow && proj.depth > 15) {
         const sprite = veh.vehicleType === 'coupe' ? PixelSpriteCatalog.TRAFFIC_CABRIO : PixelSpriteCatalog.TRAFFIC_SEDAN;
+        const clampedScale = Math.min(2.2, Math.max(0.3, proj.scale * 2.2));
         entities.push({
           z: proj.depth,
           screenX: proj.screenX,
           screenY: proj.screenY,
-          scale: proj.scale,
+          scale: clampedScale,
           sprite,
         });
       }
@@ -517,12 +587,12 @@ export class PixelCanvasRenderer {
 
     // Draw Entities
     for (const e of entities) {
-      this.drawPixelSprite(ctx, e.sprite, e.screenX, e.screenY, e.scale * 3.2);
+      this.drawPixelSprite(ctx, e.sprite, e.screenX, e.screenY, e.scale);
     }
   }
 
   /**
-   * Renders the Player's OutRun Retro Red Roadster.
+   * Renders the Player's OutRun Retro Red Roadster with Turn Banking & Brake Glow.
    */
   private renderPlayerVehicle(
     ctx: CanvasRenderingContext2D,
@@ -530,11 +600,20 @@ export class PixelCanvasRenderer {
     height: number,
     state: WorldState
   ): void {
-    const playerX = Math.round(width * 0.5 + state.player.x * 0.08);
-    const playerY = height - 22;
+    const playerX = Math.round(width * 0.5 + state.player.x * 0.12);
+    const playerY = height - 12;
     const sprite = PixelSpriteCatalog.PLAYER_CAR_STRAIGHT;
 
-    this.drawPixelSprite(ctx, sprite, playerX, playerY, 1.35);
+    // Road contact shadow under tires
+    ctx.fillStyle = '#020617';
+    ctx.globalAlpha = 0.65;
+    ctx.beginPath();
+    ctx.ellipse(playerX, playerY - 1, 24, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+
+    // Draw player roadster
+    this.drawPixelSprite(ctx, sprite, playerX, playerY, 1.45);
   }
 
   /**
@@ -561,16 +640,16 @@ export class PixelCanvasRenderer {
     if (weather.type === 'LIGHT_RAIN' || weather.type === 'HEAVY_RAIN' || weather.type === 'THUNDERSTORM') {
       ctx.strokeStyle = '#93c5fd';
       ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.5;
-      const count = weather.type === 'LIGHT_RAIN' ? 40 : 100;
-      const timeSeed = state.worldTime * 20;
+      ctx.globalAlpha = 0.55;
+      const count = weather.type === 'LIGHT_RAIN' ? 45 : 110;
+      const timeSeed = state.worldTime * 25;
 
       for (let i = 0; i < count; i++) {
-        const rx = ((i * 17.3 + timeSeed * 3) % width);
-        const ry = ((i * 31.7 + timeSeed * 18) % height);
+        const rx = ((i * 17.3 + timeSeed * 4) % width);
+        const ry = ((i * 31.7 + timeSeed * 22) % height);
         ctx.beginPath();
         ctx.moveTo(rx, ry);
-        ctx.lineTo(rx - 2, ry + 6);
+        ctx.lineTo(rx - 3, ry + 8);
         ctx.stroke();
       }
       ctx.globalAlpha = 1.0;
@@ -580,12 +659,12 @@ export class PixelCanvasRenderer {
     if (weather.type === 'SNOW' || weather.type === 'BLIZZARD') {
       ctx.fillStyle = '#f8fafc';
       ctx.globalAlpha = 0.85;
-      const count = weather.type === 'BLIZZARD' ? 120 : 60;
-      const timeSeed = state.worldTime * 10;
+      const count = weather.type === 'BLIZZARD' ? 130 : 65;
+      const timeSeed = state.worldTime * 12;
 
       for (let i = 0; i < count; i++) {
-        const sx = ((i * 23.5 + Math.sin(timeSeed + i) * 12 + timeSeed * 2) % width);
-        const sy = ((i * 41.2 + timeSeed * 8) % height);
+        const sx = ((i * 23.5 + Math.sin(timeSeed + i) * 14 + timeSeed * 2.5) % width);
+        const sy = ((i * 41.2 + timeSeed * 9) % height);
         ctx.fillRect(sx, sy, 1, 1);
       }
       ctx.globalAlpha = 1.0;
