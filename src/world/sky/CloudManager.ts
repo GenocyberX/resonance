@@ -1,12 +1,12 @@
 import { FrameBuffer } from '../../ascii/FrameBuffer';
 import { SeededRandom } from '../../procedural/SeededRandom';
-import { ColorPalette } from '../../ascii/ColorPalette';
 import {
   CloudCoverage,
   CloudFormation,
   CloudLayerInstance,
   WeatherType,
 } from './SkyTypes';
+import { CloudSpriteLibrary } from './CloudSpriteLibrary';
 
 export class CloudManager {
   private rng: SeededRandom;
@@ -15,257 +15,8 @@ export class CloudManager {
   private gridWidth: number = 0;
   private gridHeight: number = 0;
 
-  // 21 Handcrafted Volumetric Retro Arcade Pseudo-Pixel-Art Cloud Formations across 7 Families
-  public static readonly CLOUD_PRESETS: CloudFormation[] = [
-    // 1. SMALL_ISOLATED (3 Variants) - 10 to 14 chars wide, 3 lines
-    {
-      id: 'small_1',
-      type: 'SMALL_ISOLATED',
-      width: 12,
-      height: 3,
-      lines: [
-        '  .-----.   ',
-        '.-( ░░░ )-. ',
-        '(___________)',
-      ],
-    },
-    {
-      id: 'small_2',
-      type: 'SMALL_ISOLATED',
-      width: 14,
-      height: 3,
-      lines: [
-        '   .------.   ',
-        ' .-( ░▒▒░ )-. ',
-        '(____________)',
-      ],
-    },
-    {
-      id: 'small_3',
-      type: 'SMALL_ISOLATED',
-      width: 14,
-      height: 3,
-      lines: [
-        '  .--.  .--.  ',
-        '.-( ░░::░░ )-.',
-        '(____________)',
-      ],
-    },
-
-    // 2. MEDIUM_COMPACT (3 Variants) - 18 to 20 chars wide, 4 lines
-    {
-      id: 'med_1',
-      type: 'MEDIUM_COMPACT',
-      width: 18,
-      height: 4,
-      lines: [
-        '     .-------.    ',
-        '  .-/ ░░░░░░░ \\-. ',
-        ' (   ▒▒▒▒▒▒▒▒▒   )',
-        '(_________________)',
-      ],
-    },
-    {
-      id: 'med_2',
-      type: 'MEDIUM_COMPACT',
-      width: 20,
-      height: 4,
-      lines: [
-        '    .--------.      ',
-        " .-' ░░░░░░░░ '-.   ",
-        '(   ▒▒▒▒▒▒▒▒▒▒   )  ',
-        ' (______________)   ',
-      ],
-    },
-    {
-      id: 'med_3',
-      type: 'MEDIUM_COMPACT',
-      width: 18,
-      height: 4,
-      lines: [
-        '   .---.  .---.   ',
-        " .-' ░░ '' ░░ '-. ",
-        '(   ▒▒▒▒▒▒▒▒▒▒   )',
-        ' (______________) ',
-      ],
-    },
-
-    // 3. WIDE_LOW (3 Variants) - 24 to 28 chars wide, 3 lines
-    {
-      id: 'wide_1',
-      type: 'WIDE_LOW',
-      width: 24,
-      height: 3,
-      lines: [
-        '   .~~--......--~~.     ',
-        ' .-(   ░░░▒▒▒▒░░░   )-. ',
-        '(______________________) ',
-      ],
-    },
-    {
-      id: 'wide_2',
-      type: 'WIDE_LOW',
-      width: 28,
-      height: 3,
-      lines: [
-        '  .~~~~---........---~~~~.  ',
-        ' (     ░░░▒▒▒▒▒▒▒▒░░░     ) ',
-        '(__________________________)',
-      ],
-    },
-    {
-      id: 'wide_3',
-      type: 'WIDE_LOW',
-      width: 26,
-      height: 3,
-      lines: [
-        '   .---.            .---.   ',
-        " .-( ░░ '--......--' ░░ )-. ",
-        '(__________________________)',
-      ],
-    },
-
-    // 4. LARGE_VOLUMETRIC (3 Variants) - 28 to 30 chars wide, 5-6 lines
-    {
-      id: 'large_1',
-      type: 'LARGE_VOLUMETRIC',
-      width: 28,
-      height: 6,
-      lines: [
-        '        .--------.          ',
-        '     .-/ ░░░░░░░░ \\-.       ',
-        "   .-'  ░░░░░░░░░░  '-.     ",
-        '  (    ▒▒▒▒▒▒▒▒▒▒▒▒    )    ',
-        ' (    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓    )   ',
-        '(________________________)  ',
-      ],
-    },
-    {
-      id: 'large_2',
-      type: 'LARGE_VOLUMETRIC',
-      width: 30,
-      height: 5,
-      lines: [
-        '       .----.    .----.       ',
-        '    .-/ ░░░░ \\--/ ░░░░ \\-.    ',
-        "  .-'  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  '-.  ",
-        ' (    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓   )  ',
-        '(____________________________)',
-      ],
-    },
-    {
-      id: 'large_3',
-      type: 'LARGE_VOLUMETRIC',
-      width: 28,
-      height: 5,
-      lines: [
-        '      .------------.        ',
-        "   .-'  ░░░░░░░░░░  '-.     ",
-        " .-'   ▒▒▒▒▒▒▒▒▒▒▒▒   '-.   ",
-        '(     ▓▓▓▓▓▓▓▓▓▓▓▓▓▓     )  ',
-        '(________________________)  ',
-      ],
-    },
-
-    // 5. HORIZON_BANK (3 Variants) - 32 to 36 chars wide, 3 lines
-    {
-      id: 'horizon_bank_1',
-      type: 'HORIZON_BANK',
-      width: 34,
-      height: 3,
-      lines: [
-        '  .~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.  ',
-        ' (   ░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░   ) ',
-        '(__________________________________)',
-      ],
-    },
-    {
-      id: 'horizon_bank_2',
-      type: 'HORIZON_BANK',
-      width: 36,
-      height: 3,
-      lines: [
-        ' .~~--..~~~~~~~~~~~~~~~~~~~~..--~~. ',
-        '(   ░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░   )',
-        '(__________________________________)',
-      ],
-    },
-    {
-      id: 'horizon_bank_3',
-      type: 'HORIZON_BANK',
-      width: 32,
-      height: 3,
-      lines: [
-        '  .~~~~~~~~~~~~~~~~~~~~~~~~~~~~.  ',
-        ' (   ░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░   ) ',
-        '(________________________________)',
-      ],
-    },
-
-    // 6. HIGH_CIRRUS (3 Variants) - 14 to 18 chars wide, 1 line
-    {
-      id: 'high_cirrus_1',
-      type: 'HIGH_CIRRUS',
-      width: 16,
-      height: 1,
-      lines: [
-        '---...    ...---',
-      ],
-    },
-    {
-      id: 'high_cirrus_2',
-      type: 'HIGH_CIRRUS',
-      width: 18,
-      height: 1,
-      lines: [
-        '   ...-------...  ',
-      ],
-    },
-    {
-      id: 'high_cirrus_3',
-      type: 'HIGH_CIRRUS',
-      width: 16,
-      height: 1,
-      lines: [
-        '--.   .---.   .--',
-      ],
-    },
-
-    // 7. OVERCAST_CANOPY (3 Variants) - 38 chars wide, 3 lines
-    {
-      id: 'overcast_1',
-      type: 'OVERCAST_CANOPY',
-      width: 38,
-      height: 3,
-      lines: [
-        '.~~~~~~-------..........-------~~~~~~.',
-        '(     ░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░     )',
-        '(____________________________________)',
-      ],
-    },
-    {
-      id: 'overcast_2',
-      type: 'OVERCAST_CANOPY',
-      width: 38,
-      height: 3,
-      lines: [
-        '.~~~~~---....................---~~~~~.',
-        '(    ░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░    )',
-        '(____________________________________)',
-      ],
-    },
-    {
-      id: 'overcast_3',
-      type: 'OVERCAST_CANOPY',
-      width: 38,
-      height: 3,
-      lines: [
-        '.~~~~---------..........---------~~~~.',
-        '(    ░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░    )',
-        '(____________________________________)',
-      ],
-    },
-  ];
+  // Expose CloudSpriteLibrary presets
+  public static readonly CLOUD_PRESETS: CloudFormation[] = CloudSpriteLibrary.PRESETS;
 
   constructor(seed: number) {
     this.rng = new SeededRandom(seed ^ 0x3c6ef372);
@@ -282,22 +33,22 @@ export class CloudManager {
     switch (weather) {
       case 'CLEAR':
       case 'HEAT_HAZE':
-        return { coverage: 'CLEAR', ratio: 0.12 };
+        return { coverage: 'CLEAR', ratio: 0.15 };
       case 'CLOUDY':
-        return { coverage: 'SCATTERED', ratio: 0.48 };
+        return { coverage: 'SCATTERED', ratio: 0.50 };
       case 'LIGHT_RAIN':
       case 'SNOW':
       case 'NEON_MIST':
-        return { coverage: 'MOSTLY_CLOUDY', ratio: 0.72 };
+        return { coverage: 'MOSTLY_CLOUDY', ratio: 0.75 };
       case 'HEAVY_RAIN':
       case 'THUNDERSTORM':
       case 'BLIZZARD':
-        return { coverage: 'OVERCAST', ratio: 0.94 };
+        return { coverage: 'OVERCAST', ratio: 0.95 };
       case 'FOG':
       case 'VOLCANIC_ASH':
-        return { coverage: 'MOSTLY_CLOUDY', ratio: 0.75 };
+        return { coverage: 'MOSTLY_CLOUDY', ratio: 0.78 };
       default:
-        return { coverage: 'FEW', ratio: 0.28 };
+        return { coverage: 'FEW', ratio: 0.30 };
     }
   }
 
@@ -306,98 +57,192 @@ export class CloudManager {
   }
 
   /**
-   * Initializes or reconfigures cloud instances across parallax layers for vibrant, living skies.
+   * Initializes cloud compositions according to strict coverage rules and pseudo-pixel arcade density.
    */
   public initCloudLayers(coverage: CloudCoverage, celestialAvoidHeading: number | null = null): void {
     this.instances = [];
 
-    // Filter presets by family
-    const highPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'HIGH_CIRRUS' || p.type === 'SMALL_ISOLATED');
-    const midPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'MEDIUM_COMPACT' || p.type === 'WIDE_LOW');
-    const lowPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'LARGE_VOLUMETRIC' || p.type === 'HORIZON_BANK' || p.type === 'OVERCAST_CANOPY');
+    const smallPresets = CloudSpriteLibrary.PRESETS.filter(p => p.type === 'PUFF_SMALL');
+    const medPresets = CloudSpriteLibrary.PRESETS.filter(p => p.type === 'CUMULUS_MEDIUM');
+    const largePresets = CloudSpriteLibrary.PRESETS.filter(p => p.type === 'CUMULUS_LARGE');
+    const bankPresets = CloudSpriteLibrary.PRESETS.filter(p => p.type === 'CLOUD_BANK');
+    const stormPresets = CloudSpriteLibrary.PRESETS.filter(p => p.type === 'STORM_MASS');
 
-    // Rich instance count distribution
-    let highCount = 0;
-    let midCount = 0;
-    let lowCount = 0;
-
-    switch (coverage) {
-      case 'CLEAR':
-        highCount = 1;
-        midCount = 1;
-        lowCount = 0;
-        break;
-      case 'FEW':
-        highCount = 2;
-        midCount = 2;
-        lowCount = 0;
-        break;
-      case 'SCATTERED':
-        highCount = 2;
-        midCount = 3;
-        lowCount = 2;
-        break;
-      case 'MOSTLY_CLOUDY':
-        highCount = 3;
-        midCount = 4;
-        lowCount = 3;
-        break;
-      case 'OVERCAST':
-        highCount = 4;
-        midCount = 5;
-        lowCount = 5;
-        break;
-    }
-
-    // Helper: Select xNorm with optional gentle celestial buffer in clear weather
+    // Helper: Pick X coordinate with celestial avoidance in clear/few weather
     const pickX = (baseX: number, isOvercast: boolean): number => {
       let x = (baseX + this.rng.range(-0.06, 0.06) + 1.0) % 1.0;
       if (celestialAvoidHeading !== null && !isOvercast && (coverage === 'CLEAR' || coverage === 'FEW')) {
         const dist = Math.abs(x - celestialAvoidHeading);
         if (dist < 0.12) {
-          x = (x + (x >= celestialAvoidHeading ? 0.15 : -0.15) + 1.0) % 1.0;
+          x = (x + (x >= celestialAvoidHeading ? 0.16 : -0.16) + 1.0) % 1.0;
         }
       }
       return x;
     };
 
-    // Layer 1: HIGH Parallax Layer (Cirrus & Small Puffs, High Altitude)
-    for (let i = 0; i < highCount; i++) {
-      const formation = this.rng.choice(highPresets);
-      this.instances.push({
-        xNorm: pickX((i + 0.3) / Math.max(1, highCount), coverage === 'OVERCAST'),
-        yNorm: this.rng.range(0.04, 0.18),
-        speed: 0.0012,
-        formation,
-        layer: 'HIGH',
-        alpha: 0.75,
-      });
-    }
+    switch (coverage) {
+      case 'CLEAR': {
+        // 1-2 small puffs + 1 optional medium cumulus
+        const count = this.rng.rangeInt(1, 3);
+        for (let i = 0; i < count; i++) {
+          const formation = (i === 0) ? this.rng.choice(smallPresets) : this.rng.choice(medPresets);
+          this.instances.push({
+            xNorm: pickX(0.25 + i * 0.45, false),
+            yNorm: this.rng.range(0.06, 0.22),
+            speed: 0.0012,
+            formation,
+            layer: i === 0 ? 'HIGH' : 'MID',
+            alpha: 0.85,
+          });
+        }
+        break;
+      }
 
-    // Layer 2: MID Parallax Layer (Medium Cumulus & Wide Low Clouds, Mid Altitude)
-    for (let i = 0; i < midCount; i++) {
-      const formation = this.rng.choice(midPresets);
-      this.instances.push({
-        xNorm: pickX((i + 0.15) / Math.max(1, midCount), coverage === 'OVERCAST'),
-        yNorm: this.rng.range(0.16, 0.38),
-        speed: 0.0028,
-        formation,
-        layer: 'MID',
-        alpha: 0.90,
-      });
-    }
+      case 'FEW': {
+        // 2-4 clouds (1-2 small, 1-2 medium)
+        const smallCount = 2;
+        const medCount = this.rng.rangeInt(1, 2);
 
-    // Layer 3: LOW Parallax Layer (Large Volumetric, Horizon Banks, Overcast Canopy)
-    for (let i = 0; i < lowCount; i++) {
-      const formation = this.rng.choice(lowPresets);
-      this.instances.push({
-        xNorm: pickX((i + 0.5) / Math.max(1, lowCount), coverage === 'OVERCAST'),
-        yNorm: this.rng.range(0.28, 0.55),
-        speed: 0.0048,
-        formation,
-        layer: 'LOW',
-        alpha: 1.0,
-      });
+        for (let i = 0; i < smallCount; i++) {
+          this.instances.push({
+            xNorm: pickX(0.15 + i * 0.50, false),
+            yNorm: this.rng.range(0.05, 0.16),
+            speed: 0.0012,
+            formation: this.rng.choice(smallPresets),
+            layer: 'HIGH',
+            alpha: 0.85,
+          });
+        }
+        for (let i = 0; i < medCount; i++) {
+          this.instances.push({
+            xNorm: pickX(0.40 + i * 0.45, false),
+            yNorm: this.rng.range(0.18, 0.35),
+            speed: 0.0026,
+            formation: this.rng.choice(medPresets),
+            layer: 'MID',
+            alpha: 0.95,
+          });
+        }
+        break;
+      }
+
+      case 'SCATTERED': {
+        // 3-6 clouds: 1 large cumulus + 2 medium cumulus + 1-2 small puffs
+        this.instances.push({
+          xNorm: pickX(0.60, false),
+          yNorm: this.rng.range(0.14, 0.30),
+          speed: 0.0040,
+          formation: this.rng.choice(largePresets),
+          layer: 'LOW',
+          alpha: 1.0,
+        });
+
+        for (let i = 0; i < 2; i++) {
+          this.instances.push({
+            xNorm: pickX(0.15 + i * 0.50, false),
+            yNorm: this.rng.range(0.16, 0.36),
+            speed: 0.0025,
+            formation: this.rng.choice(medPresets),
+            layer: 'MID',
+            alpha: 0.95,
+          });
+        }
+
+        for (let i = 0; i < 2; i++) {
+          this.instances.push({
+            xNorm: pickX(0.35 + i * 0.45, false),
+            yNorm: this.rng.range(0.04, 0.18),
+            speed: 0.0012,
+            formation: this.rng.choice(smallPresets),
+            layer: 'HIGH',
+            alpha: 0.85,
+          });
+        }
+        break;
+      }
+
+      case 'MOSTLY_CLOUDY': {
+        // 6-8 clouds: 2 large cumulus + 1-2 cloud banks + 2 medium cumulus + 2 small puffs (60-80% sky covered)
+        for (let i = 0; i < 2; i++) {
+          this.instances.push({
+            xNorm: pickX(0.10 + i * 0.55, false),
+            yNorm: this.rng.range(0.16, 0.35),
+            speed: 0.0045,
+            formation: this.rng.choice(largePresets),
+            layer: 'LOW',
+            alpha: 1.0,
+          });
+        }
+
+        this.instances.push({
+          xNorm: pickX(0.40, false),
+          yNorm: this.rng.range(0.32, 0.48),
+          speed: 0.0035,
+          formation: this.rng.choice(bankPresets),
+          layer: 'LOW',
+          alpha: 1.0,
+        });
+
+        for (let i = 0; i < 2; i++) {
+          this.instances.push({
+            xNorm: pickX(0.25 + i * 0.50, false),
+            yNorm: this.rng.range(0.12, 0.28),
+            speed: 0.0026,
+            formation: this.rng.choice(medPresets),
+            layer: 'MID',
+            alpha: 0.95,
+          });
+        }
+
+        for (let i = 0; i < 2; i++) {
+          this.instances.push({
+            xNorm: pickX(0.05 + i * 0.50, false),
+            yNorm: this.rng.range(0.04, 0.16),
+            speed: 0.0012,
+            formation: this.rng.choice(smallPresets),
+            layer: 'HIGH',
+            alpha: 0.85,
+          });
+        }
+        break;
+      }
+
+      case 'OVERCAST': {
+        // 8-10 dense connected storm masses + cloud banks spanning the sky (85-100% covered)
+        for (let i = 0; i < 3; i++) {
+          this.instances.push({
+            xNorm: pickX(i / 3.0, true),
+            yNorm: this.rng.range(0.06, 0.28),
+            speed: 0.0035,
+            formation: this.rng.choice(stormPresets),
+            layer: 'LOW',
+            alpha: 1.0,
+          });
+        }
+
+        for (let i = 0; i < 3; i++) {
+          this.instances.push({
+            xNorm: pickX((i + 0.5) / 3.0, true),
+            yNorm: this.rng.range(0.22, 0.48),
+            speed: 0.0040,
+            formation: this.rng.choice(bankPresets),
+            layer: 'LOW',
+            alpha: 1.0,
+          });
+        }
+
+        for (let i = 0; i < 3; i++) {
+          this.instances.push({
+            xNorm: pickX(i / 3.0, true),
+            yNorm: this.rng.range(0.02, 0.18),
+            speed: 0.0020,
+            formation: this.rng.choice(medPresets),
+            layer: 'MID',
+            alpha: 1.0,
+          });
+        }
+        break;
+      }
     }
   }
 
@@ -452,13 +297,14 @@ export class CloudManager {
   }
 
   /**
-   * Renders all cloud layers with highlight crowns, volumetric pixel dithering, and shaded underbellies.
+   * Renders all cloud layers with solid pseudo-pixel masks and 3-tone lighting.
    */
   public renderClouds(
     fb: FrameBuffer,
     width: number,
     horizonRow: number,
     cloudHighlightColor: string,
+    cloudBodyColor: string,
     cloudShadowColor: string
   ): void {
     // Sort layers: HIGH behind, MID, LOW in front
@@ -471,18 +317,21 @@ export class CloudManager {
       const startX = Math.floor(cloud.xNorm * width);
       const startY = Math.floor(cloud.yNorm * horizonRow);
       const lines = cloud.formation.lines;
+      const totalRows = lines.length;
 
-      for (let r = 0; r < lines.length; r++) {
+      for (let r = 0; r < totalRows; r++) {
         const line = lines[r];
         const cy = startY + r;
         if (cy < 0 || cy >= horizonRow) continue;
 
-        // Tonal grading from top highlight to shaded underside
-        const isTop = r === 0;
-        const isBottom = r === lines.length - 1 && lines.length > 2;
-        const rowColor = isBottom
-          ? cloudShadowColor
-          : (isTop ? cloudHighlightColor : ColorPalette.lerp(cloudHighlightColor, cloudShadowColor, 0.35));
+        // 3-Tone Tonal Grading: Top highlight (0-25%), Body mass (25-70%), Underside shadow (70-100%)
+        const rowFraction = r / Math.max(1, totalRows - 1);
+        let defaultRowColor = cloudBodyColor;
+        if (rowFraction <= 0.25) {
+          defaultRowColor = cloudHighlightColor;
+        } else if (rowFraction >= 0.70) {
+          defaultRowColor = cloudShadowColor;
+        }
 
         for (let c = 0; c < line.length; c++) {
           const ch = line[c];
@@ -490,16 +339,14 @@ export class CloudManager {
             const cx = (startX + c + width) % width;
             const zOrder = cloud.layer === 'LOW' ? 9965 : (cloud.layer === 'MID' ? 9970 : 9975);
 
-            // Subtle pseudo-pixel character coloring
-            let charColor = rowColor;
-            if (ch === '░') {
-              charColor = ColorPalette.lerp(cloudHighlightColor, cloudShadowColor, 0.25);
-            } else if (ch === '▒') {
-              charColor = ColorPalette.lerp(cloudHighlightColor, cloudShadowColor, 0.55);
-            } else if (ch === '▓') {
+            // Per-character pixel density coloring
+            let charColor = defaultRowColor;
+            if (ch === '.') {
+              charColor = cloudHighlightColor;
+            } else if (ch === ':') {
+              charColor = (rowFraction >= 0.65) ? cloudShadowColor : cloudBodyColor;
+            } else if (ch === '▒' || ch === '#' || ch === '*') {
               charColor = cloudShadowColor;
-            } else if (ch === '.' || ch === ':') {
-              charColor = ColorPalette.lerp(rowColor, cloudShadowColor, 0.30);
             }
 
             fb.setCell(cx, cy, ch, charColor, zOrder, undefined, true);

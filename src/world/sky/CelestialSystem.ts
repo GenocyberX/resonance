@@ -29,92 +29,89 @@ export class CelestialSystem {
     'WANING_CRESCENT',
   ];
 
-  // Discrete ASCII art shapes for the 8 lunar phases (5x5 discs with surface crater detail)
+  // Discrete Solid Character Discs for all 8 Lunar Phases (7x5 Solid Discs)
   private static readonly MOON_PHASE_SHAPES: Record<MoonPhase, string[]> = {
     NEW_MOON: [
-      ' .-. ',
-      '(: :)',
-      '| : |',
-      '(: :)',
-      " '-' ",
+      '  .....  ',
+      ' ..:::.. ',
+      '.:::::::.',
+      ' ..:::.. ',
+      '  .....  ',
     ],
     WAXING_CRESCENT: [
-      ' .-. ',
-      '(  :)',
-      '|  )|',
-      '(  :)',
-      " '-' ",
+      '  .....  ',
+      ' ..::#.. ',
+      '.::::##..',
+      ' ..::#.. ',
+      '  .....  ',
     ],
     FIRST_QUARTER: [
-      ' .-. ',
-      '( |#)',
-      '| |#|',
-      '( |#)',
-      " '-' ",
+      '  .....  ',
+      ' ..:##.. ',
+      '.:::###..',
+      ' ..:##.. ',
+      '  .....  ',
     ],
     WAXING_GIBBOUS: [
-      ' .-. ',
-      '(##:)',
-      '|###|',
-      '(##:)',
-      " '-' ",
+      '  .....  ',
+      ' ..###.. ',
+      '.::####..',
+      ' ..###.. ',
+      '  .....  ',
     ],
     FULL_MOON: [
-      ' .-. ',
-      '(###)',
-      '|#o#|',
-      '(###)',
-      " '-' ",
+      '  .....  ',
+      ' ..###.. ',
+      '.##o###..',
+      ' ..###.. ',
+      '  .....  ',
     ],
     WANING_GIBBOUS: [
-      ' .-. ',
-      '(:##)',
-      '|###|',
-      '(:##)',
-      " '-' ",
+      '  .....  ',
+      ' ..###.. ',
+      '.####::..',
+      ' ..###.. ',
+      '  .....  ',
     ],
     LAST_QUARTER: [
-      ' .-. ',
-      '(#| )',
-      '|#| |',
-      '(#| )',
-      " '-' ",
+      '  .....  ',
+      ' ..##:.. ',
+      '.###:::..',
+      ' ..##:.. ',
+      '  .....  ',
     ],
     WANING_CRESCENT: [
-      ' .-. ',
-      '(:  )',
-      '|(  |',
-      '(:  )',
-      " '-' ",
+      '  .....  ',
+      ' ..#::.. ',
+      '.##::::..',
+      ' ..#::.. ',
+      '  .....  ',
     ],
   };
 
-  // Bold, high-presence Sun shapes with distinct visual weight for each diurnal phase
+  // Bold Solid Sun Discs with distinct visual weight for each diurnal phase
   private static readonly SUN_SHAPES = {
-    SUNRISE: [
-      '  \\  |  /  ',
-      '--( === )--',
-      '  /  |  \\  ',
+    SUN_LOW: [
+      '   .......   ',
+      ' ..*******.. ',
+      '.***********.',
+      ' *********** ',
+      '  .*******.  ',
     ],
-    MIDDAY: [
+    SUN_HIGH: [
       '   \\  |  /   ',
-      ' --.-"O"-.-- ',
-      '---|  *  |---',
-      ' --\'-.O.-\'-- ',
+      ' ..*******.. ',
+      '-***********-',
+      ' ..*******.. ',
       '   /  |  \\   ',
     ],
-    GOLDEN: [
-      '  .-------.  ',
-      ' / ======= \\ ',
-      '| ========= |',
-      ' \\ ======= / ',
-      "  '-------'  ",
-    ],
-    LOW_HORIZON: [
-      '  .---------.  ',
-      ' / =========== \\ ',
-      '| ============= |',
-      '-----------------',
+    SUNSET: [
+      '   ...........   ',
+      ' ..***********.. ',
+      '.***************.',
+      ' *************** ',
+      '  .***********.  ',
+      '    .........    ',
     ],
   };
 
@@ -322,7 +319,7 @@ export class CelestialSystem {
   }
 
   /**
-   * Renders celestial stars, sun, moon, and shooting stars with spatial cloud occlusion and radiant halo.
+   * Renders solid celestial bodies (Sun, Moon, Stars) with real spatial cloud occlusion.
    */
   public renderCelestialBodies(
     fb: FrameBuffer,
@@ -375,18 +372,16 @@ export class CelestialSystem {
       }
     }
 
-    // 2. Render Sun with Bold Corona / Disc Presence
+    // 2. Render Sun as Solid Character Disc
     if (sunVisible && sunElev > 0.0) {
       const sunY = Math.floor(horizonRow * (1.0 - sunElev * 0.78));
       const sunX = Math.floor(sunHeading * width);
 
-      let shape = CelestialSystem.SUN_SHAPES.MIDDAY;
-      if (sunElev < 0.20) {
-        shape = CelestialSystem.SUN_SHAPES.LOW_HORIZON;
-      } else if (dayPhase === 'SUNRISE' || dayPhase === 'DAWN') {
-        shape = CelestialSystem.SUN_SHAPES.SUNRISE;
+      let shape = CelestialSystem.SUN_SHAPES.SUN_HIGH;
+      if (sunElev < 0.22) {
+        shape = CelestialSystem.SUN_SHAPES.SUN_LOW;
       } else if (dayPhase === 'GOLDEN_HOUR' || dayPhase === 'SUNSET') {
-        shape = CelestialSystem.SUN_SHAPES.GOLDEN;
+        shape = CelestialSystem.SUN_SHAPES.SUNSET;
       }
 
       const halfW = Math.floor(shape[0].length / 2);
@@ -412,7 +407,7 @@ export class CelestialSystem {
         }
       }
 
-      // Render Sun disc
+      // Render Solid Sun Disc
       for (let r = 0; r < shape.length; r++) {
         const line = shape[r];
         const py = sunY - halfH + r;
@@ -423,14 +418,22 @@ export class CelestialSystem {
           if (ch !== ' ') {
             const px = (sunX - halfW + c + width) % width;
             if (!isOccluded(px, py)) {
-              fb.setCell(px, py, ch, sunColor, 9980, undefined, true);
+              let cellColor = sunColor;
+              if (shape === CelestialSystem.SUN_SHAPES.SUNSET) {
+                // Sunset vertical gradient: yellow center -> orange -> crimson
+                const t = r / (shape.length - 1);
+                cellColor = t < 0.5
+                  ? ColorPalette.lerp('#fde047', '#f97316', t * 2)
+                  : ColorPalette.lerp('#f97316', '#dc2626', (t - 0.5) * 2);
+              }
+              fb.setCell(px, py, ch, cellColor, 9980, undefined, true);
             }
           }
         }
       }
     }
 
-    // 3. Render Moon with Crater Texture & Halo
+    // 3. Render Moon as Solid Character Disc
     if (moonVisible && moonElev > 0.0) {
       const moonY = Math.floor(horizonRow * (1.0 - moonElev * 0.75));
       const moonX = Math.floor(moonHeading * width);
@@ -440,9 +443,10 @@ export class CelestialSystem {
       const halfH = Math.floor(shape.length / 2);
 
       const isLowMoon = specialEvent === 'LOW_FULL_MOON' && moonPhase === 'FULL_MOON';
-      const moonColor = isLowMoon ? '#fde047' : '#f8fafc';
+      const brightMoonColor = isLowMoon ? '#fde047' : '#f8fafc';
+      const shadowMoonColor = '#1e293b';
 
-      // Full Moon halo
+      // Full Moon Halo
       if (moonPhase === 'FULL_MOON') {
         const haloOffsets = [
           { dx: -halfW - 2, dy: 0 },
@@ -458,6 +462,7 @@ export class CelestialSystem {
         }
       }
 
+      // Render Solid Moon Disc
       for (let r = 0; r < shape.length; r++) {
         const line = shape[r];
         const py = moonY - halfH + r;
@@ -468,7 +473,14 @@ export class CelestialSystem {
           if (ch !== ' ') {
             const px = (moonX - halfW + c + width) % width;
             if (!isOccluded(px, py)) {
-              const tint = ch === '#' ? moonColor : (ch === 'o' ? '#94a3b8' : '#cbd5e1');
+              let tint = brightMoonColor;
+              if (ch === ':') {
+                tint = shadowMoonColor;
+              } else if (ch === 'o') {
+                tint = '#94a3b8'; // Crater feature
+              } else if (ch === '.') {
+                tint = '#64748b'; // Soft rim
+              }
               fb.setCell(px, py, ch, tint, 9980, undefined, true);
             }
           }

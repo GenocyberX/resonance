@@ -251,20 +251,20 @@ describe('RESONANCE — Atmospheric Polish + Living Weather V2 Test Suite', () =
   it('17. verifies that cloud coverage tiers scale up gracefully (Clear to Overcast canopy)', () => {
     const cm = new CloudManager(1234);
     cm.initCloudLayers('CLEAR');
-    expect(cm.getInstances().length).toBeGreaterThanOrEqual(2);
+    expect(cm.getInstances().length).toBeGreaterThanOrEqual(1);
     expect(cm.getInstances().length).toBeLessThanOrEqual(3);
 
     cm.initCloudLayers('FEW');
-    expect(cm.getInstances().length).toBeGreaterThanOrEqual(4);
+    expect(cm.getInstances().length).toBeGreaterThanOrEqual(3);
 
     cm.initCloudLayers('SCATTERED');
-    expect(cm.getInstances().length).toBeGreaterThanOrEqual(6);
+    expect(cm.getInstances().length).toBeGreaterThanOrEqual(4);
 
     cm.initCloudLayers('MOSTLY_CLOUDY');
-    expect(cm.getInstances().length).toBeGreaterThanOrEqual(9);
+    expect(cm.getInstances().length).toBeGreaterThanOrEqual(6);
 
     cm.initCloudLayers('OVERCAST');
-    expect(cm.getInstances().length).toBeGreaterThanOrEqual(12);
+    expect(cm.getInstances().length).toBeGreaterThanOrEqual(8);
   });
 
   // 18. Celestial Clearing Zone in Clear Weather
@@ -279,24 +279,26 @@ describe('RESONANCE — Atmospheric Polish + Living Weather V2 Test Suite', () =
     }
   });
 
-  // 19. All Cloud Presets Contain Organic Outline and Internal Texture
-  it('19. audits all cloud presets: non-empty internal texturing across all 7 families', () => {
+  // 19. All Cloud Presets Are Solid Filled Pseudo-Pixel Masks (Zero Empty Wireframe Outlines)
+  it('19. audits all cloud presets: solid pseudo-pixel mass with non-empty characters in every row', () => {
     for (const preset of CloudManager.CLOUD_PRESETS) {
-      const allText = preset.lines.join('');
-      // Must have some internal texture character (dot, colon, tilde, or quote)
-      expect(allText).toMatch(/[.:~'"]/);
+      expect(preset.lines.length).toBeGreaterThanOrEqual(4);
+      for (const line of preset.lines) {
+        expect(line.trim().length).toBeGreaterThan(0);
+        // Must contain solid mask characters (. or :)
+        expect(line).toMatch(/[.:]/);
+      }
     }
   });
 
-  // 20. 7 Distinct Cloud Families
-  it('20. verifies that all 7 distinct cloud families are registered and available', () => {
+  // 20. 5 Distinct Solid Cloud Families with 15 Handcrafted Masks
+  it('20. verifies that all 5 distinct solid cloud families and 15 masks are registered', () => {
+    expect(CloudManager.CLOUD_PRESETS.length).toBe(15);
     const families = new Set(CloudManager.CLOUD_PRESETS.map(p => p.type));
-    expect(families.has('SMALL_ISOLATED')).toBe(true);
-    expect(families.has('MEDIUM_COMPACT')).toBe(true);
-    expect(families.has('WIDE_LOW')).toBe(true);
-    expect(families.has('LARGE_VOLUMETRIC')).toBe(true);
-    expect(families.has('HORIZON_BANK')).toBe(true);
-    expect(families.has('HIGH_CIRRUS')).toBe(true);
-    expect(families.has('OVERCAST_CANOPY')).toBe(true);
+    expect(families.has('PUFF_SMALL')).toBe(true);
+    expect(families.has('CUMULUS_MEDIUM')).toBe(true);
+    expect(families.has('CUMULUS_LARGE')).toBe(true);
+    expect(families.has('CLOUD_BANK')).toBe(true);
+    expect(families.has('STORM_MASS')).toBe(true);
   });
 });

@@ -11,7 +11,7 @@ import {
 
 export class AtmospherePalette {
   /**
-   * Base canonical color ramps for all 11 DayPhases.
+   * Base canonical color ramps with 3-tone cloud shading for all 11 DayPhases.
    */
   private static readonly PHASE_RAMPS: Record<DayPhase, SkyColorRamp> = {
     DEEP_NIGHT: {
@@ -19,8 +19,9 @@ export class AtmospherePalette {
       skyMid: '#090d16',         // Deep Indigo Black
       skyBottom: '#0f172a',      // Dark Slate Floor
       horizonGlow: '#1e1b4b',    // Cold Night Rim
-      cloudHighlight: '#1e293b', // Faint Starlit Cloud Rim
-      cloudShadow: '#090d16',    // Dark Night Cloud Mass
+      cloudHighlight: '#38bdf8', // Moonlight Starlit Rim
+      cloudBody: '#0f172a',      // Midnight Cloud Mass
+      cloudShadow: '#020617',    // Void Cloud Base
       ambientLight: 0.26,
     },
     PRE_DAWN: {
@@ -28,8 +29,9 @@ export class AtmospherePalette {
       skyMid: '#1e1b4b',         // Deep Violet Navy
       skyBottom: '#2e1065',      // Faint Pre-Dawn Purple
       horizonGlow: '#4c1d95',    // Soft Amethyst Glow
-      cloudHighlight: '#312e81', // Indigo Cloud Edge
-      cloudShadow: '#0f172a',    // Dark Shadow Body
+      cloudHighlight: '#818cf8', // Indigo Cloud Edge
+      cloudBody: '#312e81',      // Pre-Dawn Plum Body
+      cloudShadow: '#0f172a',    // Dark Shadow Base
       ambientLight: 0.32,
     },
     DAWN: {
@@ -38,7 +40,8 @@ export class AtmospherePalette {
       skyBottom: '#701a75',      // Magenta Dawn Gradient
       horizonGlow: '#c026d3',    // Vibrant Magenta Horizon
       cloudHighlight: '#f472b6', // Coral Pink Cloud Rim
-      cloudShadow: '#4a044e',    // Deep Plum Cloud Base
+      cloudBody: '#a21caf',      // Rich Violet Body
+      cloudShadow: '#4a044e',    // Deep Plum Base
       ambientLight: 0.45,
     },
     SUNRISE: {
@@ -46,8 +49,9 @@ export class AtmospherePalette {
       skyMid: '#4338ca',         // Morning Indigo
       skyBottom: '#ea580c',      // Warm Amber-Orange Transition
       horizonGlow: '#fde047',    // Luminous Soft Gold Horizon Glow
-      cloudHighlight: '#fef08a', // Pale Gold Rim
-      cloudShadow: '#9a3412',    // Warm Amber Cloud Base
+      cloudHighlight: '#fef08a', // Pale Yellow Gold Rim
+      cloudBody: '#fb7185',      // Peach / Pink Body
+      cloudShadow: '#701a75',    // Violet / Plum Base
       ambientLight: 0.65,
     },
     MORNING: {
@@ -55,7 +59,8 @@ export class AtmospherePalette {
       skyMid: '#0ea5e9',         // Vibrant Blue
       skyBottom: '#38bdf8',      // Crisp Morning Cyan
       horizonGlow: '#bae6fd',    // Soft Pale Horizon
-      cloudHighlight: '#f8fafc', // Crisp White Top
+      cloudHighlight: '#ffffff', // Crisp White Top
+      cloudBody: '#e0f2fe',      // Pale Cyan Body
       cloudShadow: '#7dd3fc',    // Cyan Sky Reflection Shadow
       ambientLight: 0.85,
     },
@@ -65,7 +70,8 @@ export class AtmospherePalette {
       skyBottom: '#38bdf8',      // Clean Horizon Blue
       horizonGlow: '#e0f2fe',    // Brilliant Solar Rim
       cloudHighlight: '#ffffff', // Pure White Sunlit Cloud
-      cloudShadow: '#93c5fd',    // Ice Blue Shadow
+      cloudBody: '#f1f5f9',      // Pale White Body
+      cloudShadow: '#94a3b8',    // Cool Gray Shadow
       ambientLight: 1.0,
     },
     AFTERNOON: {
@@ -74,7 +80,8 @@ export class AtmospherePalette {
       skyBottom: '#67e8f9',      // Soft Warm Cyan
       horizonGlow: '#fef08a',    // Beginning Golden Rim
       cloudHighlight: '#ffffff', // Brilliant White
-      cloudShadow: '#a5f3fc',    // Light Cyan Shadow
+      cloudBody: '#f8fafc',      // Clean Cloud Body
+      cloudShadow: '#93c5fd',    // Ice Blue Shadow
       ambientLight: 0.95,
     },
     GOLDEN_HOUR: {
@@ -82,8 +89,9 @@ export class AtmospherePalette {
       skyMid: '#2563eb',         // Cobalt Blue Mid-Sky
       skyBottom: '#f59e0b',      // Luminous Warm Amber
       horizonGlow: '#fde047',    // Pure Gold Horizon
-      cloudHighlight: '#fef08a', // Intense Golden Highlights
-      cloudShadow: '#b45309',    // Warm Amber Cloud Base
+      cloudHighlight: '#fde047', // Intense Gold Rim
+      cloudBody: '#fb923c',      // Warm Peach / Amber Body
+      cloudShadow: '#9333ea',    // Magenta / Violet Base
       ambientLight: 0.80,
     },
     SUNSET: {
@@ -92,7 +100,8 @@ export class AtmospherePalette {
       skyBottom: '#c026d3',      // Soft Magenta-Rose
       horizonGlow: '#f97316',    // Warm Amber-Orange Horizon
       cloudHighlight: '#fb7185', // Warm Coral Highlights
-      cloudShadow: '#581c87',    // Violet Plum Shadow Base
+      cloudBody: '#c026d3',      // Vibrant Magenta Body
+      cloudShadow: '#4c1d95',    // Deep Violet Shadow Base
       ambientLight: 0.60,
     },
     DUSK: {
@@ -101,6 +110,7 @@ export class AtmospherePalette {
       skyBottom: '#4c1d95',      // Fading Amethyst
       horizonGlow: '#9333ea',    // Soft Ultraviolet Glow
       cloudHighlight: '#c084fc', // Lavender Cloud Edge
+      cloudBody: '#581c87',      // Violet Twilight Body
       cloudShadow: '#1e1b4b',    // Deep Violet Shadow
       ambientLight: 0.40,
     },
@@ -109,8 +119,9 @@ export class AtmospherePalette {
       skyMid: '#0f172a',         // Dark Navy Mid-Sky
       skyBottom: '#1e293b',      // Cool Slate Horizon
       horizonGlow: '#1e1b4b',    // Faint Lunar Horizon
-      cloudHighlight: '#334155', // Dim Silver Cloud Rim
-      cloudShadow: '#020617',    // Deep Midnight Cloud Base
+      cloudHighlight: '#67e8f9', // Subtle Moon Cyan Rim
+      cloudBody: '#1e293b',      // Dark Slate Blue Body
+      cloudShadow: '#090d16',    // Deep Midnight Cloud Base
       ambientLight: 0.30,
     },
   };
@@ -169,6 +180,7 @@ export class AtmospherePalette {
       skyBottom: ColorPalette.lerp(r1.skyBottom, r2.skyBottom, smoothT),
       horizonGlow: ColorPalette.lerp(r1.horizonGlow, r2.horizonGlow, smoothT),
       cloudHighlight: ColorPalette.lerp(r1.cloudHighlight, r2.cloudHighlight, smoothT),
+      cloudBody: ColorPalette.lerp(r1.cloudBody, r2.cloudBody, smoothT),
       cloudShadow: ColorPalette.lerp(r1.cloudShadow, r2.cloudShadow, smoothT),
       ambientLight: r1.ambientLight + (r2.ambientLight - r1.ambientLight) * smoothT,
     };
@@ -221,28 +233,41 @@ export class AtmospherePalette {
         ambientCoolness = 0.40;
         break;
       default:
+        ambientWarmth = 0.0;
+        ambientCoolness = 0.0;
         break;
     }
 
-    if (biomeId === 'ALPINE') ambientCoolness = Math.min(1.0, ambientCoolness + 0.25);
-    if (biomeId === 'DESERT') ambientWarmth = Math.min(1.0, ambientWarmth + 0.20);
+    // Biome-specific ambient temperature
+    if (biomeId === 'DESERT') ambientWarmth = Math.min(1.0, ambientWarmth + 0.15);
+    if (biomeId === 'ALPINE') ambientCoolness = Math.min(1.0, ambientCoolness + 0.20);
+    if (biomeId === 'VOLCANIC') ambientWarmth = Math.min(1.0, ambientWarmth + 0.25);
+
+    const baseBrightness = Math.max(0.22, ambientLight * (1.0 - weatherDarkening * 0.42));
+    const effectiveBrightness = lightningActive ? 1.0 : baseBrightness;
 
     let fogTint = '#94a3b8';
-    if (ambientWarmth > 0.4) fogTint = '#fed7aa'; // Warm peach/gold haze
-    else if (ambientCoolness > 0.4) fogTint = '#334155'; // Cool slate/indigo haze
-    if (biomeId === 'NEON_CITY') fogTint = '#701a75'; // Cyber purple haze
-    if (biomeId === 'VOLCANIC') fogTint = '#78350f'; // Smoky amber haze
+    if (phase === 'SUNRISE' || phase === 'GOLDEN_HOUR' || phase === 'SUNSET') {
+      fogTint = '#f59e0b';
+    } else if (phase === 'DEEP_NIGHT' || phase === 'NIGHT') {
+      fogTint = '#1e1b4b';
+    }
 
-    let roadWetnessState: RoadWetnessState = 'DRY';
-    if (roadWetness > 0.65) roadWetnessState = 'WET';
-    else if (roadWetness > 0.15) roadWetnessState = 'DAMP';
+    if (biomeId === 'DESERT') fogTint = '#d97706';
+    if (biomeId === 'ALPINE') fogTint = '#cbd5e1';
+    if (biomeId === 'NEON_CITY') fogTint = '#c026d3';
+    if (biomeId === 'VOLCANIC') fogTint = '#7f1d1d';
+
+    const roadWetnessState: RoadWetnessState = roadWetness < 0.15
+      ? 'DRY'
+      : (roadWetness <= 0.65 ? 'DAMP' : 'WET');
 
     return {
-      ambientBrightness: Math.max(0.22, ambientLight * (1.0 - weatherDarkening * 0.45)),
+      ambientBrightness: effectiveBrightness,
       ambientWarmth,
       ambientCoolness,
       fogTint,
-      fogDensity: weatherDarkening,
+      fogDensity: 0.0,
       roadWetness,
       roadWetnessState,
       wind,
@@ -251,7 +276,33 @@ export class AtmospherePalette {
   }
 
   /**
-   * Applies biome color bias to the sky ramp.
+   * Modulates a world terrain or scenery color by the active ambient atmosphere.
+   */
+  public static modulateWorldColor(
+    baseColor: string,
+    atmosphere: AmbientAtmosphere
+  ): string {
+    let result = baseColor;
+
+    if (atmosphere.ambientWarmth > 0.05) {
+      result = ColorPalette.lerp(result, '#f59e0b', atmosphere.ambientWarmth * 0.22);
+    } else if (atmosphere.ambientCoolness > 0.05) {
+      result = ColorPalette.lerp(result, '#1e3a8a', atmosphere.ambientCoolness * 0.25);
+    }
+
+    if (atmosphere.ambientBrightness < 0.98) {
+      result = ColorPalette.scaleBrightness(result, atmosphere.ambientBrightness);
+    }
+
+    if (atmosphere.lightningFlashIntensity > 0.1) {
+      result = ColorPalette.lerp(result, '#ffffff', atmosphere.lightningFlashIntensity * 0.65);
+    }
+
+    return result;
+  }
+
+  /**
+   * Applies biome color tinting to the sky color ramp.
    */
   public static applyBiomeTint(
     baseRamp: SkyColorRamp,
@@ -261,22 +312,19 @@ export class AtmospherePalette {
       case 'TROPICAL':
         return {
           ...baseRamp,
-          skyTop: ColorPalette.lerp(baseRamp.skyTop, '#0369a1', 0.15),
           skyBottom: ColorPalette.lerp(baseRamp.skyBottom, '#38bdf8', 0.15),
-          horizonGlow: ColorPalette.lerp(baseRamp.horizonGlow, '#0284c7', 0.20),
+          horizonGlow: ColorPalette.lerp(baseRamp.horizonGlow, '#67e8f9', 0.20),
         };
       case 'FOREST':
         return {
           ...baseRamp,
-          skyTop: ColorPalette.lerp(baseRamp.skyTop, '#064e3b', 0.20),
-          skyBottom: ColorPalette.lerp(baseRamp.skyBottom, '#059669', 0.15),
-          horizonGlow: ColorPalette.lerp(baseRamp.horizonGlow, '#34d399', 0.15),
+          skyBottom: ColorPalette.lerp(baseRamp.skyBottom, '#10b981', 0.10),
+          horizonGlow: ColorPalette.lerp(baseRamp.horizonGlow, '#a7f3d0', 0.15),
         };
       case 'DESERT':
         return {
           ...baseRamp,
-          skyTop: ColorPalette.lerp(baseRamp.skyTop, '#7c2d12', 0.20),
-          skyBottom: ColorPalette.lerp(baseRamp.skyBottom, '#ea580c', 0.25),
+          skyBottom: ColorPalette.lerp(baseRamp.skyBottom, '#f59e0b', 0.25),
           horizonGlow: ColorPalette.lerp(baseRamp.horizonGlow, '#f97316', 0.30),
         };
       case 'ALPINE':
@@ -311,7 +359,7 @@ export class AtmospherePalette {
    */
   public static applyWeatherAtmosphere(
     ramp: SkyColorRamp,
-    weatherDarkening: number, // [0, 1]
+    weatherDarkening: number,
     isStorm: boolean,
     isSnow: boolean
   ): SkyColorRamp {
@@ -321,123 +369,75 @@ export class AtmospherePalette {
     const overcastBottom = isSnow ? '#94a3b8' : (isStorm ? '#1e1b4b' : '#475569');
     const overcastHorizon = isSnow ? '#cbd5e1' : (isStorm ? '#312e81' : '#64748b');
 
-    const dimFactor = 1.0 - weatherDarkening * 0.45;
-
     return {
       skyTop: ColorPalette.lerp(ramp.skyTop, overcastTop, weatherDarkening * 0.85),
       skyMid: ColorPalette.lerp(ramp.skyMid, overcastTop, weatherDarkening * 0.80),
       skyBottom: ColorPalette.lerp(ramp.skyBottom, overcastBottom, weatherDarkening * 0.75),
       horizonGlow: ColorPalette.lerp(ramp.horizonGlow, overcastHorizon, weatherDarkening * 0.70),
-      cloudHighlight: ColorPalette.lerp(ramp.cloudHighlight, isStorm ? '#475569' : '#94a3b8', weatherDarkening * 0.7),
-      cloudShadow: ColorPalette.lerp(ramp.cloudShadow, isStorm ? '#020617' : '#0f172a', weatherDarkening * 0.9),
-      ambientLight: ramp.ambientLight * dimFactor,
+      cloudHighlight: ColorPalette.lerp(ramp.cloudHighlight, isStorm ? '#64748b' : '#cbd5e1', weatherDarkening * 0.80),
+      cloudBody: ColorPalette.lerp(ramp.cloudBody, isStorm ? '#334155' : '#64748b', weatherDarkening * 0.85),
+      cloudShadow: ColorPalette.lerp(ramp.cloudShadow, isStorm ? '#0f172a' : '#1e293b', weatherDarkening * 0.90),
+      ambientLight: Math.max(0.22, ramp.ambientLight * (1.0 - weatherDarkening * 0.45)),
     };
   }
 
   /**
-   * Applies special chromatic sky events (e.g. RED_SUNSET, GOLDEN_SUNSET, VIOLET_DUSK).
-   */
-  public static applySpecialEventRamp(
-    ramp: SkyColorRamp,
-    event: SpecialSkyEvent,
-    intensity: number
-  ): SkyColorRamp {
-    if (event === 'NONE' || intensity <= 0.01) return ramp;
-
-    switch (event) {
-      case 'RED_SUNSET':
-        return {
-          ...ramp,
-          skyTop: ColorPalette.lerp(ramp.skyTop, '#450a0a', intensity * 0.7),
-          skyMid: ColorPalette.lerp(ramp.skyMid, '#991b1b', intensity * 0.8),
-          skyBottom: ColorPalette.lerp(ramp.skyBottom, '#dc2626', intensity * 0.9),
-          horizonGlow: ColorPalette.lerp(ramp.horizonGlow, '#ea580c', intensity * 0.95),
-          cloudHighlight: ColorPalette.lerp(ramp.cloudHighlight, '#fca5a5', intensity * 0.8),
-          cloudShadow: ColorPalette.lerp(ramp.cloudShadow, '#7f1d1d', intensity * 0.8),
-        };
-      case 'GOLDEN_SUNSET':
-        return {
-          ...ramp,
-          skyTop: ColorPalette.lerp(ramp.skyTop, '#1e3a8a', intensity * 0.5),
-          skyMid: ColorPalette.lerp(ramp.skyMid, '#b45309', intensity * 0.8),
-          skyBottom: ColorPalette.lerp(ramp.skyBottom, '#f59e0b', intensity * 0.9),
-          horizonGlow: ColorPalette.lerp(ramp.horizonGlow, '#fde047', intensity * 0.95),
-          cloudHighlight: ColorPalette.lerp(ramp.cloudHighlight, '#fef08a', intensity * 0.85),
-          cloudShadow: ColorPalette.lerp(ramp.cloudShadow, '#78350f', intensity * 0.85),
-        };
-      case 'VIOLET_DUSK':
-        return {
-          ...ramp,
-          skyTop: ColorPalette.lerp(ramp.skyTop, '#090514', intensity * 0.7),
-          skyMid: ColorPalette.lerp(ramp.skyMid, '#3b0764', intensity * 0.85),
-          skyBottom: ColorPalette.lerp(ramp.skyBottom, '#701a75', intensity * 0.9),
-          horizonGlow: ColorPalette.lerp(ramp.horizonGlow, '#c026d3', intensity * 0.95),
-          cloudHighlight: ColorPalette.lerp(ramp.cloudHighlight, '#e879f9', intensity * 0.8),
-          cloudShadow: ColorPalette.lerp(ramp.cloudShadow, '#4a044e', intensity * 0.8),
-        };
-      case 'RED_DAWN':
-        return {
-          ...ramp,
-          skyTop: ColorPalette.lerp(ramp.skyTop, '#1e1b4b', intensity * 0.6),
-          skyMid: ColorPalette.lerp(ramp.skyMid, '#7f1d1d', intensity * 0.8),
-          skyBottom: ColorPalette.lerp(ramp.skyBottom, '#e11d48', intensity * 0.9),
-          horizonGlow: ColorPalette.lerp(ramp.horizonGlow, '#f43f5e', intensity * 0.95),
-        };
-      default:
-        return ramp;
-    }
-  }
-
-  /**
-   * Modulates terrain and scenery colors with ambient warmth / coolness / weather.
-   */
-  public static modulateWorldColor(
-    baseColor: string,
-    atmosphere: AmbientAtmosphere
-  ): string {
-    let color = baseColor;
-
-    // Apply brightness
-    color = ColorPalette.scaleBrightness(color, atmosphere.ambientBrightness);
-
-    // Apply warmth during golden hour/sunset
-    if (atmosphere.ambientWarmth > 0.05) {
-      color = ColorPalette.lerp(color, '#f59e0b', atmosphere.ambientWarmth * 0.22);
-    }
-
-    // Apply coolness during night/deep night
-    if (atmosphere.ambientCoolness > 0.05) {
-      color = ColorPalette.lerp(color, '#1e1b4b', atmosphere.ambientCoolness * 0.28);
-    }
-
-    // Apply lightning illumination
-    if (atmosphere.lightningFlashIntensity > 0.05) {
-      color = ColorPalette.lerp(color, '#e0f2fe', atmosphere.lightningFlashIntensity * 0.75);
-    }
-
-    return color;
-  }
-
-  /**
-   * Applies subtle audio modulation.
+   * Modulates ramp by music parameters.
    */
   public static applyMusicModulation(
     ramp: SkyColorRamp,
     musicParams: WorldMusicParameters
   ): SkyColorRamp {
     if (!musicParams) return ramp;
-
     const glow = musicParams.environmentalGlow || 0;
-    const brightnessScale = 1.0 + glow * 0.12;
+    if (glow <= 0.01) return ramp;
 
     return {
-      skyTop: ColorPalette.scaleBrightness(ramp.skyTop, brightnessScale),
-      skyMid: ColorPalette.scaleBrightness(ramp.skyMid, brightnessScale),
-      skyBottom: ColorPalette.scaleBrightness(ramp.skyBottom, brightnessScale),
-      horizonGlow: ColorPalette.scaleBrightness(ramp.horizonGlow, 1.0 + glow * 0.20),
-      cloudHighlight: ColorPalette.scaleBrightness(ramp.cloudHighlight, brightnessScale),
-      cloudShadow: ColorPalette.scaleBrightness(ramp.cloudShadow, brightnessScale),
-      ambientLight: Math.min(1.0, ramp.ambientLight * (1.0 + glow * 0.10)),
+      ...ramp,
+      horizonGlow: ColorPalette.scaleBrightness(ramp.horizonGlow, 1.0 + glow * 0.35),
+      ambientLight: Math.min(1.0, ramp.ambientLight * (1.0 + glow * 0.20)),
     };
+  }
+
+  /**
+   * Applies special celestial event lighting to the ramp.
+   */
+  public static applySpecialEventRamp(
+    ramp: SkyColorRamp,
+    event: SpecialSkyEvent,
+    intensity: number = 1.0
+  ): SkyColorRamp {
+    if (event === 'NONE' || intensity <= 0.01) return ramp;
+
+    switch (event) {
+      case 'AURORA':
+        return {
+          ...ramp,
+          skyTop: ColorPalette.lerp(ramp.skyTop, '#064e3b', 0.40 * intensity),
+          skyMid: ColorPalette.lerp(ramp.skyMid, '#047857', 0.35 * intensity),
+          horizonGlow: ColorPalette.lerp(ramp.horizonGlow, '#10b981', 0.50 * intensity),
+          ambientLight: Math.min(1.0, ramp.ambientLight * (1.0 + 0.15 * intensity)),
+        };
+      case 'RED_SUNSET':
+        return {
+          ...ramp,
+          skyBottom: ColorPalette.lerp(ramp.skyBottom, '#dc2626', 0.50 * intensity),
+          horizonGlow: ColorPalette.lerp(ramp.horizonGlow, '#f97316', 0.60 * intensity),
+        };
+      case 'GOLDEN_SUNSET':
+        return {
+          ...ramp,
+          skyBottom: ColorPalette.lerp(ramp.skyBottom, '#d97706', 0.50 * intensity),
+          horizonGlow: ColorPalette.lerp(ramp.horizonGlow, '#fde047', 0.60 * intensity),
+        };
+      case 'VIOLET_DUSK':
+        return {
+          ...ramp,
+          skyMid: ColorPalette.lerp(ramp.skyMid, '#581c87', 0.45 * intensity),
+          horizonGlow: ColorPalette.lerp(ramp.horizonGlow, '#9333ea', 0.55 * intensity),
+        };
+      default:
+        return ramp;
+    }
   }
 }

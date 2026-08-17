@@ -31,13 +31,11 @@ export type CloudCoverage =
   | 'OVERCAST';
 
 export type CloudFormationType =
-  | 'SMALL_ISOLATED'
-  | 'MEDIUM_COMPACT'
-  | 'WIDE_LOW'
-  | 'LARGE_VOLUMETRIC'
-  | 'HORIZON_BANK'
-  | 'HIGH_CIRRUS'
-  | 'OVERCAST_CANOPY';
+  | 'PUFF_SMALL'
+  | 'CUMULUS_MEDIUM'
+  | 'CUMULUS_LARGE'
+  | 'CLOUD_BANK'
+  | 'STORM_MASS';
 
 export type WeatherType =
   | 'CLEAR'
@@ -127,6 +125,7 @@ export interface SkyColorRamp {
   skyBottom: string;
   horizonGlow: string;
   cloudHighlight: string;
+  cloudBody: string;
   cloudShadow: string;
   ambientLight: number;   // [0.20, 1.0]
 }
@@ -162,7 +161,8 @@ export interface SkyState {
   skyMidColor: string;
   skyBottomColor: string;
   horizonGlowColor: string;
-  cloudColor: string;
+  cloudHighlightColor: string;
+  cloudBodyColor: string;
   cloudShadowColor: string;
   ambientLight: number;
 

@@ -230,7 +230,8 @@ export class SkyDirector {
       skyMidColor: ramp.skyMid,
       skyBottomColor: ramp.skyBottom,
       horizonGlowColor: ramp.horizonGlow,
-      cloudColor: ramp.cloudHighlight,
+      cloudHighlightColor: ramp.cloudHighlight,
+      cloudBodyColor: ramp.cloudBody,
       cloudShadowColor: ramp.cloudShadow,
       ambientLight: ramp.ambientLight,
 
@@ -275,7 +276,7 @@ export class SkyDirector {
       );
     }
 
-    // 4. Render Celestial Bodies (Stars, Sun, Moon, Shooting Stars) with cloud occlusion
+    // 4. Render Celestial Bodies (Stars, Sun, Moon, Shooting Stars) with real cloud occlusion
     this.celestial.renderCelestialBodies(
       fb,
       width,
@@ -295,8 +296,15 @@ export class SkyDirector {
       state.specialEvent
     );
 
-    // 5. Render Multi-Tiered Drifting Cloud Formations
-    this.clouds.renderClouds(fb, width, horizonRow, state.cloudColor, state.cloudShadowColor);
+    // 5. Render Multi-Tiered Solid Drifting Cloud Formations
+    this.clouds.renderClouds(
+      fb,
+      width,
+      horizonRow,
+      state.cloudHighlightColor,
+      state.cloudBodyColor,
+      state.cloudShadowColor
+    );
 
     // 6. Render Weather Effects (Lightning Bolts, Fog Bands, Precipitation)
     this.weather.renderWeatherEffects(fb, width, horizonRow, screenHeight);
