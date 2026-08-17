@@ -15,198 +15,190 @@ export class CloudManager {
   private gridWidth: number = 0;
   private gridHeight: number = 0;
 
-  // Handcrafted Organic ASCII Cloud Formations with Soft Internal Texture across 7 Families
+  // 21 Handcrafted Volumetric Retro Arcade Pseudo-Pixel-Art Cloud Formations across 7 Families
   public static readonly CLOUD_PRESETS: CloudFormation[] = [
-    // 1. SMALL (3 Variants) - 10 to 14 chars wide, 3 lines
+    // 1. SMALL_ISOLATED (3 Variants) - 10 to 14 chars wide, 3 lines
     {
       id: 'small_1',
-      type: 'SMALL',
-      width: 10,
+      type: 'SMALL_ISOLATED',
+      width: 12,
       height: 3,
       lines: [
-        '  .---.   ',
-        '.-( : )-. ',
-        '(_______) ',
+        '  .-----.   ',
+        '.-( ░░░ )-. ',
+        '(___________)',
       ],
     },
     {
       id: 'small_2',
-      type: 'SMALL',
-      width: 12,
+      type: 'SMALL_ISOLATED',
+      width: 14,
       height: 3,
       lines: [
-        '   .----.   ',
-        ' .-( .. )-. ',
-        '(__________)',
+        '   .------.   ',
+        ' .-( ░▒▒░ )-. ',
+        '(____________)',
       ],
     },
     {
       id: 'small_3',
-      type: 'SMALL',
+      type: 'SMALL_ISOLATED',
       width: 14,
       height: 3,
       lines: [
         '  .--.  .--.  ',
-        '.-(  :..:  )-.',
+        '.-( ░░::░░ )-.',
         '(____________)',
       ],
     },
 
-    // 2. MEDIUM (3 Variants) - 16 to 20 chars wide, 4 lines
+    // 2. MEDIUM_COMPACT (3 Variants) - 18 to 20 chars wide, 4 lines
     {
       id: 'med_1',
-      type: 'MEDIUM',
-      width: 16,
+      type: 'MEDIUM_COMPACT',
+      width: 18,
       height: 4,
       lines: [
-        '     .----.     ',
-        '  .-/  ..  \\-.  ',
-        ' (   :....:   ) ',
-        '(______________) ',
+        '     .-------.    ',
+        '  .-/ ░░░░░░░ \\-. ',
+        ' (   ▒▒▒▒▒▒▒▒▒   )',
+        '(_________________)',
       ],
     },
     {
       id: 'med_2',
-      type: 'MEDIUM',
-      width: 18,
+      type: 'MEDIUM_COMPACT',
+      width: 20,
       height: 4,
       lines: [
-        '    .------.      ',
-        " .-'   ::   '-.   ",
-        '(   :......:   )  ',
-        ' (____________)   ',
+        '    .--------.      ',
+        " .-' ░░░░░░░░ '-.   ",
+        '(   ▒▒▒▒▒▒▒▒▒▒   )  ',
+        ' (______________)   ',
       ],
     },
     {
       id: 'med_3',
-      type: 'MEDIUM',
+      type: 'MEDIUM_COMPACT',
       width: 18,
       height: 4,
       lines: [
         '   .---.  .---.   ',
-        " .-' .  ''  . '-. ",
-        '(   :........:   )',
+        " .-' ░░ '' ░░ '-. ",
+        '(   ▒▒▒▒▒▒▒▒▒▒   )',
         ' (______________) ',
       ],
     },
 
-    // 3. WIDE (3 Variants) - 24 to 28 chars wide, 3 lines
+    // 3. WIDE_LOW (3 Variants) - 24 to 28 chars wide, 3 lines
     {
       id: 'wide_1',
-      type: 'WIDE',
+      type: 'WIDE_LOW',
       width: 24,
       height: 3,
       lines: [
         '   .~~--......--~~.     ',
-        ' .-(   :......:   )-.   ',
-        '(____________________)  ',
+        ' .-(   ░░░▒▒▒▒░░░   )-. ',
+        '(______________________) ',
       ],
     },
     {
       id: 'wide_2',
-      type: 'WIDE',
+      type: 'WIDE_LOW',
       width: 28,
       height: 3,
       lines: [
         '  .~~~~---........---~~~~.  ',
-        ' (     :............:     ) ',
+        ' (     ░░░▒▒▒▒▒▒▒▒░░░     ) ',
         '(__________________________)',
       ],
     },
     {
       id: 'wide_3',
-      type: 'WIDE',
+      type: 'WIDE_LOW',
       width: 26,
       height: 3,
       lines: [
         '   .---.            .---.   ',
-        " .-(   '--........--'   )-. ",
+        " .-( ░░ '--......--' ░░ )-. ",
         '(__________________________)',
       ],
     },
 
-    // 4. DENSE (3 Variants) - 24 to 28 chars wide, 5 lines
+    // 4. LARGE_VOLUMETRIC (3 Variants) - 28 to 30 chars wide, 5-6 lines
     {
-      id: 'dense_1',
-      type: 'DENSE',
-      width: 24,
-      height: 5,
+      id: 'large_1',
+      type: 'LARGE_VOLUMETRIC',
+      width: 28,
+      height: 6,
       lines: [
-        '       .------.         ',
-        '    .-/   ..   \\-.      ',
-        "  .-'   :....:   '-.    ",
-        ' (   :..........:   )   ',
-        '(____________________)  ',
+        '        .--------.          ',
+        '     .-/ ░░░░░░░░ \\-.       ',
+        "   .-'  ░░░░░░░░░░  '-.     ",
+        '  (    ▒▒▒▒▒▒▒▒▒▒▒▒    )    ',
+        ' (    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓    )   ',
+        '(________________________)  ',
       ],
     },
     {
-      id: 'dense_2',
-      type: 'DENSE',
-      width: 28,
+      id: 'large_2',
+      type: 'LARGE_VOLUMETRIC',
+      width: 30,
       height: 5,
       lines: [
-        '       .----.    .----.     ',
-        '    .-/  ..  \\--/  ..  \\-.  ',
-        "  .-'   :............:   '-.",
-        ' (   :..................:   )',
+        '       .----.    .----.       ',
+        '    .-/ ░░░░ \\--/ ░░░░ \\-.    ',
+        "  .-'  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  '-.  ",
+        ' (    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓   )  ',
         '(____________________________)',
       ],
     },
     {
-      id: 'dense_3',
-      type: 'DENSE',
-      width: 26,
+      id: 'large_3',
+      type: 'LARGE_VOLUMETRIC',
+      width: 28,
       height: 5,
       lines: [
-        '      .--------.        ',
-        "   .-'   ....   '-.     ",
-        " .-'   :......:   '-.   ",
-        '(   :............:   )  ',
-        '(____________________)  ',
+        '      .------------.        ',
+        "   .-'  ░░░░░░░░░░  '-.     ",
+        " .-'   ▒▒▒▒▒▒▒▒▒▒▒▒   '-.   ",
+        '(     ▓▓▓▓▓▓▓▓▓▓▓▓▓▓     )  ',
+        '(________________________)  ',
       ],
     },
 
-    // 5. STORM_HEAVY (3 Variants) - 30 to 34 chars wide, 6 lines
+    // 5. HORIZON_BANK (3 Variants) - 32 to 36 chars wide, 3 lines
     {
-      id: 'storm_heavy_1',
-      type: 'STORM_HEAVY',
-      width: 30,
-      height: 6,
+      id: 'horizon_bank_1',
+      type: 'HORIZON_BANK',
+      width: 34,
+      height: 3,
       lines: [
-        '        .------------.        ',
-        '     .-/   :......:   \\-.     ',
-        "   .-'   :..........:   '-.   ",
-        '  /   :................:   \\  ',
-        ' |   :..................:   | ',
-        '  \\________________________/  ',
+        '  .~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.  ',
+        ' (   ░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░   ) ',
+        '(__________________________________)',
       ],
     },
     {
-      id: 'storm_heavy_2',
-      type: 'STORM_HEAVY',
+      id: 'horizon_bank_2',
+      type: 'HORIZON_BANK',
+      width: 36,
+      height: 3,
+      lines: [
+        ' .~~--..~~~~~~~~~~~~~~~~~~~~..--~~. ',
+        '(   ░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░   )',
+        '(__________________________________)',
+      ],
+    },
+    {
+      id: 'horizon_bank_3',
+      type: 'HORIZON_BANK',
       width: 32,
-      height: 6,
+      height: 3,
       lines: [
-        '      .----------.    .----.    ',
-        '   .-/   :....:   \\--/  ..  \\-. ',
-        " .-'   :..................:   '-.",
-        '(   :........................:   )',
-        '|   :........................:   |',
-        ' \\______________________________/ ',
-      ],
-    },
-    {
-      id: 'storm_heavy_3',
-      type: 'STORM_HEAVY',
-      width: 30,
-      height: 6,
-      lines: [
-        '       .----------------.     ',
-        '    .-/   :..........:   \\-.  ',
-        "  .-'   :..............:   '-.",
-        ' (   :....................:   )',
-        ' |   :....................:   |',
-        '  \\__________________________/ ',
+        '  .~~~~~~~~~~~~~~~~~~~~~~~~~~~~.  ',
+        ' (   ░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░   ) ',
+        '(________________________________)',
       ],
     },
 
@@ -239,7 +231,7 @@ export class CloudManager {
       ],
     },
 
-    // 7. OVERCAST_CANOPY (3 Variants) - 36 to 40 chars wide, 3 lines
+    // 7. OVERCAST_CANOPY (3 Variants) - 38 chars wide, 3 lines
     {
       id: 'overcast_1',
       type: 'OVERCAST_CANOPY',
@@ -247,7 +239,7 @@ export class CloudManager {
       height: 3,
       lines: [
         '.~~~~~~-------..........-------~~~~~~.',
-        '(     :........................:     )',
+        '(     ░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░     )',
         '(____________________________________)',
       ],
     },
@@ -258,7 +250,7 @@ export class CloudManager {
       height: 3,
       lines: [
         '.~~~~~---....................---~~~~~.',
-        '(    :..........................:    )',
+        '(    ░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░    )',
         '(____________________________________)',
       ],
     },
@@ -269,7 +261,7 @@ export class CloudManager {
       height: 3,
       lines: [
         '.~~~~---------..........---------~~~~.',
-        '(    :..........................:    )',
+        '(    ░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░    )',
         '(____________________________________)',
       ],
     },
@@ -320,9 +312,9 @@ export class CloudManager {
     this.instances = [];
 
     // Filter presets by family
-    const smallPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'SMALL' || p.type === 'HIGH_CIRRUS');
-    const medWidePresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'MEDIUM' || p.type === 'WIDE');
-    const denseStormPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'DENSE' || p.type === 'STORM_HEAVY' || p.type === 'OVERCAST_CANOPY');
+    const highPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'HIGH_CIRRUS' || p.type === 'SMALL_ISOLATED');
+    const midPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'MEDIUM_COMPACT' || p.type === 'WIDE_LOW');
+    const lowPresets = CloudManager.CLOUD_PRESETS.filter(p => p.type === 'LARGE_VOLUMETRIC' || p.type === 'HORIZON_BANK' || p.type === 'OVERCAST_CANOPY');
 
     // Rich instance count distribution
     let highCount = 0;
@@ -371,7 +363,7 @@ export class CloudManager {
 
     // Layer 1: HIGH Parallax Layer (Cirrus & Small Puffs, High Altitude)
     for (let i = 0; i < highCount; i++) {
-      const formation = this.rng.choice(smallPresets);
+      const formation = this.rng.choice(highPresets);
       this.instances.push({
         xNorm: pickX((i + 0.3) / Math.max(1, highCount), coverage === 'OVERCAST'),
         yNorm: this.rng.range(0.04, 0.18),
@@ -382,9 +374,9 @@ export class CloudManager {
       });
     }
 
-    // Layer 2: MID Parallax Layer (Medium Cumulus & Wide Stratus, Mid Altitude)
+    // Layer 2: MID Parallax Layer (Medium Cumulus & Wide Low Clouds, Mid Altitude)
     for (let i = 0; i < midCount; i++) {
-      const formation = this.rng.choice(medWidePresets);
+      const formation = this.rng.choice(midPresets);
       this.instances.push({
         xNorm: pickX((i + 0.15) / Math.max(1, midCount), coverage === 'OVERCAST'),
         yNorm: this.rng.range(0.16, 0.38),
@@ -395,9 +387,9 @@ export class CloudManager {
       });
     }
 
-    // Layer 3: LOW Parallax Layer (Dense Masses, Storm Clouds, Overcast Canopy)
+    // Layer 3: LOW Parallax Layer (Large Volumetric, Horizon Banks, Overcast Canopy)
     for (let i = 0; i < lowCount; i++) {
-      const formation = this.rng.choice(denseStormPresets);
+      const formation = this.rng.choice(lowPresets);
       this.instances.push({
         xNorm: pickX((i + 0.5) / Math.max(1, lowCount), coverage === 'OVERCAST'),
         yNorm: this.rng.range(0.28, 0.55),
@@ -460,7 +452,7 @@ export class CloudManager {
   }
 
   /**
-   * Renders all cloud layers with highlight crowns, soft textured bodies, and shadow underbellies.
+   * Renders all cloud layers with highlight crowns, volumetric pixel dithering, and shaded underbellies.
    */
   public renderClouds(
     fb: FrameBuffer,
@@ -485,12 +477,12 @@ export class CloudManager {
         const cy = startY + r;
         if (cy < 0 || cy >= horizonRow) continue;
 
-        // Top line receives clean highlight; bottom lines receive soft shadow contour; middle lines receive body tone
+        // Tonal grading from top highlight to shaded underside
         const isTop = r === 0;
         const isBottom = r === lines.length - 1 && lines.length > 2;
         const rowColor = isBottom
           ? cloudShadowColor
-          : (isTop ? cloudHighlightColor : ColorPalette.lerp(cloudHighlightColor, cloudShadowColor, 0.40));
+          : (isTop ? cloudHighlightColor : ColorPalette.lerp(cloudHighlightColor, cloudShadowColor, 0.35));
 
         for (let c = 0; c < line.length; c++) {
           const ch = line[c];
@@ -498,11 +490,17 @@ export class CloudManager {
             const cx = (startX + c + width) % width;
             const zOrder = cloud.layer === 'LOW' ? 9965 : (cloud.layer === 'MID' ? 9970 : 9975);
 
-            // Internal textured characters (. or :) use slightly softer body tint
-            const isInternalTexture = ch === '.' || ch === ':' || ch === '~';
-            const charColor = isInternalTexture
-              ? ColorPalette.lerp(rowColor, cloudShadowColor, 0.30)
-              : rowColor;
+            // Subtle pseudo-pixel character coloring
+            let charColor = rowColor;
+            if (ch === '░') {
+              charColor = ColorPalette.lerp(cloudHighlightColor, cloudShadowColor, 0.25);
+            } else if (ch === '▒') {
+              charColor = ColorPalette.lerp(cloudHighlightColor, cloudShadowColor, 0.55);
+            } else if (ch === '▓') {
+              charColor = cloudShadowColor;
+            } else if (ch === '.' || ch === ':') {
+              charColor = ColorPalette.lerp(rowColor, cloudShadowColor, 0.30);
+            }
 
             fb.setCell(cx, cy, ch, charColor, zOrder, undefined, true);
           }

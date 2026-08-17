@@ -31,11 +31,11 @@ export type CloudCoverage =
   | 'OVERCAST';
 
 export type CloudFormationType =
-  | 'SMALL'
-  | 'MEDIUM'
-  | 'WIDE'
-  | 'DENSE'
-  | 'STORM_HEAVY'
+  | 'SMALL_ISOLATED'
+  | 'MEDIUM_COMPACT'
+  | 'WIDE_LOW'
+  | 'LARGE_VOLUMETRIC'
+  | 'HORIZON_BANK'
   | 'HIGH_CIRRUS'
   | 'OVERCAST_CANOPY';
 

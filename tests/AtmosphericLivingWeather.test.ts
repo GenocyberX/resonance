@@ -291,11 +291,11 @@ describe('RESONANCE — Atmospheric Polish + Living Weather V2 Test Suite', () =
   // 20. 7 Distinct Cloud Families
   it('20. verifies that all 7 distinct cloud families are registered and available', () => {
     const families = new Set(CloudManager.CLOUD_PRESETS.map(p => p.type));
-    expect(families.has('SMALL')).toBe(true);
-    expect(families.has('MEDIUM')).toBe(true);
-    expect(families.has('WIDE')).toBe(true);
-    expect(families.has('DENSE')).toBe(true);
-    expect(families.has('STORM_HEAVY')).toBe(true);
+    expect(families.has('SMALL_ISOLATED')).toBe(true);
+    expect(families.has('MEDIUM_COMPACT')).toBe(true);
+    expect(families.has('WIDE_LOW')).toBe(true);
+    expect(families.has('LARGE_VOLUMETRIC')).toBe(true);
+    expect(families.has('HORIZON_BANK')).toBe(true);
     expect(families.has('HIGH_CIRRUS')).toBe(true);
     expect(families.has('OVERCAST_CANOPY')).toBe(true);
   });
